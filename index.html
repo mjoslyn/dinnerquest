@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DINNER QUEST · A Meal Planning Roguelike</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0a0f;
+      --bg-panel: #12121a;
+      --border: #2a2a3a;
+      --text: #c4c4d4;
+      --text-dim: #6a6a7a;
+      --accent: #f4a020;
+      --accent-glow: #f4a02044;
+      --success: #40d480;
+      --danger: #e04060;
+      --purple: #a060f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      line-height: 1.4;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanline effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        rgba(0, 0, 0, 0.1) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 30px;
+    }
+
+    .title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 24px;
+      color: var(--accent);
+      text-shadow: 0 0 20px var(--accent-glow);
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 16px;
+    }
+
+    /* Game panels */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .panel-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    /* Day header */
+    .day-header {
+      text-align: center;
+      padding: 20px;
+      border: 2px double var(--border);
+      margin-bottom: 20px;
+      background: linear-gradient(180deg, var(--bg-panel), transparent);
+    }
+
+    .day-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 18px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .day-flavor {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* Narrative text */
+    .narrative {
+      padding: 20px;
+      border-left: 3px solid var(--purple);
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, rgba(160, 96, 240, 0.1), transparent);
+      line-height: 1.6;
+    }
+
+    .narrative .highlight {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    /* Meal cards */
+    .meal-grid {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .meal-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: grid;
+      grid-template-columns: 60px 1fr auto;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .meal-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateX(5px);
+    }
+
+    .meal-card.selected {
+      border-color: var(--success);
+      background: rgba(64, 212, 128, 0.1);
+    }
+
+    .meal-emoji {
+      font-size: 40px;
+      text-align: center;
+    }
+
+    .meal-info h3 {
+      color: var(--text);
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .meal-meta {
+      color: var(--text-dim);
+      font-size: 16px;
+    }
+
+    .meal-meta span {
+      margin-right: 15px;
+    }
+
+    .meal-select {
+      color: var(--text-dim);
+      font-size: 24px;
+    }
+
+    .meal-card.selected .meal-select {
+      color: var(--success);
+    }
+
+    /* Token display */
+    .tokens {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .token-label {
+      color: var(--text-dim);
+      font-size: 14px;
+    }
+
+    .token-bar {
+      flex: 1;
+      height: 20px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 2px;
+      padding: 2px;
+    }
+
+    .token-pip {
+      flex: 1;
+      background: var(--accent);
+      transition: opacity 0.3s ease;
+    }
+
+    .token-pip.empty {
+      background: var(--border);
+    }
+
+    .token-count {
+      color: var(--accent);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    /* Bid slider */
+    .bid-section {
+      padding: 20px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .bid-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .bid-value {
+      color: var(--accent);
+      font-size: 24px;
+    }
+
+    .bid-slider {
+      width: 100%;
+      height: 30px;
+      -webkit-appearance: none;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .bid-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 30px;
+      height: 30px;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .bid-desc {
+      color: var(--text-dim);
+      font-size: 16px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      padding: 15px 30px;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: var(--bg-dark);
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      border-color: var(--border);
+      color: var(--text-dim);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    /* Status messages */
+    .status {
+      text-align: center;
+      padding: 30px;
+      border: 1px dashed var(--border);
+      margin-bottom: 20px;
+    }
+
+    .status-waiting {
+      color: var(--purple);
+    }
+
+    .status-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    /* Result reveal */
+    .result {
+      text-align: center;
+      padding: 30px;
+      border: 2px solid var(--success);
+      margin-bottom: 20px;
+      background: rgba(64, 212, 128, 0.1);
+    }
+
+    .result.conflict {
+      border-color: var(--danger);
+      background: rgba(224, 64, 96, 0.1);
+    }
+
+    .result-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .result.conflict .result-title {
+      color: var(--danger);
+    }
+
+    .result .meal-emoji {
+      font-size: 60px;
+      margin-bottom: 10px;
+    }
+
+    .result-meal {
+      font-size: 28px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    /* Week summary */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .week-day {
+      text-align: center;
+      padding: 10px 5px;
+      border: 1px solid var(--border);
+      background: var(--bg-dark);
+    }
+
+    .week-day-name {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .week-day-emoji {
+      font-size: 28px;
+    }
+
+    .week-day.current {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .week-day.complete {
+      border-color: var(--success);
+    }
+
+    /* Setup screen */
+    .setup-input {
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      width: 100%;
+      padding: 15px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      color: var(--text);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .setup-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .setup-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .player-badges {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .player-badge {
+      padding: 10px 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-dark);
+    }
+
+    .player-badge.you {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Share link */
+    .share-box {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .share-url {
+      font-size: 14px;
+      color: var(--purple);
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+
+    /* Animations */
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+      50% { box-shadow: 0 0 40px var(--accent-glow); }
+    }
+
+    .pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .title { font-size: 16px; }
+      .meal-card { grid-template-columns: 50px 1fr; }
+      .meal-select { display: none; }
+      .week-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* Hide screens by default */
+    .screen { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">🍽️ DINNER QUEST</h1>
+      <p class="subtitle">A Meal Planning Roguelike for Two</p>
+    </header>
+
+    <!-- SCREEN: Start / Join -->
+    <div id="screen-start" class="screen active">
+      <div class="panel">
+        <div class="panel-title">⚔️ BEGIN YOUR QUEST</div>
+        
+        <div class="narrative">
+          The week stretches before you like an endless dungeon. 
+          <span class="highlight">Seven dinners</span> await. 
+          Two appetites. One kitchen. 
+          <br><br>
+          Will you find <span class="highlight">harmony</span>... or descend into takeout chaos?
+        </div>
+
+        <input type="text" class="setup-input" id="player-name" placeholder="Enter your name, brave chef..." maxlength="20">
+        
+        <button class="btn" id="btn-new-game" style="margin-bottom: 15px;">
+          🗡️ Start New Quest
+        </button>
+        
+        <button class="btn btn-secondary" id="btn-join-game">
+          🤝 Join Partner's Quest
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: Waiting for partner -->
+    <div id="screen-waiting" class="screen">
+      <div class="panel">
+        <div class="panel-title">📜 SUMMON YOUR PARTNER</div>
+        
+        <div class="narrative">
+          Your quest has begun, but a hero cannot dine alone.
+          Send this magical link to summon your partner:
+        </div>
+
+        <div class="share-box">
+          <div class="share-url" id="share-url">Loading...</div>
+          <button class="btn" id="btn-copy-link">📋 Copy Link</button>
+        </div>
+
+        <div class="status status-waiting">
+          <div class="status-icon">⏳</div>
+          <div>Waiting for partner to join...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: Game -->
+    <div id="screen-game" class="screen">
+      <div class="player-badges">
+        <div class="player-badge you" id="badge-you">You</div>
+        <div class="player-badge" id="badge-partner">Partner</div>
+      </div>
+
+      <div class="week-grid" id="week-grid">
+        <!-- Generated by JS -->
+      </div>
+
+      <div class="day-header">
+        <div class="day-name" id="current-day">MONDAY</div>
+        <div class="day-flavor" id="day-flavor">The hunger begins...</div>
+      </div>
+
+      <div id="game-content">
+        <!-- Dynamic content -->
+      </div>
+    </div>
+
+    <!-- SCREEN: Week Complete -->
+    <div id="screen-complete" class="screen">
+      <div class="panel">
+        <div class="panel-title">🏆 QUEST COMPLETE</div>
+        
+        <div class="narrative">
+          The week has been conquered! Your meals have been chosen.
+          May your grocery list be short and your cooking times merciful.
+        </div>
+
+        <div class="week-grid" id="final-week-grid">
+          <!-- Generated by JS -->
+        </div>
+
+        <div id="final-stats" class="panel">
+          <!-- Stats generated by JS -->
+        </div>
+
+        <button class="btn" id="btn-new-quest" style="margin-top: 20px;">
+          🔄 Start New Quest
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== GAME DATA ====================
+    const MEALS = [
+      { id: 1, name: "Tacos", emoji: "🌮", time: 25, cost: "$", cuisine: "Mexican" },
+      { id: 2, name: "Spaghetti", emoji: "🍝", time: 30, cost: "$", cuisine: "Italian" },
+      { id: 3, name: "Sushi", emoji: "🍣", time: 15, cost: "$$$", cuisine: "Japanese" },
+      { id: 4, name: "Pizza", emoji: "🍕", time: 20, cost: "$", cuisine: "Italian" },
+      { id: 5, name: "Burger & Fries", emoji: "🍔", time: 25, cost: "$$", cuisine: "American" },
+      { id: 6, name: "Pad Thai", emoji: "🍜", time: 30, cost: "$$", cuisine: "Thai" },
+      { id: 7, name: "Steak", emoji: "🥩", time: 35, cost: "$$$", cuisine: "American" },
+      { id: 8, name: "Curry", emoji: "🍛", time: 40, cost: "$$", cuisine: "Indian" },
+      { id: 9, name: "Ramen", emoji: "🍜", time: 35, cost: "$$", cuisine: "Japanese" },
+      { id: 10, name: "Salad", emoji: "🥗", time: 15, cost: "$", cuisine: "Healthy" },
+      { id: 11, name: "Fried Rice", emoji: "🍚", time: 20, cost: "$", cuisine: "Chinese" },
+      { id: 12, name: "BBQ Ribs", emoji: "🍖", time: 60, cost: "$$", cuisine: "American" },
+      { id: 13, name: "Fish & Chips", emoji: "🐟", time: 30, cost: "$$", cuisine: "British" },
+      { id: 14, name: "Burrito Bowl", emoji: "🌯", time: 20, cost: "$$", cuisine: "Mexican" },
+      { id: 15, name: "Soup & Bread", emoji: "🍲", time: 25, cost: "$", cuisine: "Comfort" },
+      { id: 16, name: "Grilled Chicken", emoji: "🍗", time: 30, cost: "$$", cuisine: "Healthy" },
+      { id: 17, name: "Dumplings", emoji: "🥟", time: 35, cost: "$$", cuisine: "Chinese" },
+      { id: 18, name: "Kebabs", emoji: "🍢", time: 30, cost: "$$", cuisine: "Mediterranean" },
+      { id: 19, name: "Mac & Cheese", emoji: "🧀", time: 25, cost: "$", cuisine: "Comfort" },
+      { id: 20, name: "Poke Bowl", emoji: "🥢", time: 15, cost: "$$", cuisine: "Hawaiian" },
+      { id: 21, name: "Sandwich Night", emoji: "🥪", time: 10, cost: "$", cuisine: "Quick" },
+      { id: 22, name: "Breakfast for Dinner", emoji: "🍳", time: 20, cost: "$", cuisine: "Comfort" },
+      { id: 23, name: "Shrimp Scampi", emoji: "🦐", time: 25, cost: "$$$", cuisine: "Italian" },
+      { id: 24, name: "Veggie Stir Fry", emoji: "🥦", time: 20, cost: "$", cuisine: "Healthy" },
+    ];
+
+    const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    
+    const DAY_FLAVORS = [
+      "The hunger begins...",
+      "Momentum builds...",
+      "Halfway through the gauntlet...",
+      "The week shows its teeth...",
+      "Almost there, champions...",
+      "Weekend vibes emerge...",
+      "The final feast awaits..."
+    ];
+
+    const CONFLICT_MESSAGES = [
+      "The kitchen trembles with disagreement!",
+      "Two cravings enter. One meal leaves.",
+      "A clash of culinary visions!",
+      "The fridge watches in suspense...",
+      "Appetites collide!"
+    ];
+
+    const HARMONY_MESSAGES = [
+      "HARMONY! Great minds dine alike.",
+      "UNITY! Your taste buds are aligned.",
+      "SYNCHRONICITY! A perfect match.",
+      "ACCORD! The kitchen rejoices.",
+      "CONSENSUS! No tokens needed."
+    ];
+
+    // ==================== STATE ====================
+    let gameState = null;
+    let playerId = null;
+    let pollInterval = null;
+
+    // Simple ID generators
+    const generateId = () => Math.random().toString(36).substr(2, 9);
+    
+    // LocalStorage-based "backend" for demo (would be real API in production)
+    const storage = {
+      save: (gameId, state) => {
+        localStorage.setItem(`dq_${gameId}`, JSON.stringify(state));
+      },
+      load: (gameId) => {
+        const data = localStorage.getItem(`dq_${gameId}`);
+        return data ? JSON.parse(data) : null;
+      }
+    };
+
+    // ==================== GAME LOGIC ====================
+    function createGame(playerName) {
+      const gameId = generateId();
+      playerId = 'A';
+      
+      gameState = {
+        id: gameId,
+        players: {
+          A: { name: playerName, tokens: 10 },
+          B: null
+        },
+        currentDay: 0,
+        week: DAYS.map((day, i) => ({
+          day,
+          pool: getRandomMeals(5),
+          picks: { A: null, B: null },
+          bids: { A: 0, B: 0 },
+          result: null,
+          phase: 'picking' // picking, reveal, complete
+        })),
+        status: 'waiting' // waiting, active, complete
+      };
+      
+      storage.save(gameId, gameState);
+      updateURL(gameId, playerId);
+      return gameState;
+    }
+
+    function joinGame(gameId, playerName) {
+      gameState = storage.load(gameId);
+      if (!gameState) return null;
+      
+      if (gameState.players.B) {
+        // Already has 2 players, check if rejoining
+        playerId = 'B';
+      } else {
+        playerId = 'B';
+        gameState.players.B = { name: playerName, tokens: 10 };
+        gameState.status = 'active';
+        storage.save(gameId, gameState);
+      }
+      
+      updateURL(gameId, playerId);
+      return gameState;
+    }
+
+    function getRandomMeals(count) {
+      const shuffled = [...MEALS].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, count);
+    }
+
+    function submitPick(mealId, bid) {
+      const day = gameState.week[gameState.currentDay];
+      day.picks[playerId] = mealId;
+      day.bids[playerId] = bid;
+      
+      gameState.players[playerId].tokens -= bid;
+      
+      // Check if both players have picked
+      const otherPlayer = playerId === 'A' ? 'B' : 'A';
+      if (day.picks[otherPlayer] !== null) {
+        resolveDay();
+      }
+      
+      storage.save(gameState.id, gameState);
+    }
+
+    function resolveDay() {
+      const day = gameState.week[gameState.currentDay];
+      
+      if (day.picks.A === day.picks.B) {
+        // Harmony! Same pick
+        day.result = { 
+          meal: day.picks.A, 
+          harmony: true,
+          winner: null 
+        };
+        // Refund tokens on harmony
+        gameState.players.A.tokens += day.bids.A;
+        gameState.players.B.tokens += day.bids.B;
+      } else {
+        // Conflict - weighted random based on bids
+        const totalBids = day.bids.A + day.bids.B + 2; // +2 base so 0 bids still have chance
+        const aChance = (day.bids.A + 1) / totalBids;
+        const winner = Math.random() < aChance ? 'A' : 'B';
+        
+        day.result = {
+          meal: day.picks[winner],
+          harmony: false,
+          winner: winner
+        };
+      }
+      
+      day.phase = 'reveal';
+      storage.save(gameState.id, gameState);
+    }
+
+    function advanceDay() {
+      const day = gameState.week[gameState.currentDay];
+      day.phase = 'complete';
+      
+      if (gameState.currentDay < 6) {
+        gameState.currentDay++;
+      } else {
+        gameState.status = 'complete';
+      }
+      
+      storage.save(gameState.id, gameState);
+    }
+
+    function updateURL(gameId, player) {
+      const url = new URL(window.location);
+      url.searchParams.set('game', gameId);
+      url.searchParams.set('player', player);
+      window.history.replaceState({}, '', url);
+    }
+
+    // ==================== UI RENDERING ====================
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function renderWeekGrid(containerId, currentDay = -1) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = gameState.week.map((day, i) => {
+        let emoji = '❓';
+        let classes = 'week-day';
+        
+        if (day.result) {
+          const meal = MEALS.find(m => m.id === day.result.meal);
+          emoji = meal ? meal.emoji : '✓';
+          classes += ' complete';
+        }
+        if (i === currentDay) {
+          classes += ' current';
+        }
+        
+        return `
+          <div class="${classes}">
+            <div class="week-day-name">${day.day.slice(0, 3)}</div>
+            <div class="week-day-emoji">${emoji}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderGameScreen() {
+      showScreen('screen-game');
+      
+      // Update player badges
+      document.getElementById('badge-you').textContent = gameState.players[playerId].name;
+      const otherPlayer = playerId === 'A' ? 'B' : 'A';
+      document.getElementById('badge-partner').textContent = 
+        gameState.players[otherPlayer]?.name || 'Partner';
+      
+      renderWeekGrid('week-grid', gameState.currentDay);
+      
+      const day = gameState.week[gameState.currentDay];
+      document.getElementById('current-day').textContent = day.day.toUpperCase();
+      document.getElementById('day-flavor').textContent = DAY_FLAVORS[gameState.currentDay];
+      
+      const content = document.getElementById('game-content');
+      
+      if (day.phase === 'reveal') {
+        renderReveal(content, day);
+      } else if (day.picks[playerId] !== null) {
+        renderWaitingForPartner(content, day);
+      } else {
+        renderPicking(content, day);
+      }
+    }
+
+    function renderPicking(container, day) {
+      const otherPlayer = playerId === 'A' ? 'B' : 'A';
+      const otherName = gameState.players[otherPlayer]?.name || 'Partner';
+      const partnerPicked = day.picks[otherPlayer] !== null;
+      
+      let narrative = partnerPicked 
+        ? `<span class="highlight">${otherName}</span> has made their choice. The kitchen awaits your decision...`
+        : `The meal options materialize before you. Choose wisely, for <span class="highlight">${otherName}</span> ponders the same choices...`;
+      
+      container.innerHTML = `
+        <div class="narrative">${narrative}</div>
+        
+        <div class="tokens">
+          <span class="token-label">ENTHUSIASM</span>
+          <div class="token-bar">
+            ${Array(10).fill(0).map((_, i) => 
+              `<div class="token-pip ${i >= gameState.players[playerId].tokens ? 'empty' : ''}"></div>`
+            ).join('')}
+          </div>
+          <span class="token-count">${gameState.players[playerId].tokens}/10</span>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-title">🍽️ TONIGHT'S OPTIONS</div>
+          <div class="meal-grid">
+            ${day.pool.map(meal => `
+              <div class="meal-card" data-meal-id="${meal.id}">
+                <div class="meal-emoji">${meal.emoji}</div>
+                <div class="meal-info">
+                  <h3>${meal.name}</h3>
+                  <div class="meal-meta">
+                    <span>⏱ ${meal.time} min</span>
+                    <span>💰 ${meal.cost}</span>
+                    <span>🏷️ ${meal.cuisine}</span>
+                  </div>
+                </div>
+                <div class="meal-select">○</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        
+        <div class="bid-section" id="bid-section" style="display: none;">
+          <div class="bid-label">
+            <span>Enthusiasm Bid</span>
+            <span class="bid-value" id="bid-value">0</span>
+          </div>
+          <input type="range" class="bid-slider" id="bid-slider" min="0" max="${gameState.players[playerId].tokens}" value="0">
+          <div class="bid-desc" id="bid-desc">No extra enthusiasm (50% base chance in conflicts)</div>
+        </div>
+        
+        <button class="btn" id="btn-submit" disabled>
+          ⚔️ Lock In Choice
+        </button>
+      `;
+      
+      // Event listeners
+      let selectedMeal = null;
+      
+      container.querySelectorAll('.meal-card').forEach(card => {
+        card.addEventListener('click', () => {
+          container.querySelectorAll('.meal-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedMeal = parseInt(card.dataset.mealId);
+          document.getElementById('bid-section').style.display = 'block';
+          document.getElementById('btn-submit').disabled = false;
+        });
+      });
+      
+      const slider = document.getElementById('bid-slider');
+      slider.addEventListener('input', () => {
+        const val = parseInt(slider.value);
+        document.getElementById('bid-value').textContent = val;
+        const descs = [
+          "No extra enthusiasm (50% base chance in conflicts)",
+          "Mild interest (+5% influence)",
+          "Notable craving (+10% influence)",
+          "Strong desire (+15% influence)",
+          "PASSIONATE YEARNING (+20% influence)"
+        ];
+        document.getElementById('bid-desc').textContent = descs[Math.min(val, 4)];
+      });
+      
+      document.getElementById('btn-submit').addEventListener('click', () => {
+        if (selectedMeal) {
+          submitPick(selectedMeal, parseInt(slider.value));
+          renderGameScreen();
+        }
+      });
+    }
+
+    function renderWaitingForPartner(container, day) {
+      const meal = MEALS.find(m => m.id === day.picks[playerId]);
+      const otherPlayer = playerId === 'A' ? 'B' : 'A';
+      const otherName = gameState.players[otherPlayer]?.name || 'Partner';
+      
+      container.innerHTML = `
+        <div class="narrative">
+          Your choice echoes into the void. You have proposed 
+          <span class="highlight">${meal.name}</span> with 
+          <span class="highlight">${day.bids[playerId]}</span> enthusiasm tokens.
+          <br><br>
+          <span class="highlight">${otherName}</span> contemplates. The fridge hums in anticipation...
+        </div>
+        
+        <div class="status status-waiting">
+          <div class="status-icon">${meal.emoji}</div>
+          <div>Awaiting partner's decision...</div>
+        </div>
+      `;
+    }
+
+    function renderReveal(container, day) {
+      const myMeal = MEALS.find(m => m.id === day.picks[playerId]);
+      const otherPlayer = playerId === 'A' ? 'B' : 'A';
+      const theirMeal = MEALS.find(m => m.id === day.picks[otherPlayer]);
+      const resultMeal = MEALS.find(m => m.id === day.result.meal);
+      const otherName = gameState.players[otherPlayer]?.name || 'Partner';
+      
+      if (day.result.harmony) {
+        const msg = HARMONY_MESSAGES[Math.floor(Math.random() * HARMONY_MESSAGES.length)];
+        container.innerHTML = `
+          <div class="result">
+            <div class="result-title">✨ ${msg} ✨</div>
+            <div class="meal-emoji">${resultMeal.emoji}</div>
+            <div class="result-meal">${resultMeal.name}</div>
+            <div>You both chose the same meal! Tokens refunded.</div>
+          </div>
+          
+          <button class="btn" id="btn-continue">
+            ${gameState.currentDay < 6 ? '➡️ Continue to ' + DAYS[gameState.currentDay + 1] : '🏆 View Results'}
+          </button>
+        `;
+      } else {
+        const msg = CONFLICT_MESSAGES[Math.floor(Math.random() * CONFLICT_MESSAGES.length)];
+        const youWon = day.result.winner === playerId;
+        const winnerName = youWon ? 'You' : otherName;
+        
+        container.innerHTML = `
+          <div class="result conflict">
+            <div class="result-title">⚔️ ${msg} ⚔️</div>
+            
+            <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
+              <div style="text-align: center; opacity: ${youWon ? 1 : 0.5}">
+                <div style="font-size: 40px;">${myMeal.emoji}</div>
+                <div>You</div>
+                <div style="color: var(--accent);">Bid: ${day.bids[playerId]}</div>
+              </div>
+              <div style="font-size: 30px; align-self: center;">VS</div>
+              <div style="text-align: center; opacity: ${youWon ? 0.5 : 1}">
+                <div style="font-size: 40px;">${theirMeal.emoji}</div>
+                <div>${otherName}</div>
+                <div style="color: var(--accent);">Bid: ${day.bids[otherPlayer]}</div>
+              </div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+              The tokens were cast. Fate favors... <span style="color: var(--accent);">${winnerName.toUpperCase()}</span>!
+            </div>
+            <div class="meal-emoji" style="margin-top: 10px;">${resultMeal.emoji}</div>
+            <div class="result-meal">${resultMeal.name}</div>
+          </div>
+          
+          <button class="btn" id="btn-continue">
+            ${gameState.currentDay < 6 ? '➡️ Continue to ' + DAYS[gameState.currentDay + 1] : '🏆 View Results'}
+          </button>
+        `;
+      }
+      
+      document.getElementById('btn-continue').addEventListener('click', () => {
+        advanceDay();
+        if (gameState.status === 'complete') {
+          renderCompleteScreen();
+        } else {
+          renderGameScreen();
+        }
+      });
+    }
+
+    function renderCompleteScreen() {
+      showScreen('screen-complete');
+      renderWeekGrid('final-week-grid');
+      
+      // Calculate stats
+      let harmonies = 0;
+      let conflicts = 0;
+      const cuisines = {};
+      let totalCost = 0;
+      let totalTime = 0;
+      
+      gameState.week.forEach(day => {
+        if (day.result.harmony) harmonies++;
+        else conflicts++;
+        
+        const meal = MEALS.find(m => m.id === day.result.meal);
+        if (meal) {
+          cuisines[meal.cuisine] = (cuisines[meal.cuisine] || 0) + 1;
+          totalCost += meal.cost.length;
+          totalTime += meal.time;
+        }
+      });
+      
+      const topCuisine = Object.entries(cuisines).sort((a, b) => b[1] - a[1])[0];
+      
+      document.getElementById('final-stats').innerHTML = `
+        <div class="panel-title">📊 QUEST STATISTICS</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div>
+            <div style="color: var(--text-dim);">Harmonies</div>
+            <div style="font-size: 28px; color: var(--success);">${harmonies}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-dim);">Conflicts</div>
+            <div style="font-size: 28px; color: var(--danger);">${conflicts}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-dim);">Top Cuisine</div>
+            <div style="font-size: 28px; color: var(--accent);">${topCuisine ? topCuisine[0] : 'Varied'}</div>
+          </div>
+          <div>
+            <div style="color: var(--text-dim);">Total Cook Time</div>
+            <div style="font-size: 28px; color: var(--purple);">${totalTime} min</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border);">
+          <div style="color: var(--text-dim); margin-bottom: 10px;">YOUR MENU</div>
+          ${gameState.week.map(day => {
+            const meal = MEALS.find(m => m.id === day.result.meal);
+            return `<div style="margin: 5px 0;">${day.day}: ${meal.emoji} ${meal.name}</div>`;
+          }).join('')}
+        </div>
+      `;
+      
+      document.getElementById('btn-new-quest').addEventListener('click', () => {
+        window.location.href = window.location.pathname;
+      });
+    }
+
+    function renderWaitingScreen() {
+      showScreen('screen-waiting');
+      const shareUrl = window.location.href.replace(`player=${playerId}`, 'player=B');
+      document.getElementById('share-url').textContent = shareUrl;
+      
+      document.getElementById('btn-copy-link').addEventListener('click', () => {
+        navigator.clipboard.writeText(shareUrl);
+        document.getElementById('btn-copy-link').textContent = '✓ Copied!';
+        setTimeout(() => {
+          document.getElementById('btn-copy-link').textContent = '📋 Copy Link';
+        }, 2000);
+      });
+    }
+
+    // ==================== POLLING ====================
+    function startPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      
+      pollInterval = setInterval(() => {
+        if (!gameState) return;
+        
+        const fresh = storage.load(gameState.id);
+        if (!fresh) return;
+        
+        // Check for changes
+        const wasWaiting = gameState.status === 'waiting';
+        const isNowActive = fresh.status === 'active';
+        
+        gameState = fresh;
+        
+        if (wasWaiting && isNowActive) {
+          renderGameScreen();
+        } else if (gameState.status === 'active') {
+          const day = gameState.week[gameState.currentDay];
+          if (day.phase === 'reveal' || (day.picks[playerId] === null && day.picks[playerId === 'A' ? 'B' : 'A'] !== null)) {
+            renderGameScreen();
+          }
+        }
+      }, 1000);
+    }
+
+    // ==================== INIT ====================
+    function init() {
+      const params = new URLSearchParams(window.location.search);
+      const gameId = params.get('game');
+      const player = params.get('player');
+      
+      if (gameId && player) {
+        // Rejoining or joining
+        gameState = storage.load(gameId);
+        if (gameState) {
+          playerId = player;
+          
+          if (gameState.status === 'waiting' && playerId === 'A') {
+            renderWaitingScreen();
+          } else if (gameState.status === 'waiting' && playerId === 'B') {
+            // Player B joining
+            showScreen('screen-start');
+            document.getElementById('btn-new-game').style.display = 'none';
+            document.getElementById('btn-join-game').textContent = '🤝 Join Quest';
+          } else if (gameState.status === 'complete') {
+            renderCompleteScreen();
+          } else {
+            renderGameScreen();
+          }
+          
+          startPolling();
+          return;
+        }
+      }
+      
+      showScreen('screen-start');
+      
+      // Event listeners for start screen
+      document.getElementById('btn-new-game').addEventListener('click', () => {
+        const name = document.getElementById('player-name').value.trim() || 'Player 1';
+        createGame(name);
+        renderWaitingScreen();
+        startPolling();
+      });
+      
+      document.getElementById('btn-join-game').addEventListener('click', () => {
+        const name = document.getElementById('player-name').value.trim() || 'Player 2';
+        
+        if (gameId) {
+          // Joining via link
+          joinGame(gameId, name);
+          renderGameScreen();
+          startPolling();
+        } else {
+          // Manual join - prompt for code
+          const code = prompt('Enter the game code from your partner:');
+          if (code) {
+            const joined = joinGame(code, name);
+            if (joined) {
+              renderGameScreen();
+              startPolling();
+            } else {
+              alert('Game not found!');
+            }
+          }
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
