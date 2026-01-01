@@ -31,17 +31,44 @@ Will you find **harmony**... or descend into takeout chaos?
 
 ## Quick Start
 
-Just open `index.html` in your browser. No build step, no dependencies.
+### Running Locally
 
+#### Option 1: Python HTTP Server (Recommended)
 ```bash
-# Clone the repo
-git clone https://github.com/YOUR_USERNAME/dinner-quest.git
+python3 -m http.server 8000
+```
+Then visit http://localhost:8000
 
-# Open in browser
-open index.html
+#### Option 2: Direct File Opening
+Double-click `index.html` or:
+```bash
+open index.html  # macOS/Linux
 ```
 
-Or deploy to any static hosting (GitHub Pages, Netlify, Vercel).
+#### Option 3: Other Servers
+- Node.js: `npx http-server`
+- Ruby: `ruby -run -ehttpd . -p8000`
+
+### Deploy to GitHub Pages
+
+1. **Enable GitHub Pages:**
+   - Go to https://github.com/mjoslyn/dinnerquest/settings/pages
+   - Under "Build and deployment", select:
+     - Source: `GitHub Actions`
+   - Click Save
+
+2. **Push changes:**
+   ```bash
+   git add .
+   git commit -m "Add deployment configuration"
+   git push origin main
+   ```
+
+3. **Access your game:**
+   - Wait 1-2 minutes for deployment
+   - Visit `https://mjoslyn.github.io/dinnerquest/`
+
+**Automatic Deployment:** Every push to `main` auto-deploys via GitHub Actions (see `.github/workflows/deploy.yml`)
 
 ## Tech Stack
 
