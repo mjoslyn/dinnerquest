@@ -154,11 +154,36 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
           }
         },
 
-        sendSMS() {
+        async sendSMS() {
           const shareUrl = window.location.href;
-          const message = encodeURIComponent(`Check out our Dinner Quest meal plan and shopping list: ${shareUrl}`);
-          const smsUrl = `sms:?&body=${message}`;
-          window.location.href = smsUrl;
+          const message = `Check out our Dinner Quest meal plan and shopping list: ${shareUrl}`;
+          const shareMessage = document.getElementById('share-message');
+
+          // Use Web Share API to share with partner
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: 'Dinner Quest - Meal Plan',
+                text: message
+              });
+              shareMessage.textContent = 'Shared successfully!';
+              shareMessage.style.display = 'block';
+              setTimeout(() => {
+                shareMessage.style.display = 'none';
+              }, 3000);
+            } catch (err) {
+              // User cancelled or share failed
+              if (err.name !== 'AbortError') {
+                console.error('Share failed:', err);
+                shareMessage.textContent = 'Share failed. Copy link with 🔗 button.';
+                shareMessage.style.display = 'block';
+              }
+            }
+          } else {
+            // Browser doesn't support Web Share API - fallback to SMS
+            const smsUrl = `sms:?&body=${encodeURIComponent(message)}`;
+            window.location.href = smsUrl;
+          }
         }
       };
     }
