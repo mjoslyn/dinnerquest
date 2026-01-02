@@ -1,15 +1,36 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
-import { decodeGameState } from '../lib/urlCodec.js';
+import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
+import { createInitialState } from '../lib/gameState.js';
 import { getRandomUpgrades } from '../lib/gameData.js';
 
 export const prerender = false;
 
 const params = Astro.url.searchParams;
-const state = decodeGameState(params);
 
-if (!state) {
-  return Astro.redirect('/');
+// Check if we received raw settings (from index page) or encoded state
+let state;
+const mealCountParam = params.get('mealCount');
+const budgetCapParam = params.get('budgetCap');
+
+if (mealCountParam && budgetCapParam) {
+  // New game from index page - create initial state
+  const settings = {
+    mealCount: parseInt(mealCountParam),
+    budgetCap: budgetCapParam,
+    allergies: params.get('allergies') ? params.get('allergies').split(',').filter(Boolean) : []
+  };
+  state = createInitialState('', settings);
+
+  // Redirect to waiting page with encoded state
+  const encoded = encodeGameState(state);
+  return Astro.redirect(`/waiting?${encoded.toString()}&player=A`);
+} else {
+  // Existing game - decode state from URL
+  state = decodeGameState(params);
+  if (!state) {
+    return Astro.redirect('/');
+  }
 }
 
 // Check if Player B has joined

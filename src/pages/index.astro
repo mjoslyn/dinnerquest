@@ -1,5 +1,7 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
+import { createInitialState } from '../lib/gameState.js';
+import { encodeGameState } from '../lib/urlCodec.js';
 
 export const prerender = false;
 
@@ -73,9 +75,6 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
   </div>
 
   <script>
-    import { createInitialState } from '../lib/gameState.js';
-    import { encodeGameState } from '../lib/urlCodec.js';
-
     const form = document.getElementById('setup-form');
 
     form.addEventListener('submit', async (e) => {
@@ -86,18 +85,14 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
       const budgetCap = formData.get('budgetCap');
       const allergies = formData.getAll('allergies');
 
-      const settings = {
-        mealCount,
+      // Navigate to waiting page with game settings
+      const params = new URLSearchParams({
+        mealCount: mealCount.toString(),
         budgetCap,
-        allergies
-      };
+        allergies: allergies.join(',')
+      });
 
-      // Create initial game state without a name (will be set on game page)
-      const state = createInitialState('', settings);
-
-      // Encode and navigate to game
-      const encodedState = encodeGameState(state);
-      window.location.href = `/game?${encodedState.toString()}&player=A`;
+      window.location.href = `/waiting?${params.toString()}`;
     });
   </script>
 
