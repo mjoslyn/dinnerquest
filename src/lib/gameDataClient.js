@@ -43,11 +43,6 @@ export async function getRandomMeals(count, excludeAllergens = [], avgDietPrefer
     return !meal.allergens.some(allergen => excludeAllergens.includes(allergen));
   });
 
-  // If diet preference is vegetarian (1-2), exclude all meat-based meals
-  if (avgDietPreference <= 2) {
-    filtered = filtered.filter(meal => meal.dietScore <= 2);
-  }
-
   // Weight by diet preference
   const weighted = filtered.map(meal => {
     const dietDiff = Math.abs(meal.dietScore - avgDietPreference);

@@ -44,11 +44,6 @@ export async function getRandomMeals(count, excludeAllergens = [], avgDietPrefer
     );
   }
 
-  // If diet preference is vegetarian (1-2), exclude all meat-based meals
-  if (avgDietPreference <= 2) {
-    meals = meals.filter(meal => meal.dietScore <= 2);
-  }
-
   // Balance pool based on diet preference
   // If avg is low (veggie), bias toward low dietScore meals
   // If avg is high (meaty), bias toward high dietScore meals

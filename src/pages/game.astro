@@ -49,10 +49,17 @@ const partialHarmonyMeals = partialHarmonyIds.map(id => allMeals.find(m => m.id 
 // Combine pool with other player's picks
 const poolMealIds = state.pool.map(m => m.id);
 const combinedPoolIds = [...new Set([...poolMealIds, ...partialHarmonyIds])];
-const poolMeals = combinedPoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
+let poolMeals = combinedPoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
 
-// Track which meals are from other player's picks (for star icon)
+// Filter by current player's diet preference (exclude meat if vegetarian)
+// BUT keep partial harmonies regardless of diet preference
 const otherPlayerPicksSet = new Set(partialHarmonyIds);
+if (player.dietPreference <= 2) {
+  // Vegetarian - exclude meat dishes (dietScore >= 3) unless they're partial harmonies
+  poolMeals = poolMeals.filter(meal =>
+    meal.dietScore <= 2 || otherPlayerPicksSet.has(meal.id)
+  );
+}
 
 // Get harmonies for display
 const harmonyMeals = state.harmoniesSoFar.map(id => allMeals.find(m => m.id === id));

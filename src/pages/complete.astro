@@ -1,8 +1,7 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
 import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
-import { getAllMeals, getNarrativeMessages, getRandomMessage, generateShoppingList } from '../lib/gameData.js';
-import { calculateStats } from '../lib/gameLogic.js';
+import { getAllMeals, generateShoppingList } from '../lib/gameData.js';
 
 export const prerender = false;
 
@@ -21,15 +20,12 @@ const finalMeals = state.results.finalMenu.map(id =>
   allMeals.find(m => m.id === id)
 );
 
-// Get stats
-const stats = calculateStats(state);
-
-// Get narrative messages
-const harmonyMessages = await getNarrativeMessages('harmony');
-const conflictMessages = await getNarrativeMessages('conflict');
-
 // Generate shopping list
 const shoppingList = await generateShoppingList(finalMeals);
+
+// Get checked items from URL
+const checkedParam = params.get('checked') || '';
+const checkedItems = checkedParam ? checkedParam.split(',') : [];
 ---
 
 <GameLayout>
@@ -55,77 +51,18 @@ const shoppingList = await generateShoppingList(finalMeals);
       </div>
     </div>
 
-    <div class="results-section">
-      <h3>Battle Results</h3>
-
-      <div class="results-grid">
-        {state.results.harmonies.length > 0 && (
-          <div class="result-category harmony">
-            <div class="result-header">
-              <span class="result-icon">🤝</span>
-              <span class="result-title">Harmonies ({state.results.harmonies.length})</span>
-            </div>
-            {state.results.harmonies.map(mealId => {
-              const meal = allMeals.find(m => m.id === mealId);
-              return (
-                <div class="result-item">
-                  <span>{meal?.emoji}</span>
-                  <span>{meal?.name}</span>
-                  <span class="result-message">{getRandomMessage(harmonyMessages)}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {state.results.conflicts.length > 0 && (
-          <div class="result-category conflict">
-            <div class="result-header">
-              <span class="result-icon">⚔️</span>
-              <span class="result-title">Conflicts ({state.results.conflicts.length})</span>
-            </div>
-            {state.results.conflicts.map(conflict => {
-              const meal = allMeals.find(m => m.id === conflict.meal);
-              const winnerName = state.players[conflict.winner].name;
-              return (
-                <div class="result-item">
-                  <span>{meal?.emoji}</span>
-                  <span>{meal?.name}</span>
-                  <span class="result-winner">
-                    {winnerName} wins! ({conflict.winner === 'A' ? conflict.playerABid : conflict.playerBBid} tokens)
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-
-    <div class="stats-section">
-      <h3>Quest Statistics</h3>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value">{stats.harmonies}</div>
-          <div class="stat-label">Harmonies</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{stats.conflicts}</div>
-          <div class="stat-label">Conflicts</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{stats.totalTime}</div>
-          <div class="stat-label">Total Minutes</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{stats.topCuisine}</div>
-          <div class="stat-label">Top Cuisine</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="shopping-list-section" x-data="{ checkedItems: new Set() }">
+    <div class="shopping-list-section" x-data="shoppingListData()">
       <h3>Shopping List</h3>
+
+      <div class="share-actions">
+        <button @click="sendSMS" class="btn btn-primary">
+          Conjure & Share
+        </button>
+        <button @click="copyLink" class="btn btn-secondary" title="Copy link">
+          🔗
+        </button>
+      </div>
+      <div id="share-message" class="share-message" style="display: none;"></div>
 
       {Object.entries(shoppingList.bySection).map(([sectionName, items]) => (
         <div class="grocery-section">
@@ -133,19 +70,26 @@ const shoppingList = await generateShoppingList(finalMeals);
             <span class="section-name">{sectionName}</span>
           </div>
           <ul class="ingredient-list">
-            {items.map(item => (
-              <li x-data="{ checked: false }">
-                <label class="ingredient-item">
-                  <input type="checkbox" x-model="checked" />
-                  <span :class="checked ? 'line-through opacity-50' : ''">
-                    {item.ingredient}
-                  </span>
-                  <span class="meal-usage">
-                    ({item.meals.join(', ')})
-                  </span>
-                </label>
-              </li>
-            ))}
+            {items.map(item => {
+              const itemId = item.ingredient.toLowerCase().replace(/[^a-z0-9]/g, '-');
+              return (
+                <li data-item-id={itemId}>
+                  <label class="ingredient-item">
+                    <input
+                      type="checkbox"
+                      :checked={`checkedItems.has('${itemId}')`}
+                      @change={`toggleItem('${itemId}')`}
+                    />
+                    <span :class={`checkedItems.has('${itemId}') ? 'line-through opacity-50' : ''`}>
+                      {item.ingredient}
+                    </span>
+                    <span class="meal-usage">
+                      ({item.meals.join(', ')})
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
           </ul>
         </div>
       ))}
@@ -162,10 +106,66 @@ const shoppingList = await generateShoppingList(finalMeals);
     <p>The week is planned. The kitchen awaits. Your culinary adventure begins now!</p>
   </div>
 
+  <script is:inline>
+    window.shoppingListData = function() {
+      // Get initial checked items from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const checkedParam = urlParams.get('checked') || '';
+      const initialChecked = checkedParam ? checkedParam.split(',').filter(Boolean) : [];
+
+      return {
+        checkedItems: new Set(initialChecked),
+
+        toggleItem(itemId) {
+          if (this.checkedItems.has(itemId)) {
+            this.checkedItems.delete(itemId);
+          } else {
+            this.checkedItems.add(itemId);
+          }
+          this.updateURL();
+        },
+
+        updateURL() {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (this.checkedItems.size > 0) {
+            urlParams.set('checked', Array.from(this.checkedItems).join(','));
+          } else {
+            urlParams.delete('checked');
+          }
+          const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+          window.history.replaceState({}, '', newUrl);
+        },
+
+        async copyLink() {
+          const shareUrl = window.location.href;
+          const shareMessage = document.getElementById('share-message');
+
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            shareMessage.textContent = 'Link copied to clipboard!';
+            shareMessage.style.display = 'block';
+            setTimeout(() => {
+              shareMessage.style.display = 'none';
+            }, 3000);
+          } catch (err) {
+            console.error('Copy failed:', err);
+            shareMessage.textContent = 'Failed to copy link.';
+            shareMessage.style.display = 'block';
+          }
+        },
+
+        sendSMS() {
+          const shareUrl = window.location.href;
+          const message = encodeURIComponent(`Check out our Dinner Quest meal plan and shopping list: ${shareUrl}`);
+          const smsUrl = `sms:?&body=${message}`;
+          window.location.href = smsUrl;
+        }
+      };
+    }
+  </script>
+
   <style>
-    .final-menu h2,
-    .results-section h3,
-    .stats-section h3 {
+    .final-menu h2 {
       font-size: 14px;
       color: var(--primary);
       margin-bottom: 16px;
@@ -209,91 +209,6 @@ const shoppingList = await generateShoppingList(finalMeals);
       color: var(--text-dim);
     }
 
-    .results-section {
-      margin: 30px 0;
-    }
-
-    .results-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .result-category {
-      padding: 16px;
-      border: 2px solid var(--border);
-      background: var(--bg-dark);
-    }
-
-    .result-category.harmony {
-      border-color: var(--primary);
-    }
-
-    .result-category.conflict {
-      border-color: #ff6b6b;
-    }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    .result-icon {
-      font-size: 20px;
-    }
-
-    .result-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
-      margin: 4px 0;
-      background: var(--bg);
-      font-size: 12px;
-    }
-
-    .result-message {
-      color: var(--primary);
-      font-style: italic;
-    }
-
-    .result-winner {
-      color: var(--text-dim);
-    }
-
-    .stats-section {
-      margin: 30px 0;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 16px;
-    }
-
-    .stat-item {
-      text-align: center;
-      padding: 20px;
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-
     .shopping-list-section {
       margin: 30px 0;
     }
@@ -302,6 +217,31 @@ const shoppingList = await generateShoppingList(finalMeals);
       font-size: 14px;
       color: var(--primary);
       margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .share-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .share-actions .btn-primary {
+      flex: 1;
+    }
+
+    .share-actions .btn-secondary {
+      flex: 0;
+      width: 52px;
+    }
+
+    .share-message {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      font-size: 12px;
       text-align: center;
     }
 
@@ -390,6 +330,16 @@ const shoppingList = await generateShoppingList(finalMeals);
 
     .btn-primary:hover {
       transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
     }
   </style>
 </GameLayout>
