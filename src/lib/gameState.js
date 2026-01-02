@@ -1,0 +1,244 @@
+import { generateId } from './urlCodec.js';
+
+/**
+ * @typedef {Object} GameSettings
+ * @property {3 | 5 | 7 | 10} mealCount
+ * @property {'tight' | 'moderate' | 'fancy' | 'none'} budgetCap
+ * @property {string[]} allergies
+ */
+
+/**
+ * @typedef {Object} Player
+ * @property {string} name
+ * @property {number} dietPreference - 1 (veggie) to 5 (meaty)
+ * @property {Array} upgrades - Array of upgrade objects
+ * @property {number[]} picks - Array of meal IDs
+ * @property {Object.<number, number>} tokens - Map of mealId -> token count
+ * @property {boolean} locked
+ */
+
+/**
+ * @typedef {Object} ConflictResult
+ * @property {number} meal - Meal ID
+ * @property {string} winner - 'A' or 'B'
+ * @property {number} playerABid
+ * @property {number} playerBBid
+ */
+
+/**
+ * @typedef {Object} GameResults
+ * @property {number[]} finalMenu - Array of meal IDs
+ * @property {number[]} harmonies - Array of meal IDs where players agreed
+ * @property {ConflictResult[]} conflicts - Array of conflict resolutions
+ */
+
+/**
+ * @typedef {Object} GameState
+ * @property {string} id
+ * @property {GameSettings} settings
+ * @property {{ A: Player | null, B: Player | null }} players
+ * @property {import('./gameData.js').Meal[]} pool
+ * @property {GameResults | null} results
+ * @property {'setup' | 'waiting' | 'drafting' | 'revealing' | 'complete'} status
+ * @property {number} currentRound - Current drafting round (1, 2, 3...)
+ * @property {number[]} harmoniesSoFar - Accumulated harmonies across all rounds
+ * @property {number[]} usedMeals - Meals that have been drafted (removed from pool)
+ * @property {number[]} playerAAllPicks - All meals Player A has picked across all rounds
+ * @property {number[]} playerBAllPicks - All meals Player B has picked across all rounds
+ */
+
+/**
+ * Create initial game state with settings
+ * @param {string} playerName
+ * @param {GameSettings} settings
+ * @returns {GameState}
+ */
+export function createInitialState(playerName, settings) {
+  const gameId = generateId();
+
+  return {
+    id: gameId,
+    settings,
+    players: {
+      A: {
+        name: playerName,
+        dietPreference: 3,
+        upgrades: [],
+        picks: [],
+        tokens: {},
+        locked: false
+      },
+      B: null
+    },
+    pool: [],
+    results: null,
+    status: 'waiting',
+    currentRound: 1,
+    harmoniesSoFar: [],
+    usedMeals: [],
+    playerAAllPicks: [],
+    playerBAllPicks: []
+  };
+}
+
+/**
+ * Add player B to existing game
+ * @param {GameState} state
+ * @param {string} playerName
+ * @returns {GameState}
+ */
+export function addPlayerB(state, playerName) {
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      B: {
+        name: playerName,
+        dietPreference: 3,
+        upgrades: [],
+        picks: [],
+        tokens: {},
+        locked: false
+      }
+    },
+    status: 'setup'
+  };
+}
+
+/**
+ * Set player diet preference
+ * @param {GameState} state
+ * @param {string} playerId - 'A' or 'B'
+ * @param {number} dietPreference - 1 to 5
+ * @returns {GameState}
+ */
+export function setDietPreference(state, playerId, dietPreference) {
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...state.players[playerId],
+        dietPreference
+      }
+    }
+  };
+}
+
+/**
+ * Draw random upgrades for a player
+ * @param {GameState} state
+ * @param {string} playerId - 'A' or 'B'
+ * @param {Array} upgrades - Pre-fetched upgrades
+ * @returns {GameState}
+ */
+export function setPlayerUpgrades(state, playerId, upgrades) {
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...state.players[playerId],
+        upgrades
+      }
+    }
+  };
+}
+
+/**
+ * Generate meal pool based on settings and diet preferences
+ * @param {GameState} state
+ * @param {import('./gameData.js').Meal[]} meals - Pre-fetched meals
+ * @returns {GameState}
+ */
+export function generateMealPool(state, meals) {
+  const poolSize = state.settings.mealCount * 5;
+
+  return {
+    ...state,
+    pool: meals.slice(0, poolSize),
+    status: 'drafting'
+  };
+}
+
+/**
+ * Update player's picks
+ * @param {GameState} state
+ * @param {string} playerId
+ * @param {number[]} picks - Array of meal IDs
+ * @returns {GameState}
+ */
+export function updatePlayerPicks(state, playerId, picks) {
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...state.players[playerId],
+        picks
+      }
+    }
+  };
+}
+
+/**
+ * Update player's token distribution
+ * @param {GameState} state
+ * @param {string} playerId
+ * @param {Object.<number, number>} tokens
+ * @returns {GameState}
+ */
+export function updatePlayerTokens(state, playerId, tokens) {
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...state.players[playerId],
+        tokens
+      }
+    }
+  };
+}
+
+/**
+ * Lock in player's draft
+ * @param {GameState} state
+ * @param {string} playerId
+ * @returns {GameState}
+ */
+export function lockPlayerDraft(state, playerId) {
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      [playerId]: {
+        ...state.players[playerId],
+        locked: true
+      }
+    }
+  };
+}
+
+/**
+ * Check if both players have locked in
+ * @param {GameState} state
+ * @returns {boolean}
+ */
+export function bothPlayersLocked(state) {
+  return state.players.A?.locked && state.players.B?.locked;
+}
+
+/**
+ * Set game results
+ * @param {GameState} state
+ * @param {GameResults} results
+ * @returns {GameState}
+ */
+export function setGameResults(state, results) {
+  return {
+    ...state,
+    results,
+    status: 'complete'
+  };
+}

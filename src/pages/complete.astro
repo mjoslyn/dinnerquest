@@ -1,0 +1,291 @@
+---
+import GameLayout from '../layouts/GameLayout.astro';
+import { decodeGameState } from '../lib/urlCodec.js';
+import { getAllMeals, getNarrativeMessages, getRandomMessage } from '../lib/gameData.js';
+import { calculateStats } from '../lib/gameLogic.js';
+
+export const prerender = false;
+
+const params = Astro.url.searchParams;
+const state = decodeGameState(params);
+
+if (!state || state.status !== 'complete') {
+  return Astro.redirect('/');
+}
+
+const currentPlayer = params.get('player') || 'A';
+
+// Fetch full meal data
+const allMeals = await getAllMeals();
+const finalMeals = state.results.finalMenu.map(id =>
+  allMeals.find(m => m.id === id)
+);
+
+// Get stats
+const stats = calculateStats(state);
+
+// Get narrative messages
+const harmonyMessages = await getNarrativeMessages('harmony');
+const conflictMessages = await getNarrativeMessages('conflict');
+---
+
+<GameLayout>
+  <div class="panel">
+    <div class="panel-title">QUEST COMPLETE!</div>
+
+    <div class="final-menu">
+      <h2>Your Final Menu</h2>
+      <div class="menu-grid">
+        {finalMeals.map(meal => (
+          <div class="menu-item">
+            <span class="menu-emoji">{meal?.emoji || '?'}</span>
+            <div class="menu-details">
+              <div class="menu-name">{meal?.name || 'Unknown'}</div>
+              <div class="menu-meta">
+                <span>{meal?.time}min</span>
+                <span>{meal?.cost}</span>
+                <span>{meal?.cuisine}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="results-section">
+      <h3>Battle Results</h3>
+
+      <div class="results-grid">
+        {state.results.harmonies.length > 0 && (
+          <div class="result-category harmony">
+            <div class="result-header">
+              <span class="result-icon">🤝</span>
+              <span class="result-title">Harmonies ({state.results.harmonies.length})</span>
+            </div>
+            {state.results.harmonies.map(mealId => {
+              const meal = allMeals.find(m => m.id === mealId);
+              return (
+                <div class="result-item">
+                  <span>{meal?.emoji}</span>
+                  <span>{meal?.name}</span>
+                  <span class="result-message">{getRandomMessage(harmonyMessages)}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {state.results.conflicts.length > 0 && (
+          <div class="result-category conflict">
+            <div class="result-header">
+              <span class="result-icon">⚔️</span>
+              <span class="result-title">Conflicts ({state.results.conflicts.length})</span>
+            </div>
+            {state.results.conflicts.map(conflict => {
+              const meal = allMeals.find(m => m.id === conflict.meal);
+              const winnerName = state.players[conflict.winner].name;
+              return (
+                <div class="result-item">
+                  <span>{meal?.emoji}</span>
+                  <span>{meal?.name}</span>
+                  <span class="result-winner">
+                    {winnerName} wins! ({conflict.winner === 'A' ? conflict.playerABid : conflict.playerBBid} tokens)
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <h3>Quest Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">{stats.harmonies}</div>
+          <div class="stat-label">Harmonies</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{stats.conflicts}</div>
+          <div class="stat-label">Conflicts</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{stats.totalTime}</div>
+          <div class="stat-label">Total Minutes</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{stats.topCuisine}</div>
+          <div class="stat-label">Top Cuisine</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button onclick="window.location.href = '/'" class="btn btn-primary">
+        New Quest
+      </button>
+    </div>
+  </div>
+
+  <div class="narrative">
+    <p>The week is planned. The kitchen awaits. Your culinary adventure begins now!</p>
+  </div>
+
+  <style>
+    .final-menu h2,
+    .results-section h3,
+    .stats-section h3 {
+      font-size: 14px;
+      color: var(--primary);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .menu-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+    }
+
+    .menu-emoji {
+      font-size: 32px;
+    }
+
+    .menu-details {
+      flex: 1;
+    }
+
+    .menu-name {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .menu-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .results-section {
+      margin: 30px 0;
+    }
+
+    .results-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .result-category {
+      padding: 16px;
+      border: 2px solid var(--border);
+      background: var(--bg-dark);
+    }
+
+    .result-category.harmony {
+      border-color: var(--primary);
+    }
+
+    .result-category.conflict {
+      border-color: #ff6b6b;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .result-icon {
+      font-size: 20px;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      margin: 4px 0;
+      background: var(--bg);
+      font-size: 11px;
+    }
+
+    .result-message {
+      color: var(--primary);
+      font-style: italic;
+    }
+
+    .result-winner {
+      color: var(--text-dim);
+    }
+
+    .stats-section {
+      margin: 30px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</GameLayout>

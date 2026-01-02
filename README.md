@@ -3,7 +3,7 @@
 > A text-based RPG roguelike for couples to decide on dinner for the week
 
 ![Dinner Quest](https://img.shields.io/badge/players-2-blue)
-![Status](https://img.shields.io/badge/status-prototype-orange)
+![Status](https://img.shields.io/badge/status-live-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## The Premise
@@ -27,58 +27,99 @@ Will you find **harmony**... or descend into takeout chaos?
 - ⚔️ **Conflict resolution** — Bid tokens to influence outcomes
 - 📊 **End-of-week stats** — Harmonies, conflicts, top cuisine, total cook time
 - 📱 **Mobile-friendly** — Works on any device
-- 🔗 **Async play** — Take turns whenever (currently requires same browser/device)
+- 🔗 **Async play** — Take turns whenever, state stored in URL
 
 ## Quick Start
 
 ### Running Locally
 
-#### Option 1: Python HTTP Server (Recommended)
+#### Option 1: npm (Recommended)
+```bash
+npm install
+npm start
+```
+Opens automatically at http://localhost:4321
+
+#### Option 2: Python HTTP Server (old version)
 ```bash
 python3 -m http.server 8000
+open old-index.html  # Original single-file version
 ```
-Then visit http://localhost:8000
-
-#### Option 2: Direct File Opening
-Double-click `index.html` or:
-```bash
-open index.html  # macOS/Linux
-```
-
-#### Option 3: Other Servers
-- Node.js: `npx http-server`
-- Ruby: `ruby -run -ehttpd . -p8000`
 
 ### Deploy to GitHub Pages
 
-1. **Enable GitHub Pages:**
-   - Go to https://github.com/mjoslyn/dinnerquest/settings/pages
-   - Under "Build and deployment", select:
-     - Source: `GitHub Actions`
-   - Click Save
-
-2. **Push changes:**
+1. **Push to GitHub:**
    ```bash
    git add .
-   git commit -m "Add deployment configuration"
+   git commit -m "Deploy Astro version"
    git push origin main
    ```
+
+2. **Enable GitHub Pages:**
+   - Go to repository Settings > Pages
+   - Under "Build and deployment", select:
+     - Source: `GitHub Actions`
+   - The workflow will auto-deploy
 
 3. **Access your game:**
    - Wait 1-2 minutes for deployment
    - Visit `https://mjoslyn.github.io/dinnerquest/`
 
-**Automatic Deployment:** Every push to `main` auto-deploys via GitHub Actions (see `.github/workflows/deploy.yml`)
+**Automatic Deployment:** Every push to `main` auto-deploys via GitHub Actions
 
 ## Tech Stack
 
+### New (Astro Version)
+- **Astro** — Static site generation
+- **HTMX** — Dynamic content swapping without heavy JS
+- **Alpine.js** — Lightweight reactivity for UI interactions
+- **LZ-String** — URL state compression
+- Pure JavaScript (no TypeScript)
+
+### Original (Single-File Version)
 - Pure HTML/CSS/JS — no frameworks, no build tools
-- LocalStorage for game state (demo only)
+- LocalStorage for game state
 - Retro terminal aesthetic with Google Fonts (VT323, Press Start 2P)
+
+## Architecture
+
+Game state is compressed and encoded in the URL using LZ-String, eliminating the need for a backend. Each player's link contains the entire game state, enabling true async play with no server persistence required.
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## Project Structure
+
+```
+dinner-quest/
+├── src/
+│   ├── components/       # Reusable Astro components
+│   ├── layouts/          # Page layouts
+│   ├── pages/            # Routes (index, waiting, game, complete)
+│   │   └── api/          # API endpoints for HTMX
+│   ├── lib/              # Game logic, state management, URL codec
+│   └── styles/           # Retro CSS theme
+├── public/               # Static assets
+└── old-index.html        # Original single-file version (backup)
+```
 
 ## Roadmap
 
-- [ ] Real backend for cross-device async (Firebase/Supabase)
+- [x] Convert to Astro + HTMX architecture
+- [x] URL-based state management
 - [ ] Push notifications
 - [ ] Dietary restriction filters
 - [ ] Unlockable meals from harmony streaks
@@ -87,7 +128,7 @@ open index.html  # macOS/Linux
 
 ## Contributing
 
-Pull requests welcome! This is a fun side project — feel free to add meals, improve the narrative, or build out the backend.
+Pull requests welcome! This is a fun side project — feel free to add meals, improve the narrative, or enhance the game mechanics.
 
 ## License
 

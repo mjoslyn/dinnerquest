@@ -1,0 +1,26 @@
+---
+import { MEALS } from '../lib/gameData.js';
+
+const { week, currentDay = -1 } = Astro.props;
+---
+
+<div class="week-grid">
+  {week.map((day, i) => {
+    let emoji = '❓';
+    if (day.result) {
+      const meal = MEALS.find(m => m.id === day.result.meal);
+      emoji = meal ? meal.emoji : '✅';
+    }
+
+    return (
+      <div class:list={[
+        "week-day",
+        { current: i === currentDay },
+        { complete: day.phase === 'complete' }
+      ]}>
+        <div class="week-day-name">{day.day.substring(0, 3)}</div>
+        <div class="week-day-emoji">{emoji}</div>
+      </div>
+    );
+  })}
+</div>

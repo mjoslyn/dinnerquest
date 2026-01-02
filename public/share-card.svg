@@ -1,0 +1,68 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="psychedelic" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:1" />
+      <stop offset="20%" style="stop-color:#ff0080;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#ff8000;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#ffff00;stop-opacity:1" />
+      <stop offset="80%" style="stop-color:#00ff80;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0080ff;stop-opacity:1" />
+    </linearGradient>
+
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" />
+      <feColorMatrix type="saturate" values="0" />
+      <feBlend mode="multiply" in="SourceGraphic" />
+    </filter>
+
+    <filter id="fuzz">
+      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="turbulence" />
+      <feDisplacementMap in2="turbulence" in="SourceGraphic" scale="3" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </defs>
+
+  <!-- Background gradient -->
+  <rect width="1200" height="630" fill="url(#psychedelic)" filter="url(#noise)" opacity="0.8" />
+  <rect width="1200" height="630" fill="#1a1a1a" opacity="0.7" />
+
+  <!-- Grid pattern overlay -->
+  <path d="M0,0 L1200,630 M1200,0 L0,630 M600,0 L600,630 M0,315 L1200,315"
+        stroke="#ff9500" stroke-width="1" opacity="0.1" />
+
+  <!-- Title with fuzz effect -->
+  <text x="600" y="220"
+        font-family="'Press Start 2P', monospace"
+        font-size="72"
+        fill="#ff9500"
+        text-anchor="middle"
+        filter="url(#fuzz)">DINNER</text>
+
+  <text x="600" y="310"
+        font-family="'Press Start 2P', monospace"
+        font-size="72"
+        fill="#ff9500"
+        text-anchor="middle"
+        filter="url(#fuzz)">QUEST</text>
+
+
+  <!-- Meal emojis scattered -->
+  <text x="150" y="150" font-size="60" opacity="0.6">🍕</text>
+  <text x="1050" y="180" font-size="60" opacity="0.6">🍜</text>
+  <text x="100" y="500" font-size="60" opacity="0.6">🥗</text>
+  <text x="1080" y="520" font-size="60" opacity="0.6">🍝</text>
+  <text x="300" y="100" font-size="45" opacity="0.5">🌮</text>
+  <text x="900" y="580" font-size="45" opacity="0.5">🍔</text>
+
+  <!-- Decorative tokens -->
+  <circle cx="200" y="350" r="20" fill="#ff9500" opacity="0.3" />
+  <circle cx="1000" y="350" r="20" fill="#ff9500" opacity="0.3" />
+  <circle cx="600" y="480" r="15" fill="#00ff80" opacity="0.3" />
+
+  <!-- Bottom text -->
+  <text x="600" y="550"
+        font-family="'Press Start 2P', monospace"
+        font-size="14"
+        fill="#ffffff"
+        text-anchor="middle"
+        opacity="0.7">DRAFT · BID · RESOLVE</text>
+</svg>

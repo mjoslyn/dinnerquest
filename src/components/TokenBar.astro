@@ -1,0 +1,13 @@
+---
+const { tokens, maxTokens = 10 } = Astro.props;
+---
+
+<div class="tokens">
+  <span class="token-label">Enthusiasm Tokens:</span>
+  <div class="token-bar">
+    {Array.from({ length: maxTokens }).map((_, i) => (
+      <div class:list={["token-pip", { empty: i >= tokens }]}></div>
+    ))}
+  </div>
+  <span class="token-count">{tokens}/{maxTokens}</span>
+</div>

@@ -1,0 +1,11 @@
+---
+const { url } = Astro.props;
+---
+
+<div class="share-box">
+  <div class="panel-title">📤 SHARE WITH PARTNER</div>
+  <div class="share-url">{url}</div>
+  <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)">
+    Copy Link
+  </button>
+</div>

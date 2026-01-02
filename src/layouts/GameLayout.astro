@@ -1,0 +1,46 @@
+---
+import '../styles/retro.css';
+
+const { title = "DINNER QUEST · A Meal Planning Roguelike" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Dinner Quest - A Roguelike for Couples">
+  <meta property="og:description" content="A text-based RPG roguelike for couples to decide on dinner for the week. Draft, bid, and resolve your way to the perfect meal plan.">
+  <meta property="og:image" content="/share-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Dinner Quest - A Roguelike for Couples">
+  <meta name="twitter:description" content="A text-based RPG roguelike for couples to decide on dinner for the week. Draft, bid, and resolve your way to the perfect meal plan.">
+  <meta name="twitter:image" content="/share-card.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">🍽️ DINNER QUEST</h1>
+      <p class="subtitle">A meal planning roguelike</p>
+    </header>
+
+    <slot />
+  </div>
+</body>
+</html>

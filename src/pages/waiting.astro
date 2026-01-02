@@ -1,0 +1,495 @@
+---
+import GameLayout from '../layouts/GameLayout.astro';
+import { decodeGameState } from '../lib/urlCodec.js';
+import { getRandomUpgrades } from '../lib/gameData.js';
+
+export const prerender = false;
+
+const params = Astro.url.searchParams;
+const state = decodeGameState(params);
+
+if (!state) {
+  return Astro.redirect('/');
+}
+
+// Check if Player B has joined
+const playerBJoined = state.players.B !== null;
+
+// Get current player from URL
+const currentPlayer = params.get('player') || 'A';
+const player = state.players[currentPlayer];
+
+// Generate share URL for Player B
+const shareUrl = `${Astro.url.origin}${import.meta.env.BASE_URL}/waiting?${params.toString()}&player=B`;
+
+// Get random upgrades for display
+let upgrades = [];
+if (playerBJoined || currentPlayer === 'A') {
+  upgrades = await getRandomUpgrades(2);
+}
+---
+
+<GameLayout>
+  <div class="panel">
+    <div class="panel-title">{player?.name || currentPlayer} - CHOOSE YOUR PATH</div>
+
+      {!playerBJoined && currentPlayer === 'B' && (
+        <form id="player-name-form" class="player-setup">
+          <div class="form-section">
+            <label class="form-label">Your Name</label>
+            <input
+              type="text"
+              name="playerName"
+              id="player-name-input"
+              class="name-input"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Continue
+          </button>
+        </form>
+      )}
+
+      {(playerBJoined || currentPlayer === 'A') && (
+        <form id="player-setup-form" class="player-setup">
+        {currentPlayer === 'A' && !player?.name && (
+          <div class="form-section">
+            <label class="form-label">Your Name</label>
+            <input
+              type="text"
+              name="playerName"
+              id="player-name-input"
+              class="name-input"
+              placeholder="Enter your name"
+              required
+            />
+          </div>
+        )}
+
+        <div class="form-section">
+          <label class="form-label">Diet Preference</label>
+          <div class="diet-slider-container">
+            <span class="diet-label">🥬 Veggie</span>
+            <input
+              type="range"
+              name="dietPreference"
+              min="1"
+              max="5"
+              value={player?.dietPreference || 3}
+              class="diet-slider"
+              id="diet-slider"
+            />
+            <span class="diet-label">Meaty 🥩</span>
+          </div>
+          <div class="diet-value" id="diet-value">
+            {player?.dietPreference || 3}
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="upgrades-header">
+            <label class="form-label">Your Upgrades (2 random)</label>
+            <button type="button" id="redraw-btn" class="btn-icon" title="Redraw Upgrades">
+              🔄
+            </button>
+          </div>
+          <div class="upgrades-grid" id="upgrades-container">
+            {upgrades.map(upgrade => (
+              <div class="upgrade-card">
+                <div class="upgrade-emoji">{upgrade.emoji}</div>
+                <div class="upgrade-name">{upgrade.name}</div>
+                <div class="upgrade-effect">{upgrade.effect}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Ready Your Provisions
+        </button>
+      </form>
+      )}
+  </div>
+
+  <div class="narrative">
+    <p>Configure your preferences. The meal pool will be tailored to both players' tastes.</p>
+  </div>
+
+  <script id="server-upgrades" type="application/json" set:html={JSON.stringify(upgrades)}></script>
+
+  <script>
+    import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
+    import { setDietPreference, setPlayerUpgrades, generateMealPool, bothPlayersLocked, addPlayerB } from '../lib/gameState.js';
+    import { getRandomUpgrades, getRandomMeals } from '../lib/gameDataClient.js';
+
+    const params = new URLSearchParams(window.location.search);
+    let state = decodeGameState(params);
+    const currentPlayer = params.get('player') || 'A';
+
+    // Initialize upgrades from server-rendered data
+    const serverUpgradesEl = document.getElementById('server-upgrades');
+    let currentUpgrades = serverUpgradesEl ? JSON.parse(serverUpgradesEl.textContent) : [];
+
+    // Player name form for Player B
+    const playerNameForm = document.getElementById('player-name-form');
+    if (playerNameForm) {
+      playerNameForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(playerNameForm);
+        const playerName = formData.get('playerName');
+
+        // Add Player B with their chosen name
+        state = addPlayerB(state, playerName);
+
+        // Reload the page with updated state
+        const encoded = encodeGameState(state);
+        window.location.href = `/waiting?${encoded.toString()}&player=B`;
+      });
+    }
+
+    // Copy link functionality
+    const copyBtn = document.getElementById('copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const input = document.getElementById('share-url');
+        input.select();
+        navigator.clipboard.writeText(input.value);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy Link';
+        }, 2000);
+      });
+    }
+
+    // Diet slider display
+    const dietSlider = document.getElementById('diet-slider');
+    const dietValue = document.getElementById('diet-value');
+    if (dietSlider && dietValue) {
+      dietSlider.addEventListener('input', (e) => {
+        dietValue.textContent = e.target.value;
+      });
+    }
+
+    // Redraw upgrades
+    const redrawBtn = document.getElementById('redraw-btn');
+    if (redrawBtn) {
+      redrawBtn.addEventListener('click', async () => {
+        const newUpgrades = await getRandomUpgrades(2);
+        currentUpgrades = newUpgrades;
+
+        const container = document.getElementById('upgrades-container');
+        container.innerHTML = newUpgrades.map(upgrade => `
+          <div class="upgrade-card">
+            <div class="upgrade-emoji">${upgrade.emoji}</div>
+            <div class="upgrade-name">${upgrade.name}</div>
+            <div class="upgrade-effect">${upgrade.effect}</div>
+          </div>
+        `).join('');
+      });
+    }
+
+    // Form submission
+    const form = document.getElementById('player-setup-form');
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const dietPref = parseInt(formData.get('dietPreference'));
+        const playerName = formData.get('playerName');
+
+        // Update state with preferences first
+        state = setDietPreference(state, currentPlayer, dietPref);
+        state = setPlayerUpgrades(state, currentPlayer, currentUpgrades);
+
+        // Update name if provided (for Player A on first setup)
+        if (playerName && currentPlayer === 'A' && state.players.A && !state.players.A.name) {
+          state = { ...state, players: { ...state.players, A: { ...state.players.A, name: playerName } } };
+        }
+
+        // Mark player as ready (locked)
+        state = { ...state, players: { ...state.players, [currentPlayer]: { ...state.players[currentPlayer], locked: true } } };
+
+        // Generate meal pool and go to draft
+        // If Player B hasn't joined, use Player A's preference; otherwise use average
+        const avgDiet = state.players.B
+          ? (state.players.A.dietPreference + state.players.B.dietPreference) / 2
+          : state.players.A.dietPreference;
+        const poolSize = state.settings.mealCount * 5;
+        const meals = await getRandomMeals(poolSize, state.settings.allergies, avgDiet);
+        state = generateMealPool(state, meals);
+
+        // Navigate to game/draft page
+        const encoded = encodeGameState(state);
+        window.location.href = `/game?${encoded.toString()}&player=${currentPlayer}`;
+      });
+    }
+
+  </script>
+
+  <style>
+    .share-section {
+      margin: 20px 0;
+    }
+
+    .share-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .share-box {
+      display: flex;
+      gap: 10px;
+    }
+
+    .share-input {
+      flex: 1;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 10px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .game-info {
+      margin: 20px 0;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+    }
+
+    .game-info h3 {
+      font-size: 12px;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    .game-info ul {
+      list-style: none;
+      padding: 0;
+      font-size: 11px;
+    }
+
+    .game-info li {
+      margin: 8px 0;
+    }
+
+    .status-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin: 30px 0;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .player-setup {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: var(--primary);
+    }
+
+    .name-input {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    .name-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .diet-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .diet-label {
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .diet-slider {
+      flex: 1;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      outline: none;
+    }
+
+    .diet-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #ff9500;
+      cursor: pointer;
+      border-radius: 50%;
+      border: 3px solid #1a1a1a;
+      box-shadow: 0 0 8px rgba(255, 149, 0, 0.6);
+    }
+
+    .diet-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: #ff9500;
+      cursor: pointer;
+      border: 3px solid #1a1a1a;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255, 149, 0, 0.6);
+    }
+
+    .diet-value {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary);
+      margin-top: 8px;
+    }
+
+    .upgrades-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .upgrade-card {
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .upgrade-emoji {
+      font-size: 32px;
+    }
+
+    .upgrade-name {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .upgrade-effect {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .upgrades-header {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .btn-icon {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      margin-left: auto;
+      transition: transform 0.2s;
+    }
+
+    .btn-icon:hover {
+      transform: scale(1.2);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+    }
+  </style>
+</GameLayout>

@@ -1,0 +1,229 @@
+---
+import GameLayout from '../layouts/GameLayout.astro';
+
+export const prerender = false;
+
+const MEAL_COUNT_OPTIONS = [3, 5, 7, 10];
+const BUDGET_OPTIONS = [
+  { value: 'tight', label: 'Tight', desc: 'Mostly budget meals' },
+  { value: 'moderate', label: 'Moderate', desc: 'Mix of options' },
+  { value: 'fancy', label: 'Fancy', desc: 'Splurge worthy' },
+  { value: 'none', label: 'No Limit', desc: 'Sky\'s the limit' }
+];
+const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs'];
+---
+
+<GameLayout>
+  <div class="panel">
+    <div class="panel-title">DINNER QUEST</div>
+
+    <form id="setup-form" class="setup-form">
+      <div class="form-section">
+        <label class="form-label">How many meals for the week?</label>
+        <div class="option-grid">
+          {MEAL_COUNT_OPTIONS.map(count => (
+            <label class="option-card">
+              <input type="radio" name="mealCount" value={count} checked={count === 5} />
+              <span class="option-content">
+                <span class="option-number">{count}</span>
+                <span class="option-text">meals</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Budget for the week?</label>
+        <div class="option-grid">
+          {BUDGET_OPTIONS.map(budget => (
+            <label class="option-card">
+              <input type="radio" name="budgetCap" value={budget.value} checked={budget.value === 'moderate'} />
+              <span class="option-content">
+                <span class="option-title">{budget.label}</span>
+                <span class="option-desc">{budget.desc}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label">Any allergies or restrictions?</label>
+        <div class="allergen-grid">
+          {ALLERGEN_OPTIONS.map(allergen => (
+            <label class="allergen-checkbox">
+              <input type="checkbox" name="allergies" value={allergen} />
+              <span>{allergen}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        Conjure the Feast
+      </button>
+    </form>
+  </div>
+
+  <div class="narrative">
+    <p>The week stretches before you like an endless dungeon.</p>
+    <p>Two appetites. One kitchen. Infinite possibilities.</p>
+    <p>Will you find <span class="highlight">harmony</span>... or descend into takeout chaos?</p>
+  </div>
+
+  <script>
+    import { createInitialState } from '../lib/gameState.js';
+    import { encodeGameState } from '../lib/urlCodec.js';
+
+    const form = document.getElementById('setup-form');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const mealCount = parseInt(formData.get('mealCount'));
+      const budgetCap = formData.get('budgetCap');
+      const allergies = formData.getAll('allergies');
+
+      const settings = {
+        mealCount,
+        budgetCap,
+        allergies
+      };
+
+      // Create initial game state without a name (will be set on waiting page)
+      const state = createInitialState('', settings);
+
+      // Encode and navigate to waiting room
+      const encodedState = encodeGameState(state);
+      window.location.href = `/waiting?${encodedState.toString()}`;
+    });
+  </script>
+
+  <style>
+    .setup-form {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: var(--primary);
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .option-card {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .option-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .option-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      border: 2px solid var(--border);
+      background: var(--bg-dark);
+      transition: all 0.2s;
+    }
+
+    .option-card input[type="radio"]:checked + .option-content {
+      border-color: var(--primary);
+      background: var(--primary-dim);
+    }
+
+    .option-card:hover .option-content {
+      border-color: var(--primary-dim);
+    }
+
+    .option-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .option-text {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .option-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .option-desc {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .allergen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .allergen-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-dark);
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .allergen-checkbox input[type="checkbox"]:checked {
+      accent-color: var(--primary);
+    }
+
+    .allergen-checkbox:hover {
+      border-color: var(--primary-dim);
+    }
+
+    .btn-primary {
+      margin-top: 20px;
+      padding: 16px;
+      font-size: 14px;
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      cursor: pointer;
+      font-family: 'Press Start 2P', monospace;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dim);
+      transform: translateY(-2px);
+    }
+
+    .highlight {
+      color: var(--primary);
+      font-weight: bold;
+    }
+  </style>
+</GameLayout>

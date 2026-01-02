@@ -1,0 +1,18 @@
+---
+// Bid slider component with Alpine.js integration
+---
+
+<div class="bid-section">
+  <div class="bid-label">
+    <span>Bid enthusiasm tokens:</span>
+    <span class="bid-value" x-text="`${bid} token${bid !== 1 ? 's' : ''}`"></span>
+  </div>
+  <input
+    type="range"
+    class="bid-slider"
+    min="0"
+    max="3"
+    x-model="bid"
+  />
+  <div class="bid-desc" x-text="bid === 0 ? 'No strong feelings' : bid === 1 ? 'Mild preference' : bid === 2 ? 'Strong craving' : 'MUST HAVE THIS'"></div>
+</div>

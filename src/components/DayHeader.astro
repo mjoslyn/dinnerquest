@@ -1,0 +1,11 @@
+---
+import { DAY_FLAVORS } from '../lib/gameData.js';
+
+const { day, dayIndex } = Astro.props;
+const flavor = DAY_FLAVORS[dayIndex] || "The adventure continues...";
+---
+
+<div class="day-header">
+  <div class="day-name">{day}</div>
+  <div class="day-flavor">{flavor}</div>
+</div>

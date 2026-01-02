@@ -1,0 +1,22 @@
+---
+const { stats } = Astro.props;
+---
+
+<div class="stats-grid">
+  <div class="stat">
+    <div class="stat-value">{stats.harmonies}</div>
+    <div class="stat-label">Harmonies</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{stats.conflicts}</div>
+    <div class="stat-label">Conflicts</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{stats.totalTime}m</div>
+    <div class="stat-label">Total Cook Time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{stats.topCuisine}</div>
+    <div class="stat-label">Top Cuisine</div>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+---
+import { MEALS, HARMONY_MESSAGES, CONFLICT_MESSAGES, getRandomMessage } from '../lib/gameData.js';
+
+const { result, playerName } = Astro.props;
+const meal = MEALS.find(m => m.id === result.meal);
+const message = result.harmony
+  ? getRandomMessage(HARMONY_MESSAGES)
+  : getRandomMessage(CONFLICT_MESSAGES);
+---
+
+<div class:list={["result", { conflict: !result.harmony }]}>
+  <div class="result-title">{message}</div>
+  <div class="meal-emoji">{meal.emoji}</div>
+  <div class="result-meal">{meal.name}</div>
+  {!result.harmony && result.winner && (
+    <p>{playerName} wins the coin flip!</p>
+  )}
+</div>

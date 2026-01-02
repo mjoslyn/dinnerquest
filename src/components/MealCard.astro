@@ -1,0 +1,21 @@
+---
+/** @type {{ meal: import('../lib/gameData.js').Meal, selectable?: boolean }} */
+const { meal, selectable = false } = Astro.props;
+---
+
+<div
+  class="meal-card"
+  x-bind:class="{ selected: selectedMeal === {meal.id} }"
+  x-on:click={selectable ? `selectedMeal = ${meal.id}` : ''}
+>
+  <div class="meal-emoji">{meal.emoji}</div>
+  <div class="meal-info">
+    <h3>{meal.name}</h3>
+    <div class="meal-meta">
+      <span>⏱️ {meal.time}m</span>
+      <span>💰 {meal.cost}</span>
+      <span>🌍 {meal.cuisine}</span>
+    </div>
+  </div>
+  {selectable && <div class="meal-select">▶</div>}
+</div>

@@ -1,0 +1,1025 @@
+---
+import GameLayout from '../layouts/GameLayout.astro';
+import { decodeGameState } from '../lib/urlCodec.js';
+import { getAllMeals, getCostPoints, getBudgetPoints, getRandomUpgrades } from '../lib/gameData.js';
+
+export const prerender = false;
+
+const params = Astro.url.searchParams;
+let state = decodeGameState(params);
+
+if (!state || state.status !== 'drafting') {
+  return Astro.redirect('/');
+}
+
+const currentPlayer = params.get('player') || 'A';
+
+// Initialize player if they don't exist
+if (!state.players[currentPlayer]) {
+  const upgrades = await getRandomUpgrades(2);
+  state = {
+    ...state,
+    players: {
+      ...state.players,
+      [currentPlayer]: {
+        name: null,
+        dietPreference: 3,
+        upgrades: upgrades,
+        picks: [],
+        tokens: {},
+        locked: false
+      }
+    }
+  };
+}
+
+const player = state.players[currentPlayer];
+const otherPlayerId = currentPlayer === 'A' ? 'B' : 'A';
+const otherPlayer = state.players[otherPlayerId];
+
+// Fetch full meal data for pool
+const allMeals = await getAllMeals();
+
+// Get the other player's previous picks (partial harmonies)
+const otherPlayerAllPicks = currentPlayer === 'A'
+  ? (state.playerBAllPicks || [])
+  : (state.playerAAllPicks || []);
+const partialHarmonyIds = otherPlayerAllPicks.filter(id => !state.harmoniesSoFar.includes(id));
+const partialHarmonyMeals = partialHarmonyIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
+
+// Combine pool with other player's picks
+const poolMealIds = state.pool.map(m => m.id);
+const combinedPoolIds = [...new Set([...poolMealIds, ...partialHarmonyIds])];
+const poolMeals = combinedPoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
+
+// Track which meals are from other player's picks (for star icon)
+const otherPlayerPicksSet = new Set(partialHarmonyIds);
+
+// Get harmonies for display
+const harmonyMeals = state.harmoniesSoFar.map(id => allMeals.find(m => m.id === id));
+
+// Budget is total across all rounds
+const budgetLimit = getBudgetPoints(state.settings.budgetCap, state.settings.mealCount);
+
+// Calculate cost already spent on harmonies
+const harmoniesCost = harmonyMeals.reduce((sum, meal) => sum + (meal ? getCostPoints(meal.cost) : 0), 0);
+const budgetRemaining = budgetLimit ? budgetLimit - harmoniesCost : null;
+const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
+---
+
+<GameLayout>
+  <div class="panel">
+    <div class="panel-title">{player?.name || `Player ${currentPlayer}`} - ROUND {state.currentRound}</div>
+
+    {harmonyMeals.length > 0 && (
+      <div class="harmonies-section">
+        <h3>Harmonies (Locked In)</h3>
+        <div class="harmony-grid">
+          {harmonyMeals.map(meal => (
+            <div class="harmony-card locked">
+              <span class="meal-emoji">{meal.emoji}</span>
+              <div class="meal-name">{meal.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {partialHarmonyMeals.length > 0 && (
+      <div class="partial-harmonies-banner">
+        <span class="banner-label">{otherPlayer?.name || 'Partner'}'s Picks:</span>
+        <div class="partner-picks-icons">
+          {partialHarmonyMeals.map(meal => (
+            <span class="partner-pick-emoji" title={meal.name}>{meal.emoji}</span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {!player?.name && (
+      <div class="name-input-section">
+        <label class="name-label" for="player-name-input">Enter Your Name:</label>
+        <input
+          type="text"
+          id="player-name-input"
+          class="name-input"
+          placeholder="Your name"
+          required
+        />
+      </div>
+    )}
+
+    <div class="draft-info">
+      <div class="info-row">
+        <div class="info-item">
+          <span class="info-label">Meals to Pick:</span>
+          <span class="info-value" id="pick-count">{state.harmoniesSoFar.length} / {state.settings.mealCount}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Budget:</span>
+          <span class="info-value" id="budget-display">{harmoniesCost} / {budgetText}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Tokens:</span>
+          <span class="info-value" id="token-count">0 / {state.settings.mealCount * 2}</span>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="meal-pool">
+      {poolMeals.map(meal => (
+        <div class="meal-card" data-meal-id={meal.id} data-cost={getCostPoints(meal.cost)} data-partial={otherPlayerPicksSet.has(meal.id) ? "true" : "false"}>
+          <div class="meal-header">
+            <span class="meal-emoji">{meal.emoji}</span>
+            <span class="meal-cost">{meal.cost}</span>
+            {otherPlayerPicksSet.has(meal.id) && <span class="partner-pick-star">✨</span>}
+          </div>
+          <div class="meal-name">{meal.name}</div>
+          <div class="meal-meta">
+            <span>{meal.time}min</span>
+            <span>{meal.cuisine}</span>
+          </div>
+          <div class="token-control" style="display: none;">
+            <span class="token-icon" data-level="1">⚪</span>
+            <span class="token-icon" data-level="2">⚪</span>
+            <span class="token-icon" data-level="3">⚪</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="draft-actions">
+      <button id="lock-btn" class="btn btn-primary" disabled>
+        Seal & Dispatch
+      </button>
+      <button id="open-link-btn" class="btn btn-secondary" disabled title="Open link">
+        →
+      </button>
+      <button id="copy-link-btn" class="btn btn-secondary" disabled title="Copy link">
+        🔗
+      </button>
+    </div>
+  </div>
+
+  <div class="narrative">
+    <p>Pick <strong>at least {state.settings.mealCount} meals</strong>. Each pick costs 1 token. Add 1-3 more tokens to meals you really want.</p>
+    <p>You have <strong>{state.settings.mealCount * 2} tokens</strong>. Extra tokens let you pick more meals. Unused tokens are OK.</p>
+  </div>
+
+  <script>
+    import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
+    import { updatePlayerPicks, updatePlayerTokens, lockPlayerDraft } from '../lib/gameState.js';
+    import { validateDraft, resolveDraft } from '../lib/gameLogic.js';
+    import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals } from '../lib/gameDataClient.js';
+
+    const params = new URLSearchParams(window.location.search);
+    let state = decodeGameState(params);
+    const currentPlayer = params.get('player') || 'A';
+
+    // Initialize player if they don't exist
+    if (!state.players[currentPlayer]) {
+      const upgrades = await getRandomUpgrades(2);
+      state = {
+        ...state,
+        players: {
+          ...state.players,
+          [currentPlayer]: {
+            name: null,
+            dietPreference: 3,
+            upgrades: upgrades,
+            picks: [],
+            tokens: {},
+            locked: false
+          }
+        }
+      };
+    }
+
+    const mealCount = state.settings.mealCount;
+    const budgetLimit = getBudgetPoints(state.settings.budgetCap, mealCount);
+
+    let selectedMeals = new Set();
+    let tokenDistribution = {};
+
+    // UI elements
+    const pickCountEl = document.getElementById('pick-count');
+    const budgetDisplayEl = document.getElementById('budget-display');
+    const tokenCountEl = document.getElementById('token-count');
+    const lockBtn = document.getElementById('lock-btn');
+    const openLinkBtn = document.getElementById('open-link-btn');
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+
+    const tokenLimit = mealCount * 2;
+
+    // Calculate cost of harmonies (already spent)
+    const harmoniesCost = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
+      const meal = state.pool.find(m => m.id === mealId);
+      return sum + (meal ? getCostPoints(meal.cost) : 0);
+    }, 0);
+
+    // Update displays and run live validation
+    function updateDisplays() {
+      const currentPicksCost = Array.from(selectedMeals).reduce((sum, id) => {
+        const card = document.querySelector(`[data-meal-id="${id}"]`);
+        return sum + parseInt(card.dataset.cost);
+      }, 0);
+
+      const cumulativeCost = harmoniesCost + currentPicksCost;
+
+      const additionalTokens = Object.values(tokenDistribution).reduce((sum, t) => sum + t, 0);
+      const totalTokensUsed = selectedMeals.size + additionalTokens;
+
+      const totalMealsSecured = state.harmoniesSoFar.length + selectedMeals.size;
+      pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
+      budgetDisplayEl.textContent = `${cumulativeCost} / ${budgetLimit ? budgetLimit + ' points' : 'No limit'}`;
+      tokenCountEl.textContent = `${totalTokensUsed} / ${tokenLimit}`;
+
+      // Color coding
+      pickCountEl.style.color = totalMealsSecured >= mealCount ? 'var(--primary)' : '#d35d5d';
+      budgetDisplayEl.style.color = (budgetLimit && cumulativeCost > budgetLimit) ? 'var(--danger)' : 'var(--primary)';
+      tokenCountEl.style.color = totalTokensUsed === tokenLimit ? 'var(--primary)' : 'var(--text)';
+
+      // Live validation
+      state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
+      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
+      const validation = validateDraft(state, currentPlayer);
+
+      if (validation.valid) {
+        lockBtn.disabled = false;
+        openLinkBtn.disabled = false;
+        copyLinkBtn.disabled = false;
+      } else {
+        lockBtn.disabled = true;
+        openLinkBtn.disabled = true;
+        copyLinkBtn.disabled = true;
+      }
+    }
+
+    // Meal card selection
+    document.querySelectorAll('.meal-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.token-btn')) return; // Ignore token button clicks
+
+        const mealId = parseInt(card.dataset.mealId);
+
+        if (selectedMeals.has(mealId)) {
+          // Deselect
+          selectedMeals.delete(mealId);
+          delete tokenDistribution[mealId];
+          card.classList.remove('selected');
+          card.querySelector('.token-control').style.display = 'none';
+        } else {
+          // Select (if we have tokens available)
+          const additionalTokens = Object.values(tokenDistribution).reduce((sum, t) => sum + t, 0);
+          const totalTokensUsed = selectedMeals.size + additionalTokens;
+
+          if (totalTokensUsed < tokenLimit) {
+            selectedMeals.add(mealId);
+            tokenDistribution[mealId] = 0;
+            card.classList.add('selected');
+            card.querySelector('.token-control').style.display = 'flex';
+          }
+        }
+
+        updateDisplays();
+      });
+    });
+
+    // Token icons
+    document.querySelectorAll('.token-icon').forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        const card = e.target.closest('.meal-card');
+        const mealId = parseInt(card.dataset.mealId);
+        const level = parseInt(e.target.dataset.level);
+        const icons = card.querySelectorAll('.token-icon');
+
+        const currentTokens = tokenDistribution[mealId] || 0;
+        const additionalTokens = Object.values(tokenDistribution).reduce((sum, t) => sum + t, 0);
+        const totalTokensUsed = selectedMeals.size + additionalTokens;
+
+        // Toggle: if clicking the current level, clear all tokens
+        if (currentTokens === level) {
+          tokenDistribution[mealId] = 0;
+        } else {
+          // Check if we have enough tokens
+          const tokensNeeded = level - currentTokens;
+          if (totalTokensUsed + tokensNeeded <= tokenLimit) {
+            tokenDistribution[mealId] = level;
+          }
+        }
+
+        // Update token display
+        updateTokenIcons(icons, tokenDistribution[mealId]);
+        updateDisplays();
+      });
+    });
+
+    function updateTokenIcons(icons, count) {
+      icons.forEach((icon, index) => {
+        icon.textContent = index < count ? '🪙' : '⚪';
+      });
+    }
+
+    // Lock button
+    lockBtn.addEventListener('click', async () => {
+      // Check if player needs to enter name
+      if (!state.players[currentPlayer]?.name) {
+        const nameInput = document.getElementById('player-name-input');
+        const playerName = nameInput?.value?.trim();
+
+        if (!playerName) {
+          alert('Please enter your name first.');
+          nameInput?.focus();
+          return;
+        }
+
+        // Update state with player name
+        state = {
+          ...state,
+          players: {
+            ...state.players,
+            [currentPlayer]: {
+              ...state.players[currentPlayer],
+              name: playerName
+            }
+          }
+        };
+      }
+
+      // Final validation
+      state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
+      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
+
+      const validation = validateDraft(state, currentPlayer);
+      if (!validation.valid) {
+        alert('Draft is invalid. Please fix errors first.');
+        return;
+      }
+
+      // Lock in
+      state = lockPlayerDraft(state, currentPlayer);
+
+      // Player A locks -> go to Player B (same round)
+      if (currentPlayer === 'A') {
+        const encoded = encodeGameState(state);
+        window.location.href = `/game?${encoded.toString()}&player=B`;
+        return;
+      }
+
+      // Player B locks -> process round and advance
+      if (currentPlayer === 'B') {
+        // Find harmonies (meals both players picked)
+        const playerAPicks = state.players.A.picks;
+        const playerBPicks = state.players.B.picks;
+        const harmonies = playerAPicks.filter(mealId => playerBPicks.includes(mealId));
+
+        // Add harmonies to accumulated list
+        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
+
+        // Track all picks for each player
+        const playerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        const playerBAllPicks = [...(state.playerBAllPicks || []), ...playerBPicks];
+
+        // Only remove harmonies from pool, keep partial picks available
+        const allPickedMeals = new Set([...playerAPicks, ...playerBPicks]);
+        const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
+
+        // Check if we have enough meals
+        if (allHarmonies.length >= state.settings.mealCount) {
+          // Game complete! Go to results
+          const results = resolveDraft(state);
+          state = {
+            ...state,
+            status: 'complete',
+            results: {
+              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              harmonies: allHarmonies,
+              conflicts: []
+            }
+          };
+          const encoded = encodeGameState(state);
+          window.location.href = `/complete?${encoded.toString()}&player=B`;
+        } else {
+          // Prepare for next round
+          // Remove harmonies (locked in)
+          // Remove meals that weren't picked by either player (not harmonies or partial harmonies)
+          // Keep partial harmonies available
+
+          const allPicksThisRound = new Set([...playerAPicks, ...playerBPicks]);
+          let newPool = state.pool.filter(meal => {
+            // Remove if it's a harmony (locked in)
+            if (allHarmonies.includes(meal.id)) return false;
+            // Keep if it was picked by at least one player this round
+            if (allPicksThisRound.has(meal.id)) return true;
+            // Keep if it's a partial harmony from previous rounds
+            const isPartialHarmony = (playerAAllPicks.includes(meal.id) || playerBAllPicks.includes(meal.id))
+                                     && !state.harmoniesSoFar.includes(meal.id);
+            if (isPartialHarmony) return true;
+            // Remove unpicked regular pool items
+            return false;
+          });
+
+          // Refill pool to (remaining meals needed) * 5
+          const mealsStillNeeded = state.settings.mealCount - allHarmonies.length;
+          const targetPoolSize = mealsStillNeeded * 5;
+          const mealsNeeded = targetPoolSize - newPool.length;
+
+          if (mealsNeeded > 0) {
+            const avgDiet = (state.players.A.dietPreference + state.players.B.dietPreference) / 2;
+            const newMeals = await getRandomMeals(mealsNeeded, state.settings.allergies, avgDiet);
+
+            // Filter out meals already in pool or harmonies
+            const existingIds = new Set([...newPool.map(m => m.id), ...allHarmonies]);
+            const filteredNewMeals = newMeals.filter(m => !existingIds.has(m.id));
+
+            newPool = [...newPool, ...filteredNewMeals];
+          }
+
+          // Unlock players and clear their picks for next round
+          state = {
+            ...state,
+            currentRound: state.currentRound + 1,
+            status: 'drafting',
+            pool: newPool,
+            harmoniesSoFar: allHarmonies,
+            usedMeals: usedMeals,
+            playerAAllPicks: playerAAllPicks,
+            playerBAllPicks: playerBAllPicks,
+            players: {
+              A: { ...state.players.A, picks: [], tokens: {}, locked: false },
+              B: { ...state.players.B, picks: [], tokens: {}, locked: false }
+            }
+          };
+
+          // Navigate to Player A for next round
+          const encoded = encodeGameState(state);
+          window.location.href = `/game?${encoded.toString()}&player=A`;
+        }
+      }
+    });
+
+    // Open link button
+    openLinkBtn.addEventListener('click', async () => {
+      // Check if player needs to enter name
+      if (!state.players[currentPlayer]?.name) {
+        const nameInput = document.getElementById('player-name-input');
+        const playerName = nameInput?.value?.trim();
+
+        if (!playerName) {
+          alert('Please enter your name first.');
+          nameInput?.focus();
+          return;
+        }
+
+        state = {
+          ...state,
+          players: {
+            ...state.players,
+            [currentPlayer]: {
+              ...state.players[currentPlayer],
+              name: playerName
+            }
+          }
+        };
+      }
+
+      // Update state with current selections
+      state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
+      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
+
+      const validation = validateDraft(state, currentPlayer);
+      if (!validation.valid) {
+        alert('Draft is invalid. Please fix errors first.');
+        return;
+      }
+
+      state = lockPlayerDraft(state, currentPlayer);
+
+      // Player A locks -> go to Player B (same round)
+      if (currentPlayer === 'A') {
+        const encoded = encodeGameState(state);
+        window.location.href = `/game?${encoded.toString()}&player=B`;
+        return;
+      }
+
+      // Player B locks -> process round and advance
+      if (currentPlayer === 'B') {
+        const playerAPicks = state.players.A.picks;
+        const playerBPicks = state.players.B.picks;
+        const harmonies = playerAPicks.filter(mealId => playerBPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
+
+        const playerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        const playerBAllPicks = [...(state.playerBAllPicks || []), ...playerBPicks];
+
+        const allPickedMeals = new Set([...playerAPicks, ...playerBPicks]);
+        const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
+
+        if (allHarmonies.length >= state.settings.mealCount) {
+          const results = resolveDraft(state);
+          state = {
+            ...state,
+            status: 'complete',
+            results: {
+              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              harmonies: allHarmonies,
+              conflicts: []
+            }
+          };
+          const encoded = encodeGameState(state);
+          window.location.href = `/complete?${encoded.toString()}&player=B`;
+        } else {
+          const allPicksThisRound = new Set([...playerAPicks, ...playerBPicks]);
+          let newPool = state.pool.filter(meal => {
+            if (allHarmonies.includes(meal.id)) return false;
+            if (allPicksThisRound.has(meal.id)) return true;
+            const isPartialHarmony = (playerAAllPicks.includes(meal.id) || playerBAllPicks.includes(meal.id))
+                                     && !state.harmoniesSoFar.includes(meal.id);
+            if (isPartialHarmony) return true;
+            return false;
+          });
+
+          const mealsStillNeeded = state.settings.mealCount - allHarmonies.length;
+          const targetPoolSize = mealsStillNeeded * 5;
+          const mealsNeeded = targetPoolSize - newPool.length;
+
+          if (mealsNeeded > 0) {
+            const avgDiet = (state.players.A.dietPreference + state.players.B.dietPreference) / 2;
+            const newMeals = await getRandomMeals(mealsNeeded, state.settings.allergies, avgDiet);
+            const existingIds = new Set([...newPool.map(m => m.id), ...allHarmonies]);
+            const filteredNewMeals = newMeals.filter(m => !existingIds.has(m.id));
+            newPool = [...newPool, ...filteredNewMeals];
+          }
+
+          state = {
+            ...state,
+            currentRound: state.currentRound + 1,
+            status: 'drafting',
+            pool: newPool,
+            harmoniesSoFar: allHarmonies,
+            usedMeals: usedMeals,
+            playerAAllPicks: playerAAllPicks,
+            playerBAllPicks: playerBAllPicks,
+            players: {
+              A: { ...state.players.A, picks: [], tokens: {}, locked: false },
+              B: { ...state.players.B, picks: [], tokens: {}, locked: false }
+            }
+          };
+          const encoded = encodeGameState(state);
+          window.location.href = `/game?${encoded.toString()}&player=A`;
+        }
+      }
+    });
+
+    // Copy link button
+    copyLinkBtn.addEventListener('click', async () => {
+      // Check if player needs to enter name
+      if (!state.players[currentPlayer]?.name) {
+        const nameInput = document.getElementById('player-name-input');
+        const playerName = nameInput?.value?.trim();
+
+        if (!playerName) {
+          alert('Please enter your name first.');
+          nameInput?.focus();
+          return;
+        }
+
+        state = {
+          ...state,
+          players: {
+            ...state.players,
+            [currentPlayer]: {
+              ...state.players[currentPlayer],
+              name: playerName
+            }
+          }
+        };
+      }
+
+      // Update state with current selections
+      state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
+      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
+
+      const validation = validateDraft(state, currentPlayer);
+      if (!validation.valid) {
+        alert('Draft is invalid. Please fix errors first.');
+        return;
+      }
+
+      state = lockPlayerDraft(state, currentPlayer);
+
+      // Player A locks -> copy link to Player B (same round)
+      if (currentPlayer === 'A') {
+        const encoded = encodeGameState(state);
+        const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=B`;
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+        return;
+      }
+
+      // Player B locks -> process round and copy link to Player A (next round)
+      if (currentPlayer === 'B') {
+        const playerAPicks = state.players.A.picks;
+        const playerBPicks = state.players.B.picks;
+        const harmonies = playerAPicks.filter(mealId => playerBPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
+
+        const playerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        const playerBAllPicks = [...(state.playerBAllPicks || []), ...playerBPicks];
+
+        const allPickedMeals = new Set([...playerAPicks, ...playerBPicks]);
+        const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
+
+        if (allHarmonies.length >= state.settings.mealCount) {
+          const results = resolveDraft(state);
+          state = {
+            ...state,
+            status: 'complete',
+            results: {
+              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              harmonies: allHarmonies,
+              conflicts: []
+            }
+          };
+          const encoded = encodeGameState(state);
+          const shareUrl = `${window.location.origin}/complete?${encoded.toString()}&player=B`;
+          await navigator.clipboard.writeText(shareUrl);
+          alert('Game complete! Link copied to clipboard!');
+        } else {
+          const allPicksThisRound = new Set([...playerAPicks, ...playerBPicks]);
+          let newPool = state.pool.filter(meal => {
+            if (allHarmonies.includes(meal.id)) return false;
+            if (allPicksThisRound.has(meal.id)) return true;
+            const isPartialHarmony = (playerAAllPicks.includes(meal.id) || playerBAllPicks.includes(meal.id))
+                                     && !state.harmoniesSoFar.includes(meal.id);
+            if (isPartialHarmony) return true;
+            return false;
+          });
+
+          const mealsStillNeeded = state.settings.mealCount - allHarmonies.length;
+          const targetPoolSize = mealsStillNeeded * 5;
+          const mealsNeeded = targetPoolSize - newPool.length;
+
+          if (mealsNeeded > 0) {
+            const avgDiet = (state.players.A.dietPreference + state.players.B.dietPreference) / 2;
+            const newMeals = await getRandomMeals(mealsNeeded, state.settings.allergies, avgDiet);
+            const existingIds = new Set([...newPool.map(m => m.id), ...allHarmonies]);
+            const filteredNewMeals = newMeals.filter(m => !existingIds.has(m.id));
+            newPool = [...newPool, ...filteredNewMeals];
+          }
+
+          state = {
+            ...state,
+            currentRound: state.currentRound + 1,
+            status: 'drafting',
+            pool: newPool,
+            harmoniesSoFar: allHarmonies,
+            usedMeals: usedMeals,
+            playerAAllPicks: playerAAllPicks,
+            playerBAllPicks: playerBAllPicks,
+            players: {
+              A: { ...state.players.A, picks: [], tokens: {}, locked: false },
+              B: { ...state.players.B, picks: [], tokens: {}, locked: false }
+            }
+          };
+          const encoded = encodeGameState(state);
+          const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=A`;
+          await navigator.clipboard.writeText(shareUrl);
+          alert('Link copied to clipboard!');
+        }
+      }
+    });
+  </script>
+
+  <style>
+    .name-input-section {
+      margin: 20px 0;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+    }
+
+    .name-label {
+      display: block;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .name-input {
+      width: 100%;
+      padding: 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: var(--text);
+      transition: border-color 0.2s;
+    }
+
+    .name-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .draft-info {
+      margin: 20px 0;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .info-value {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+
+    .meal-pool {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .meal-card {
+      padding: 12px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .meal-card:hover {
+      border-color: var(--primary-dim);
+      transform: translateY(-2px);
+    }
+
+    .meal-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-dim);
+    }
+
+    .meal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .meal-emoji {
+      font-size: 32px;
+    }
+
+    .meal-cost {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .partner-pick-star {
+      font-size: 18px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    .meal-card[data-partial="true"] {
+      border-color: var(--purple);
+      background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.1) 100%);
+    }
+
+    .meal-card[data-partial="true"].selected {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, var(--primary-dim) 0%, rgba(160, 96, 240, 0.2) 100%);
+    }
+
+    .meal-name {
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .meal-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .token-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .token-icon {
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .token-icon:hover {
+      transform: scale(1.2);
+      filter: brightness(1.3);
+    }
+
+    .harmonies-section {
+      margin: 20px 0;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 3px solid var(--primary);
+    }
+
+    .harmonies-section h3 {
+      font-size: 12px;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .harmony-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .harmony-card {
+      padding: 16px;
+      background: var(--bg);
+      border: 3px solid var(--primary);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .partial-harmonies-banner {
+      margin: 16px 0;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.15) 100%);
+      border: 2px solid var(--purple);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .banner-label {
+      font-size: 11px;
+      color: var(--purple);
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .partner-picks-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .partner-pick-emoji {
+      font-size: 28px;
+      display: inline-block;
+      position: relative;
+      cursor: help;
+      transition: transform 0.2s;
+    }
+
+    .partner-pick-emoji:hover {
+      transform: scale(1.2);
+    }
+
+    .partner-pick-emoji::after {
+      content: '✨';
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      font-size: 14px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+
+    .partial-harmonies-section {
+      margin: 20px 0;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+    }
+
+    .partial-harmonies-section h3 {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .partial-harmony-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .partial-harmony-card {
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      opacity: 0.7;
+    }
+
+    .meal-emoji-small {
+      font-size: 24px;
+    }
+
+    .meal-name-small {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .draft-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--primary);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #open-link-btn,
+    #copy-link-btn {
+      flex: 0;
+      width: 52px;
+      padding: 16px 12px;
+      font-size: 18px;
+    }
+  </style>
+</GameLayout>

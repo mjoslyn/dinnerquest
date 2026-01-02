@@ -1,0 +1,11 @@
+---
+import MealCard from './MealCard.astro';
+
+const { meals, selectable = false } = Astro.props;
+---
+
+<div class="meal-grid">
+  {meals.map(meal => (
+    <MealCard meal={meal} selectable={selectable} />
+  ))}
+</div>

@@ -1,0 +1,7 @@
+---
+const { name, isYou = false } = Astro.props;
+---
+
+<div class:list={["player-badge", { you: isYou }]}>
+  {name}
+</div>

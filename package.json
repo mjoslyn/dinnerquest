@@ -1,0 +1,35 @@
+{
+  "name": "dinnerquest",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A text-based RPG roguelike for couples to decide on dinner for the week",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mjoslyn/dinnerquest.git"
+  },
+  "keywords": [
+    "game",
+    "rpg",
+    "dinner",
+    "couples"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.13",
+    "alpinejs": "^3.14.3",
+    "astro": "^5.16.6",
+    "htmx.org": "^2.0.4",
+    "lz-string": "^1.5.0"
+  },
+  "devDependencies": {
+    "@astrojs/netlify": "^6.6.3"
+  }
+}
