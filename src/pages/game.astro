@@ -84,19 +84,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       </div>
     )}
 
-    {!player?.name && (
-      <div class="name-input-section">
-        <label class="name-label" for="player-name-input">Enter Your Name:</label>
-        <input
-          type="text"
-          id="player-name-input"
-          class="name-input"
-          placeholder="Your name"
-          required
-        />
-      </div>
-    )}
-
     <div class="draft-info">
       <div class="info-row">
         <div class="info-item">
@@ -116,10 +103,10 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         <div class="meal-card" data-meal-id={meal.id} data-cost={getCostPoints(meal.cost)} data-partial={otherPlayerPicksSet.has(meal.id) ? "true" : "false"}>
           <div class="meal-header">
             <span class="meal-emoji">{meal.emoji}</span>
-            <span class="meal-cost">{meal.cost}</span>
             {otherPlayerPicksSet.has(meal.id) && <span class="partner-pick-star">✨</span>}
           </div>
           <div class="meal-name">{meal.name}</div>
+          <div class="meal-cost">{meal.cost}</div>
           {otherPlayerPicksSet.has(meal.id) && (
             <div class="partial-harmony-badge">Partial Harmony</div>
           )}
@@ -291,30 +278,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
     // Lock button
     lockBtn.addEventListener('click', async () => {
-      // Check if player needs to enter name
-      if (!state.players[currentPlayer]?.name) {
-        const nameInput = document.getElementById('player-name-input');
-        const playerName = nameInput?.value?.trim();
-
-        if (!playerName) {
-          alert('Please enter your name first.');
-          nameInput?.focus();
-          return;
-        }
-
-        // Update state with player name
-        state = {
-          ...state,
-          players: {
-            ...state.players,
-            [currentPlayer]: {
-              ...state.players[currentPlayer],
-              name: playerName
-            }
-          }
-        };
-      }
-
       // Final validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
 
@@ -357,7 +320,9 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
         // Otherwise, open messaging app with link for Player B
         const encoded = encodeGameState(state);
-        const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=B`;
+        const playerBJoined = state.players.B !== null;
+        const targetPage = playerBJoined ? '/game' : '/waiting';
+        const shareUrl = `${window.location.origin}${targetPage}?${encoded.toString()}&player=B`;
         const message = 'Your turn to pick meals! ' + shareUrl;
 
         // Use Web Share API to share with partner
@@ -515,29 +480,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
     // Open link button
     openLinkBtn.addEventListener('click', async () => {
-      // Check if player needs to enter name
-      if (!state.players[currentPlayer]?.name) {
-        const nameInput = document.getElementById('player-name-input');
-        const playerName = nameInput?.value?.trim();
-
-        if (!playerName) {
-          alert('Please enter your name first.');
-          nameInput?.focus();
-          return;
-        }
-
-        state = {
-          ...state,
-          players: {
-            ...state.players,
-            [currentPlayer]: {
-              ...state.players[currentPlayer],
-              name: playerName
-            }
-          }
-        };
-      }
-
       // Update state with current selections
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
 
@@ -579,7 +521,9 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
         // Otherwise, go to Player B (same round)
         const encoded = encodeGameState(state);
-        window.location.href = `/game?${encoded.toString()}&player=B`;
+        const playerBJoined = state.players.B !== null;
+        const targetPage = playerBJoined ? '/game' : '/waiting';
+        window.location.href = `${targetPage}?${encoded.toString()}&player=B`;
         return;
       }
 
@@ -656,29 +600,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
     // Copy link button
     copyLinkBtn.addEventListener('click', async () => {
-      // Check if player needs to enter name
-      if (!state.players[currentPlayer]?.name) {
-        const nameInput = document.getElementById('player-name-input');
-        const playerName = nameInput?.value?.trim();
-
-        if (!playerName) {
-          alert('Please enter your name first.');
-          nameInput?.focus();
-          return;
-        }
-
-        state = {
-          ...state,
-          players: {
-            ...state.players,
-            [currentPlayer]: {
-              ...state.players[currentPlayer],
-              name: playerName
-            }
-          }
-        };
-      }
-
       // Update state with current selections
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
 
@@ -719,7 +640,9 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
         // Otherwise, copy link to Player B (same round)
         const encoded = encodeGameState(state);
-        const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=B`;
+        const playerBJoined = state.players.B !== null;
+        const targetPage = playerBJoined ? '/game' : '/waiting';
+        const shareUrl = `${window.location.origin}${targetPage}?${encoded.toString()}&player=B`;
         await navigator.clipboard.writeText(shareUrl);
         alert('Link copied to clipboard!');
         return;
@@ -802,37 +725,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
   </script>
 
   <style>
-    .name-input-section {
-      margin: 20px 0;
-      padding: 16px;
-      background: var(--bg-dark);
-      border: 2px solid var(--primary);
-    }
-
-    .name-label {
-      display: block;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 12px;
-      color: var(--primary);
-      margin-bottom: 12px;
-    }
-
-    .name-input {
-      width: 100%;
-      padding: 12px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 12px;
-      background: var(--bg);
-      border: 2px solid var(--border);
-      color: var(--text);
-      transition: border-color 0.2s;
-    }
-
-    .name-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
     .draft-info {
       margin: 20px 0;
       padding: 16px;
@@ -900,7 +792,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
     .meal-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
     }
 
@@ -912,6 +804,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       font-size: 14px;
       font-weight: bold;
       color: var(--primary);
+      text-align: center;
     }
 
     .partner-pick-star {

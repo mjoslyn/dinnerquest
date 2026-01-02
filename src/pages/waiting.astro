@@ -44,39 +44,16 @@ const player = state.players[currentPlayer];
 const shareUrl = `${Astro.url.origin}${import.meta.env.BASE_URL}/waiting?${params.toString()}&player=B`;
 
 // Get random upgrades for display (for whoever is on the setup screen)
-let upgrades = [];
-// Generate upgrades if we're showing the setup form
-if (playerBJoined || currentPlayer === 'A') {
-  upgrades = await getRandomUpgrades(2);
-}
+// Always generate upgrades since we're showing the full setup form to all players
+const upgrades = await getRandomUpgrades(2);
 ---
 
 <GameLayout>
   <div class="panel">
     <div class="panel-title">{player?.name || currentPlayer} - CHOOSE YOUR PATH</div>
 
-      {!playerBJoined && currentPlayer === 'B' && (
-        <form id="player-name-form" class="player-setup">
-          <div class="form-section">
-            <label class="form-label">Your Name</label>
-            <input
-              type="text"
-              name="playerName"
-              id="player-name-input"
-              class="name-input"
-              placeholder="Enter your name"
-              required
-            />
-          </div>
-          <button type="submit" class="btn btn-primary">
-            Continue
-          </button>
-        </form>
-      )}
-
-      {(playerBJoined || currentPlayer === 'A') && (
-        <form id="player-setup-form" class="player-setup">
-        {currentPlayer === 'A' && !player?.name && (
+      <form id="player-setup-form" class="player-setup">
+        {!player?.name && (
           <div class="form-section">
             <label class="form-label">Your Name</label>
             <input
@@ -132,7 +109,6 @@ if (playerBJoined || currentPlayer === 'A') {
           Ready Your Provisions
         </button>
       </form>
-      )}
   </div>
 
   <div class="narrative">
@@ -153,23 +129,6 @@ if (playerBJoined || currentPlayer === 'A') {
     // Initialize upgrades from server-rendered data
     const serverUpgradesEl = document.getElementById('server-upgrades');
     let currentUpgrades = serverUpgradesEl ? JSON.parse(serverUpgradesEl.textContent) : [];
-
-    // Player name form for Player B
-    const playerNameForm = document.getElementById('player-name-form');
-    if (playerNameForm) {
-      playerNameForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(playerNameForm);
-        const playerName = formData.get('playerName');
-
-        // Add Player B with their chosen name
-        state = addPlayerB(state, playerName);
-
-        // Reload the page with updated state
-        const encoded = encodeGameState(state);
-        window.location.href = `/waiting?${encoded.toString()}&player=B`;
-      });
-    }
 
     // Copy link functionality
     const copyBtn = document.getElementById('copy-btn');
@@ -222,14 +181,19 @@ if (playerBJoined || currentPlayer === 'A') {
         const dietPref = parseInt(formData.get('dietPreference'));
         const playerName = formData.get('playerName');
 
-        // Update state with preferences first
-        state = setDietPreference(state, currentPlayer, dietPref);
-        state = setPlayerUpgrades(state, currentPlayer, currentUpgrades);
+        // If Player B is joining for the first time, add them to state
+        if (playerName && currentPlayer === 'B' && !state.players.B) {
+          state = addPlayerB(state, playerName);
+        }
 
-        // Update name if provided (for Player A on first setup)
+        // Update name if provided for Player A on first setup
         if (playerName && currentPlayer === 'A' && state.players.A && !state.players.A.name) {
           state = { ...state, players: { ...state.players, A: { ...state.players.A, name: playerName } } };
         }
+
+        // Update state with preferences
+        state = setDietPreference(state, currentPlayer, dietPref);
+        state = setPlayerUpgrades(state, currentPlayer, currentUpgrades);
 
         // Mark player as ready (locked)
         state = { ...state, players: { ...state.players, [currentPlayer]: { ...state.players[currentPlayer], locked: true } } };

@@ -29,7 +29,7 @@ const harmonyMessages = await getNarrativeMessages('harmony');
 const conflictMessages = await getNarrativeMessages('conflict');
 
 // Generate shopping list
-const shoppingList = generateShoppingList(finalMeals);
+const shoppingList = await generateShoppingList(finalMeals);
 ---
 
 <GameLayout>
@@ -122,6 +122,33 @@ const shoppingList = generateShoppingList(finalMeals);
           <div class="stat-label">Top Cuisine</div>
         </div>
       </div>
+    </div>
+
+    <div class="shopping-list-section" x-data="{ checkedItems: new Set() }">
+      <h3>Shopping List</h3>
+
+      {Object.entries(shoppingList.bySection).map(([sectionName, items]) => (
+        <div class="grocery-section">
+          <div class="section-header">
+            <span class="section-name">{sectionName}</span>
+          </div>
+          <ul class="ingredient-list">
+            {items.map(item => (
+              <li x-data="{ checked: false }">
+                <label class="ingredient-item">
+                  <input type="checkbox" x-model="checked" />
+                  <span :class="checked ? 'line-through opacity-50' : ''">
+                    {item.ingredient}
+                  </span>
+                  <span class="meal-usage">
+                    ({item.meals.join(', ')})
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
 
     <div class="action-buttons">
@@ -264,6 +291,80 @@ const shoppingList = generateShoppingList(finalMeals);
 
     .stat-label {
       font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .shopping-list-section {
+      margin: 30px 0;
+    }
+
+    .shopping-list-section h3 {
+      font-size: 14px;
+      color: var(--primary);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .grocery-section {
+      margin-bottom: 20px;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+    }
+
+    .section-header {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-name {
+      display: block;
+    }
+
+    .ingredient-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .ingredient-list li {
+      margin: 4px 0;
+    }
+
+    .ingredient-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg);
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .ingredient-item:hover {
+      background: var(--bg-dark);
+    }
+
+    .ingredient-item input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    .ingredient-item .line-through {
+      text-decoration: line-through;
+    }
+
+    .ingredient-item .opacity-50 {
+      opacity: 0.5;
+    }
+
+    .meal-usage {
+      margin-left: auto;
+      font-size: 11px;
       color: var(--text-dim);
     }
 

@@ -12,6 +12,7 @@ const mealsCollection = defineCollection({
     tags: z.array(z.string()).default([]),
     allergens: z.array(z.enum(['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs'])).default([]),
     dietScore: z.number().min(1).max(5),
+    ingredients: z.array(z.string()).default([]),
   }),
 });
 
@@ -34,8 +35,30 @@ const narrativeCollection = defineCollection({
   }),
 });
 
+const grocerySectionsCollection = defineCollection({
+  type: 'data',
+  schema: z.object({
+    id: z.string(),
+    name: z.string(),
+    sortOrder: z.number(),
+    emoji: z.string().optional(),
+  }),
+});
+
+const ingredientsCollection = defineCollection({
+  type: 'data',
+  schema: z.object({
+    id: z.string(),
+    name: z.string(),
+    section: z.string(),
+    commonNames: z.array(z.string()).default([]),
+  }),
+});
+
 export const collections = {
   'meals': mealsCollection,
   'upgrades': upgradesCollection,
   'narrative': narrativeCollection,
+  'grocery-sections': grocerySectionsCollection,
+  'ingredients': ingredientsCollection,
 };

@@ -44,6 +44,11 @@ export async function getRandomMeals(count, excludeAllergens = [], avgDietPrefer
     );
   }
 
+  // If diet preference is vegetarian (1-2), exclude all meat-based meals
+  if (avgDietPreference <= 2) {
+    meals = meals.filter(meal => meal.dietScore <= 2);
+  }
+
   // Balance pool based on diet preference
   // If avg is low (veggie), bias toward low dietScore meals
   // If avg is high (meaty), bias toward high dietScore meals
@@ -150,132 +155,69 @@ export function getBudgetPoints(budgetCap, mealCount) {
   return budgetMap[budgetCap];
 }
 
-/**
- * Map ingredient to grocery store section
- * @param {string} ingredient
- * @returns {string}
- */
-export function getGrocerySection(ingredient) {
-  const lowerIngredient = ingredient.toLowerCase();
-
-  // Produce
-  if (/lettuce|tomato|onion|garlic|bell pepper|pepper|cucumber|carrot|celery|spinach|kale|arugula|broccoli|cauliflower|zucchini|mushroom|potato|sweet potato|avocado|lemon|lime|basil|cilantro|parsley|dill|thyme|rosemary|ginger|jalape|scallion|green onion|cabbage|bok choy|snap pea|edamame|corn|bean sprout|mint|lettuce|romaine/.test(lowerIngredient)) {
-    return 'Produce';
-  }
-
-  // Meat & Seafood
-  if (/chicken|beef|pork|salmon|tuna|shrimp|fish|steak|ground beef|bacon|sausage|turkey|lamb|chorizo|cod|mahi|halibut|crab|lobster|fillet|ribs|brisket/.test(lowerIngredient)) {
-    return 'Meat & Seafood';
-  }
-
-  // Dairy
-  if (/milk|cheese|yogurt|butter|cream|sour cream|mozzarella|parmesan|cheddar|feta|ricotta|goat cheese|blue cheese|provolone|swiss|cottage cheese|queso/.test(lowerIngredient)) {
-    return 'Dairy';
-  }
-
-  // Grains & Pasta
-  if (/pasta|noodle|rice|bread|tortilla|bun|roll|pita|naan|couscous|quinoa|flour|oat|cereal|cracker|bagel|english muffin|spaghetti|penne|ziti|ramen|udon|soba|vermicelli|orzo/.test(lowerIngredient)) {
-    return 'Grains & Pasta';
-  }
-
-  // Canned & Jarred
-  if (/canned|can of|tomato paste|tomato sauce|coconut milk|broth|stock|salsa|pesto|marinara|alfredo|enchilada sauce|soy sauce|fish sauce|hoisin|teriyaki|worcestershire|hot sauce|sriracha|tabasco|pickles|olives|capers|artichoke|bean|chickpea|black bean|kidney bean/.test(lowerIngredient)) {
-    return 'Canned & Jarred';
-  }
-
-  // Spices & Seasonings
-  if (/salt|pepper|cumin|paprika|chili powder|cayenne|oregano|basil|thyme|rosemary|sage|cinnamon|nutmeg|ginger|turmeric|curry|coriander|cardamom|clove|bay leaf|red pepper flake|italian seasoning|garlic powder|onion powder|mustard powder|vanilla/.test(lowerIngredient) && !/fresh/.test(lowerIngredient)) {
-    return 'Spices & Seasonings';
-  }
-
-  // Oils & Condiments
-  if (/oil|olive oil|vegetable oil|sesame oil|coconut oil|vinegar|balsamic|mustard|mayo|ketchup|bbq sauce|honey|maple syrup|jam|jelly|peanut butter|tahini/.test(lowerIngredient)) {
-    return 'Oils & Condiments';
-  }
-
-  // Frozen
-  if (/frozen/.test(lowerIngredient)) {
-    return 'Frozen';
-  }
-
-  // Bakery
-  if (/bagel|croissant|muffin|donut|cake|cookie|pie|pastry/.test(lowerIngredient)) {
-    return 'Bakery';
-  }
-
-  // Beverages
-  if (/wine|beer|juice|soda|coffee|tea|water/.test(lowerIngredient)) {
-    return 'Beverages';
-  }
-
-  // Default
-  return 'Other';
-}
+// Removed getGrocerySection - now using content collections for ingredient categorization
 
 /**
- * Generate shopping list from meals
+ * Generate shopping list from meals using content collections
  * @param {Meal[]} meals
- * @returns {Object} Shopping list with by-meal and by-section views
+ * @returns {Promise<Object>} Shopping list with by-meal and by-section views
  */
-export function generateShoppingList(meals) {
+export async function generateShoppingList(meals) {
+  const allIngredients = await getCollection('ingredients');
+  const allSections = await getCollection('grocery-sections');
+
+  // Build ingredient map with meal associations
+  const ingredientMap = new Map();
+
+  for (const meal of meals) {
+    for (const ingredientId of meal.ingredients || []) {
+      const ingredientEntry = allIngredients.find(i => i.id === ingredientId);
+      if (!ingredientEntry) continue;
+
+      const ingredient = ingredientEntry.data;
+
+      if (!ingredientMap.has(ingredientId)) {
+        ingredientMap.set(ingredientId, {
+          id: ingredient.id,
+          name: ingredient.name,
+          section: ingredient.section,
+          usedIn: []
+        });
+      }
+      ingredientMap.get(ingredientId).usedIn.push(meal.name);
+    }
+  }
+
+  // Build byMeal view
   const byMeal = meals.map(meal => ({
     mealId: meal.id,
     mealName: meal.name,
     emoji: meal.emoji,
-    ingredients: meal.ingredients || []
+    ingredients: (meal.ingredients || []).map(id => {
+      const ingredientEntry = allIngredients.find(i => i.id === id);
+      return ingredientEntry ? ingredientEntry.data.name : id;
+    })
   }));
 
-  // Consolidate ingredients by section
-  const ingredientMap = new Map();
-  meals.forEach(meal => {
-    (meal.ingredients || []).forEach(ingredient => {
-      const section = getGrocerySection(ingredient);
-      if (!ingredientMap.has(ingredient)) {
-        ingredientMap.set(ingredient, {
-          ingredient,
-          section,
-          meals: []
-        });
-      }
-      ingredientMap.get(ingredient).meals.push(meal.name);
-    });
-  });
-
   // Group by section
+  const sections = allSections
+    .map(s => s.data)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
   const bySection = {};
-  ingredientMap.forEach(item => {
-    if (!bySection[item.section]) {
-      bySection[item.section] = [];
+
+  for (const section of sections) {
+    const sectionIngredients = Array.from(ingredientMap.values())
+      .filter(ing => ing.section === section.id)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (sectionIngredients.length > 0) {
+      bySection[section.name] = sectionIngredients.map(ing => ({
+        ingredient: ing.name,
+        meals: ing.usedIn
+      }));
     }
-    bySection[item.section].push({
-      ingredient: item.ingredient,
-      meals: item.meals
-    });
-  });
+  }
 
-  // Sort sections in logical grocery store order
-  const sectionOrder = [
-    'Produce',
-    'Meat & Seafood',
-    'Dairy',
-    'Frozen',
-    'Bakery',
-    'Grains & Pasta',
-    'Canned & Jarred',
-    'Oils & Condiments',
-    'Spices & Seasonings',
-    'Beverages',
-    'Other'
-  ];
-
-  const sortedBySection = {};
-  sectionOrder.forEach(section => {
-    if (bySection[section]) {
-      sortedBySection[section] = bySection[section].sort((a, b) =>
-        a.ingredient.localeCompare(b.ingredient)
-      );
-    }
-  });
-
-  return { byMeal, bySection: sortedBySection };
+  return { byMeal, bySection };
 }
