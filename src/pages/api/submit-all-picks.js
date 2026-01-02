@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import { decodeGameState, encodeGameState } from '../../lib/urlCodec.js';
-import { resolveDay } from '../../lib/gameLogic.js';
+import { resolveDraft } from '../../lib/gameLogic.js';
 
 export async function POST({ request, url, redirect }) {
   const data = await request.json();
@@ -29,7 +29,7 @@ export async function POST({ request, url, redirect }) {
   if (allDaysPicked) {
     // Resolve all days at once
     state.week.forEach((day, dayIndex) => {
-      resolveDay(state, dayIndex);
+      resolveDraft(state, dayIndex);
       day.phase = 'complete';
     });
 

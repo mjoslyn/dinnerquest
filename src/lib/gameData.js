@@ -11,6 +11,7 @@ import { getCollection } from 'astro:content';
  * @property {string[]} tags
  * @property {string[]} allergens
  * @property {number} dietScore - 1 (veggie) to 5 (meaty)
+ * @property {string[]} ingredients - List of ingredients needed
  * @property {string} description
  */
 

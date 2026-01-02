@@ -290,3 +290,53 @@ export function applyUpgrade(state, playerId, upgradeId, upgradeData) {
   // Other upgrades don't modify state directly
   return state;
 }
+
+/**
+ * Advance to the next day after resolving the current draft
+ * @param {import('./gameState.js').GameState} state
+ * @returns {import('./gameState.js').GameState}
+ */
+export function advanceDay(state) {
+  const currentDay = state.currentDay || 0;
+  const nextDay = currentDay + 1;
+  const totalDays = state.settings.mealCount;
+
+  // Add current harmonies to the running list
+  const harmoniesSoFar = [
+    ...(state.harmoniesSoFar || []),
+    ...(state.results?.harmonies || [])
+  ];
+
+  // Check if game is complete
+  if (nextDay >= totalDays || harmoniesSoFar.length >= state.settings.mealCount) {
+    return {
+      ...state,
+      status: 'complete',
+      harmoniesSoFar
+    };
+  }
+
+  // Reset players for next day
+  const newState = {
+    ...state,
+    currentDay: nextDay,
+    harmoniesSoFar,
+    players: {
+      A: {
+        ...state.players.A,
+        picks: [],
+        tokens: {},
+        ready: false
+      },
+      B: {
+        ...state.players.B,
+        picks: [],
+        tokens: {},
+        ready: false
+      }
+    },
+    results: null
+  };
+
+  return newState;
+}

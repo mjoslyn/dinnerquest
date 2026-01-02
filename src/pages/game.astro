@@ -64,7 +64,7 @@ const budgetLimit = getBudgetPoints(state.settings.budgetCap, state.settings.mea
 // Calculate cost already spent on harmonies
 const harmoniesCost = harmonyMeals.reduce((sum, meal) => sum + (meal ? getCostPoints(meal.cost) : 0), 0);
 const budgetRemaining = budgetLimit ? budgetLimit - harmoniesCost : null;
-const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
+const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 ---
 
 <GameLayout>
@@ -80,17 +80,6 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
               <span class="meal-emoji">{meal.emoji}</span>
               <div class="meal-name">{meal.name}</div>
             </div>
-          ))}
-        </div>
-      </div>
-    )}
-
-    {partialHarmonyMeals.length > 0 && (
-      <div class="partial-harmonies-banner">
-        <span class="banner-label">{otherPlayer?.name || 'Partner'}'s Picks:</span>
-        <div class="partner-picks-icons">
-          {partialHarmonyMeals.map(meal => (
-            <span class="partner-pick-emoji" title={meal.name}>{meal.emoji}</span>
           ))}
         </div>
       </div>
@@ -117,11 +106,7 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
         </div>
         <div class="info-item">
           <span class="info-label">Budget:</span>
-          <span class="info-value" id="budget-display">{harmoniesCost} / {budgetText}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Tokens:</span>
-          <span class="info-value" id="token-count">0 / {state.settings.mealCount * 2}</span>
+          <span class="info-value" id="budget-display">{harmoniesCost} + 0 / {budgetText}</span>
         </div>
       </div>
     </div>
@@ -136,6 +121,9 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
             {otherPlayerPicksSet.has(meal.id) && <span class="partner-pick-star">✨</span>}
           </div>
           <div class="meal-name">{meal.name}</div>
+          {otherPlayerPicksSet.has(meal.id) && (
+            <div class="partial-harmony-badge">Partial Harmony</div>
+          )}
           <div class="meal-meta">
             <span>{meal.time}min</span>
             <span>{meal.cuisine}</span>
@@ -163,8 +151,7 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
   </div>
 
   <div class="narrative">
-    <p>Pick <strong>at least {state.settings.mealCount} meals</strong>. Each pick costs 1 token. Add 1-3 more tokens to meals you really want.</p>
-    <p>You have <strong>{state.settings.mealCount * 2} tokens</strong>. Extra tokens let you pick more meals. Unused tokens are OK.</p>
+    <p>Pick <strong>at least {state.settings.mealCount} meals</strong>.</p>
   </div>
 
   <script>
@@ -205,7 +192,6 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
     // UI elements
     const pickCountEl = document.getElementById('pick-count');
     const budgetDisplayEl = document.getElementById('budget-display');
-    const tokenCountEl = document.getElementById('token-count');
     const lockBtn = document.getElementById('lock-btn');
     const openLinkBtn = document.getElementById('open-link-btn');
     const copyLinkBtn = document.getElementById('copy-link-btn');
@@ -232,13 +218,11 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
 
       const totalMealsSecured = state.harmoniesSoFar.length + selectedMeals.size;
       pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
-      budgetDisplayEl.textContent = `${cumulativeCost} / ${budgetLimit ? budgetLimit + ' points' : 'No limit'}`;
-      tokenCountEl.textContent = `${totalTokensUsed} / ${tokenLimit}`;
+      budgetDisplayEl.textContent = `${harmoniesCost} + ${currentPicksCost} / ${budgetLimit ? budgetLimit : 'No limit'}`;
 
       // Color coding
       pickCountEl.style.color = totalMealsSecured >= mealCount ? 'var(--primary)' : '#d35d5d';
       budgetDisplayEl.style.color = (budgetLimit && cumulativeCost > budgetLimit) ? 'var(--danger)' : 'var(--primary)';
-      tokenCountEl.style.color = totalTokensUsed === tokenLimit ? 'var(--primary)' : 'var(--text)';
 
       // Live validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
@@ -278,7 +262,7 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
             selectedMeals.add(mealId);
             tokenDistribution[mealId] = 0;
             card.classList.add('selected');
-            card.querySelector('.token-control').style.display = 'flex';
+            card.querySelector('.token-control').style.display = 'none';
           }
         }
 
@@ -812,7 +796,6 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
     }
 
     .meal-card[data-partial="true"] {
-      border-color: var(--purple);
       background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.1) 100%);
     }
 
@@ -824,6 +807,19 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
     .meal-name {
       font-size: 12px;
       font-weight: bold;
+    }
+
+    .partial-harmony-badge {
+      font-size: 8px;
+      padding: 3px 6px;
+      background: var(--purple);
+      color: var(--bg);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      margin: 4px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .meal-meta {
@@ -888,7 +884,6 @@ const budgetText = budgetLimit ? `${budgetLimit} points` : 'No limit';
       margin: 16px 0;
       padding: 12px 16px;
       background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.15) 100%);
-      border: 2px solid var(--purple);
       border-radius: 8px;
       display: flex;
       align-items: center;

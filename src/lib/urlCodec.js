@@ -92,6 +92,12 @@ export function encodeGameState(state) {
   if (state.usedMeals && state.usedMeals.length > 0) {
     params.set('used', state.usedMeals.join(','));
   }
+  if (state.playerAAllPicks && state.playerAAllPicks.length > 0) {
+    params.set('pAAP', state.playerAAllPicks.join(','));
+  }
+  if (state.playerBAllPicks && state.playerBAllPicks.length > 0) {
+    params.set('pBAP', state.playerBAllPicks.join(','));
+  }
 
   return params;
 }
@@ -201,6 +207,8 @@ export function decodeGameState(params) {
     const currentRound = parseInt(params.get('round') || '1');
     const harmoniesSoFar = params.get('harms') ? params.get('harms').split(',').map(Number) : [];
     const usedMeals = params.get('used') ? params.get('used').split(',').map(Number) : [];
+    const playerAAllPicks = params.get('pAAP') ? params.get('pAAP').split(',').map(Number) : [];
+    const playerBAllPicks = params.get('pBAP') ? params.get('pBAP').split(',').map(Number) : [];
 
     return {
       id: params.get('id') || generateId(),
@@ -214,7 +222,9 @@ export function decodeGameState(params) {
       status: params.get('status') || 'setup',
       currentRound,
       harmoniesSoFar,
-      usedMeals
+      usedMeals,
+      playerAAllPicks,
+      playerBAllPicks
     };
   } catch (e) {
     console.error('Failed to decode game state:', e);
