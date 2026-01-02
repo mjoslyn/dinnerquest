@@ -26,7 +26,6 @@ if (!state.players[currentPlayer]) {
         dietPreference: 3,
         upgrades: upgrades,
         picks: [],
-        tokens: {},
         locked: false
       }
     }
@@ -106,7 +105,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         </div>
         <div class="info-item">
           <span class="info-label">Budget:</span>
-          <span class="info-value" id="budget-display">{harmoniesCost} + 0 / {budgetText}</span>
+          <span class="info-value" id="budget-display">{harmoniesCost} / {budgetText}</span>
         </div>
       </div>
     </div>
@@ -128,11 +127,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
             <span>{meal.time}min</span>
             <span>{meal.cuisine}</span>
           </div>
-          <div class="token-control" style="display: none;">
-            <span class="token-icon" data-level="1">⚪</span>
-            <span class="token-icon" data-level="2">⚪</span>
-            <span class="token-icon" data-level="3">⚪</span>
-          </div>
         </div>
       ))}
     </div>
@@ -148,6 +142,28 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         🔗
       </button>
     </div>
+    <div id="share-message" class="share-message" style="display: none;"></div>
+  </div>
+
+  <!-- Share Card Modal -->
+  <div id="share-modal" class="share-modal" style="display: none;">
+    <div class="share-modal-content">
+      <div class="share-modal-header">
+        <h2>Share with Partner</h2>
+        <button id="close-modal-btn" class="close-modal-btn">&times;</button>
+      </div>
+      <div class="share-modal-body">
+        <p id="share-modal-message">Send this link to your partner:</p>
+        <div class="share-link-container">
+          <input type="text" id="share-link-input" readonly class="share-link-input" />
+        </div>
+        <div class="share-actions">
+          <button id="modal-copy-btn" class="btn btn-primary">Copy Link</button>
+          <button id="modal-sms-btn" class="btn btn-secondary">Send SMS</button>
+          <button id="modal-open-btn" class="btn btn-secondary">Open Link</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="narrative">
@@ -156,7 +172,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
   <script>
     import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
-    import { updatePlayerPicks, updatePlayerTokens, lockPlayerDraft } from '../lib/gameState.js';
+    import { updatePlayerPicks, lockPlayerDraft } from '../lib/gameState.js';
     import { validateDraft, resolveDraft } from '../lib/gameLogic.js';
     import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals } from '../lib/gameDataClient.js';
 
@@ -176,7 +192,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
             dietPreference: 3,
             upgrades: upgrades,
             picks: [],
-            tokens: {},
             locked: false
           }
         }
@@ -187,7 +202,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     const budgetLimit = getBudgetPoints(state.settings.budgetCap, mealCount);
 
     let selectedMeals = new Set();
-    let tokenDistribution = {};
 
     // UI elements
     const pickCountEl = document.getElementById('pick-count');
@@ -195,8 +209,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     const lockBtn = document.getElementById('lock-btn');
     const openLinkBtn = document.getElementById('open-link-btn');
     const copyLinkBtn = document.getElementById('copy-link-btn');
-
-    const tokenLimit = mealCount * 2;
+    const shareMessage = document.getElementById('share-message');
 
     // Calculate cost of harmonies (already spent)
     const harmoniesCost = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
@@ -213,12 +226,9 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       const cumulativeCost = harmoniesCost + currentPicksCost;
 
-      const additionalTokens = Object.values(tokenDistribution).reduce((sum, t) => sum + t, 0);
-      const totalTokensUsed = selectedMeals.size + additionalTokens;
-
       const totalMealsSecured = state.harmoniesSoFar.length + selectedMeals.size;
       pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
-      budgetDisplayEl.textContent = `${harmoniesCost} + ${currentPicksCost} / ${budgetLimit ? budgetLimit : 'No limit'}`;
+      budgetDisplayEl.textContent = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'}`;
 
       // Color coding
       pickCountEl.style.color = totalMealsSecured >= mealCount ? 'var(--primary)' : '#d35d5d';
@@ -226,8 +236,28 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       // Live validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
-      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
       const validation = validateDraft(state, currentPlayer);
+
+      // Check if quest will be completed
+      let questComplete = false;
+      if (currentPlayer === 'A') {
+        const playerBAllPicks = state.playerBAllPicks || [];
+        const newHarmonies = Array.from(selectedMeals).filter(mealId => playerBAllPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
+        questComplete = allHarmonies.length >= mealCount;
+      } else if (currentPlayer === 'B') {
+        const playerAPicks = state.players.A.picks;
+        const harmonies = Array.from(selectedMeals).filter(mealId => playerAPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
+        questComplete = allHarmonies.length >= mealCount;
+      }
+
+      // Update button text based on quest completion
+      if (questComplete) {
+        lockBtn.textContent = 'Return Triumphant';
+      } else {
+        lockBtn.textContent = 'Seal & Dispatch';
+      }
 
       if (validation.valid) {
         lockBtn.disabled = false;
@@ -243,69 +273,21 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     // Meal card selection
     document.querySelectorAll('.meal-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('.token-btn')) return; // Ignore token button clicks
-
         const mealId = parseInt(card.dataset.mealId);
 
         if (selectedMeals.has(mealId)) {
           // Deselect
           selectedMeals.delete(mealId);
-          delete tokenDistribution[mealId];
           card.classList.remove('selected');
-          card.querySelector('.token-control').style.display = 'none';
         } else {
-          // Select (if we have tokens available)
-          const additionalTokens = Object.values(tokenDistribution).reduce((sum, t) => sum + t, 0);
-          const totalTokensUsed = selectedMeals.size + additionalTokens;
-
-          if (totalTokensUsed < tokenLimit) {
-            selectedMeals.add(mealId);
-            tokenDistribution[mealId] = 0;
-            card.classList.add('selected');
-            card.querySelector('.token-control').style.display = 'none';
-          }
+          // Select
+          selectedMeals.add(mealId);
+          card.classList.add('selected');
         }
 
         updateDisplays();
       });
     });
-
-    // Token icons
-    document.querySelectorAll('.token-icon').forEach(icon => {
-      icon.addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        const card = e.target.closest('.meal-card');
-        const mealId = parseInt(card.dataset.mealId);
-        const level = parseInt(e.target.dataset.level);
-        const icons = card.querySelectorAll('.token-icon');
-
-        const currentTokens = tokenDistribution[mealId] || 0;
-        const additionalTokens = Object.values(tokenDistribution).reduce((sum, t) => sum + t, 0);
-        const totalTokensUsed = selectedMeals.size + additionalTokens;
-
-        // Toggle: if clicking the current level, clear all tokens
-        if (currentTokens === level) {
-          tokenDistribution[mealId] = 0;
-        } else {
-          // Check if we have enough tokens
-          const tokensNeeded = level - currentTokens;
-          if (totalTokensUsed + tokensNeeded <= tokenLimit) {
-            tokenDistribution[mealId] = level;
-          }
-        }
-
-        // Update token display
-        updateTokenIcons(icons, tokenDistribution[mealId]);
-        updateDisplays();
-      });
-    });
-
-    function updateTokenIcons(icons, count) {
-      icons.forEach((icon, index) => {
-        icon.textContent = index < count ? '🪙' : '⚪';
-      });
-    }
 
     // Lock button
     lockBtn.addEventListener('click', async () => {
@@ -335,7 +317,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       // Final validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
-      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
 
       const validation = validateDraft(state, currentPlayer);
       if (!validation.valid) {
@@ -346,10 +327,65 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       // Lock in
       state = lockPlayerDraft(state, currentPlayer);
 
-      // Player A locks -> go to Player B (same round)
+      // Player A locks -> check if we have enough harmonies
       if (currentPlayer === 'A') {
+        const playerAPicks = state.players.A.picks;
+        const playerBAllPicks = state.playerBAllPicks || [];
+
+        // Find harmonies between A's current picks and B's all picks
+        const newHarmonies = playerAPicks.filter(mealId => playerBAllPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
+
+        // If we have enough harmonies, game is complete
+        if (allHarmonies.length >= state.settings.mealCount) {
+          // Prioritize newest harmonies (newHarmonies) over older ones (harmoniesSoFar)
+          const prioritizedHarmonies = [...newHarmonies, ...state.harmoniesSoFar];
+
+          state = {
+            ...state,
+            status: 'complete',
+            results: {
+              finalMenu: prioritizedHarmonies.slice(0, state.settings.mealCount),
+              harmonies: allHarmonies,
+              conflicts: []
+            }
+          };
+          const encoded = encodeGameState(state);
+          window.location.href = `/complete?${encoded.toString()}&player=A`;
+          return;
+        }
+
+        // Otherwise, open messaging app with link for Player B
         const encoded = encodeGameState(state);
-        window.location.href = `/game?${encoded.toString()}&player=B`;
+        const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=B`;
+        const message = 'Your turn to pick meals! ' + shareUrl;
+
+        // Use Web Share API to share with partner
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: 'Dinner Quest - Your Turn',
+              text: message
+            });
+            shareMessage.textContent = 'Shared! Use → to view next player.';
+            shareMessage.style.display = 'block';
+          } catch (err) {
+            // User cancelled or share failed
+            if (err.name !== 'AbortError') {
+              console.error('Share failed:', err);
+              shareMessage.textContent = 'Share failed. Copy link with 🔗 button.';
+              shareMessage.style.display = 'block';
+            }
+          }
+        } else {
+          // Browser doesn't support Web Share API
+          shareMessage.textContent = 'Copy link with 🔗 button to share.';
+          shareMessage.style.display = 'block';
+        }
+
+        // Enable share buttons
+        openLinkBtn.disabled = false;
+        copyLinkBtn.disabled = false;
         return;
       }
 
@@ -373,19 +409,23 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
         // Check if we have enough meals
         if (allHarmonies.length >= state.settings.mealCount) {
-          // Game complete! Go to results
-          const results = resolveDraft(state);
+          // Game complete! Prioritize full harmonies (current round) over partial (previous rounds)
+          // harmonies = current round full harmonies
+          // state.harmoniesSoFar = previous partial harmonies
+          const prioritizedHarmonies = [...harmonies, ...state.harmoniesSoFar];
+
           state = {
             ...state,
             status: 'complete',
             results: {
-              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              finalMenu: prioritizedHarmonies.slice(0, state.settings.mealCount),
               harmonies: allHarmonies,
               conflicts: []
             }
           };
           const encoded = encodeGameState(state);
           window.location.href = `/complete?${encoded.toString()}&player=B`;
+          return;
         } else {
           // Prepare for next round
           // Remove harmonies (locked in)
@@ -433,14 +473,42 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
             playerAAllPicks: playerAAllPicks,
             playerBAllPicks: playerBAllPicks,
             players: {
-              A: { ...state.players.A, picks: [], tokens: {}, locked: false },
-              B: { ...state.players.B, picks: [], tokens: {}, locked: false }
+              A: { ...state.players.A, picks: [], locked: false },
+              B: { ...state.players.B, picks: [], locked: false }
             }
           };
 
-          // Navigate to Player A for next round
+          // Open messaging app with link for Player A (next round)
           const encoded = encodeGameState(state);
-          window.location.href = `/game?${encoded.toString()}&player=A`;
+          const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=A`;
+          const message = 'Next round - your turn to pick! ' + shareUrl;
+
+          // Use Web Share API to share with partner
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: 'Dinner Quest - Next Round',
+                text: message
+              });
+              shareMessage.textContent = 'Shared! Use → to view next round.';
+              shareMessage.style.display = 'block';
+            } catch (err) {
+              // User cancelled or share failed
+              if (err.name !== 'AbortError') {
+                console.error('Share failed:', err);
+                shareMessage.textContent = 'Share failed. Copy link with 🔗 button.';
+                shareMessage.style.display = 'block';
+              }
+            }
+          } else {
+            // Browser doesn't support Web Share API
+            shareMessage.textContent = 'Copy link with 🔗 button to share.';
+            shareMessage.style.display = 'block';
+          }
+
+          // Enable share buttons
+          openLinkBtn.disabled = false;
+          copyLinkBtn.disabled = false;
         }
       }
     });
@@ -472,7 +540,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       // Update state with current selections
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
-      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
 
       const validation = validateDraft(state, currentPlayer);
       if (!validation.valid) {
@@ -482,8 +549,35 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       state = lockPlayerDraft(state, currentPlayer);
 
-      // Player A locks -> go to Player B (same round)
+      // Player A locks -> check if we have enough harmonies
       if (currentPlayer === 'A') {
+        const playerAPicks = state.players.A.picks;
+        const playerBAllPicks = state.playerBAllPicks || [];
+
+        // Find harmonies between A's current picks and B's all picks
+        const newHarmonies = playerAPicks.filter(mealId => playerBAllPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
+
+        // If we have enough harmonies, game is complete
+        if (allHarmonies.length >= state.settings.mealCount) {
+          // Prioritize newest harmonies (newHarmonies) over older ones (harmoniesSoFar)
+          const prioritizedHarmonies = [...newHarmonies, ...state.harmoniesSoFar];
+
+          state = {
+            ...state,
+            status: 'complete',
+            results: {
+              finalMenu: prioritizedHarmonies.slice(0, state.settings.mealCount),
+              harmonies: allHarmonies,
+              conflicts: []
+            }
+          };
+          const encoded = encodeGameState(state);
+          window.location.href = `/complete?${encoded.toString()}&player=A`;
+          return;
+        }
+
+        // Otherwise, go to Player B (same round)
         const encoded = encodeGameState(state);
         window.location.href = `/game?${encoded.toString()}&player=B`;
         return;
@@ -503,12 +597,14 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
 
         if (allHarmonies.length >= state.settings.mealCount) {
-          const results = resolveDraft(state);
+          // Prioritize full harmonies (current round) over partial (previous rounds)
+          const prioritizedHarmonies = [...harmonies, ...state.harmoniesSoFar];
+
           state = {
             ...state,
             status: 'complete',
             results: {
-              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              finalMenu: prioritizedHarmonies.slice(0, state.settings.mealCount),
               harmonies: allHarmonies,
               conflicts: []
             }
@@ -548,8 +644,8 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
             playerAAllPicks: playerAAllPicks,
             playerBAllPicks: playerBAllPicks,
             players: {
-              A: { ...state.players.A, picks: [], tokens: {}, locked: false },
-              B: { ...state.players.B, picks: [], tokens: {}, locked: false }
+              A: { ...state.players.A, picks: [], locked: false },
+              B: { ...state.players.B, picks: [], locked: false }
             }
           };
           const encoded = encodeGameState(state);
@@ -585,7 +681,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       // Update state with current selections
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
-      state = updatePlayerTokens(state, currentPlayer, tokenDistribution);
 
       const validation = validateDraft(state, currentPlayer);
       if (!validation.valid) {
@@ -595,8 +690,34 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
       state = lockPlayerDraft(state, currentPlayer);
 
-      // Player A locks -> copy link to Player B (same round)
+      // Player A locks -> check if we have enough harmonies
       if (currentPlayer === 'A') {
+        const playerAPicks = state.players.A.picks;
+        const playerBAllPicks = state.playerBAllPicks || [];
+
+        // Find harmonies between A's current picks and B's all picks
+        const newHarmonies = playerAPicks.filter(mealId => playerBAllPicks.includes(mealId));
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
+
+        // If we have enough harmonies, game is complete
+        if (allHarmonies.length >= state.settings.mealCount) {
+          state = {
+            ...state,
+            status: 'complete',
+            results: {
+              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              harmonies: allHarmonies,
+              conflicts: []
+            }
+          };
+          const encoded = encodeGameState(state);
+          const shareUrl = `${window.location.origin}/complete?${encoded.toString()}&player=A`;
+          await navigator.clipboard.writeText(shareUrl);
+          alert('Game complete! Link copied to clipboard!');
+          return;
+        }
+
+        // Otherwise, copy link to Player B (same round)
         const encoded = encodeGameState(state);
         const shareUrl = `${window.location.origin}/game?${encoded.toString()}&player=B`;
         await navigator.clipboard.writeText(shareUrl);
@@ -618,12 +739,14 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
 
         if (allHarmonies.length >= state.settings.mealCount) {
-          const results = resolveDraft(state);
+          // Prioritize full harmonies (current round) over partial (previous rounds)
+          const prioritizedHarmonies = [...harmonies, ...state.harmoniesSoFar];
+
           state = {
             ...state,
             status: 'complete',
             results: {
-              finalMenu: allHarmonies.slice(0, state.settings.mealCount),
+              finalMenu: prioritizedHarmonies.slice(0, state.settings.mealCount),
               harmonies: allHarmonies,
               conflicts: []
             }
@@ -665,8 +788,8 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
             playerAAllPicks: playerAAllPicks,
             playerBAllPicks: playerBAllPicks,
             players: {
-              A: { ...state.players.A, picks: [], tokens: {}, locked: false },
-              B: { ...state.players.B, picks: [], tokens: {}, locked: false }
+              A: { ...state.players.A, picks: [], locked: false },
+              B: { ...state.players.B, picks: [], locked: false }
             }
           };
           const encoded = encodeGameState(state);
@@ -689,7 +812,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     .name-label {
       display: block;
       font-family: 'Press Start 2P', monospace;
-      font-size: 11px;
+      font-size: 12px;
       color: var(--primary);
       margin-bottom: 12px;
     }
@@ -698,7 +821,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       width: 100%;
       padding: 12px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 11px;
+      font-size: 12px;
       background: var(--bg);
       border: 2px solid var(--border);
       color: var(--text);
@@ -730,12 +853,12 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     }
 
     .info-label {
-      font-size: 10px;
+      font-size: 14px;
       color: var(--text-dim);
     }
 
     .info-value {
-      font-size: 16px;
+      font-size: 22px;
       font-weight: bold;
       color: var(--text);
     }
@@ -746,6 +869,12 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 12px;
       margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      .meal-pool {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .meal-card {
@@ -776,11 +905,11 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     }
 
     .meal-emoji {
-      font-size: 32px;
+      font-size: 40px;
     }
 
     .meal-cost {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: bold;
       color: var(--primary);
     }
@@ -805,13 +934,13 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     }
 
     .meal-name {
-      font-size: 12px;
+      font-size: 15px;
       font-weight: bold;
     }
 
     .partial-harmony-badge {
-      font-size: 8px;
-      padding: 3px 6px;
+      font-size: 12px;
+      padding: 4px 8px;
       background: var(--purple);
       color: var(--bg);
       border-radius: 3px;
@@ -825,30 +954,8 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     .meal-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 9px;
+      font-size: 12px;
       color: var(--text-dim);
-    }
-
-    .token-control {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-    }
-
-    .token-icon {
-      font-size: 24px;
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: none;
-    }
-
-    .token-icon:hover {
-      transform: scale(1.2);
-      filter: brightness(1.3);
     }
 
     .harmonies-section {
@@ -891,7 +998,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     }
 
     .banner-label {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--purple);
       font-weight: bold;
       white-space: nowrap;
@@ -933,7 +1040,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     }
 
     .partial-harmonies-section h3 {
-      font-size: 11px;
+      font-size: 13px;
       color: var(--text-dim);
       margin-bottom: 12px;
     }
@@ -960,7 +1067,7 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
     }
 
     .meal-name-small {
-      font-size: 9px;
+      font-size: 12px;
       color: var(--text-dim);
     }
 
@@ -970,11 +1077,21 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       margin-top: 20px;
     }
 
+    .share-message {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg-dark);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      font-size: 13px;
+      text-align: center;
+    }
+
     .btn {
       flex: 1;
       padding: 16px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 11px;
+      font-size: 13px;
       cursor: pointer;
       border: none;
       transition: all 0.2s;

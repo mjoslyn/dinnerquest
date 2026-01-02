@@ -1,24 +1,6 @@
 import { getCostPoints, getBudgetPoints } from './gameDataClient.js';
 
 /**
- * Get total tokens for a player (mealCount * 2 + upgrades)
- * @param {import('./gameState.js').Player} player
- * @param {number} mealCount
- * @returns {number}
- */
-export function getPlayerTokenLimit(player, mealCount) {
-  let baseTokens = mealCount * 2;
-
-  // Check for token boost upgrade
-  const hasTokenBoost = player.upgrades.some(u => u.id === 'token-boost');
-  if (hasTokenBoost) {
-    baseTokens += 2;
-  }
-
-  return baseTokens;
-}
-
-/**
  * Validate a player's draft
  * @param {import('./gameState.js').GameState} state
  * @param {string} playerId - 'A' or 'B'
@@ -46,29 +28,6 @@ export function validateDraft(state, playerId) {
   const uniquePicks = new Set(player.picks);
   if (uniquePicks.size !== player.picks.length) {
     errors.push('Cannot pick the same meal twice');
-  }
-
-  // Check token total (meal count * 2)
-  const tokenLimit = getPlayerTokenLimit(player, settings.mealCount);
-  const tokenTotal = Object.values(player.tokens).reduce((sum, t) => sum + t, 0);
-
-  // Each pick costs 1 token automatically, so total tokens = picks + additional
-  const totalTokensUsed = player.picks.length + tokenTotal;
-  if (totalTokensUsed > tokenLimit) {
-    errors.push(`Cannot use more than ${tokenLimit} tokens (currently using ${totalTokensUsed}: ${player.picks.length} for picks + ${tokenTotal} additional)`);
-  }
-
-  // Check token range (1-3 additional per meal)
-  const invalidTokens = Object.values(player.tokens).filter(t => t < 0 || t > 3);
-  if (invalidTokens.length > 0) {
-    errors.push('Additional tokens per meal must be 0-3');
-  }
-
-  // Check tokens only on picked meals
-  const tokenMealIds = Object.keys(player.tokens).map(Number);
-  const tokensOnNonPicks = tokenMealIds.filter(id => !player.picks.includes(id));
-  if (tokensOnNonPicks.length > 0) {
-    errors.push('Tokens must only be on picked meals');
   }
 
   // Check budget (cumulative across all rounds)
@@ -121,19 +80,14 @@ export function resolveDraft(state) {
       finalMenuIds.add(mealId);
     } else if (aHasPick || bHasPick) {
       // Conflict - only one picked it
-      const playerABid = playerA.tokens[mealId] || 0;
-      const playerBBid = playerB.tokens[mealId] || 0;
-
-      // Weighted random based on bids
-      const totalBids = playerABid + playerBBid + 2; // +2 base so 0 bids have chance
-      const aChance = (playerABid + 1) / totalBids;
-      const winner = Math.random() < aChance ? 'A' : 'B';
+      // 50/50 random resolution
+      const winner = Math.random() < 0.5 ? 'A' : 'B';
 
       conflicts.push({
         meal: mealId,
         winner,
-        playerABid,
-        playerBBid
+        playerABid: 0,
+        playerBBid: 0
       });
 
       finalMenuIds.add(mealId);
@@ -171,15 +125,14 @@ function enforceBudget(menuIds, pool, budgetLimit, conflicts) {
     return menuIds; // Within budget
   }
 
-  // Over budget - need to swap out lowest-token conflict winners
+  // Over budget - need to swap out conflict winners (random order since no bids)
   const conflictMeals = conflicts
     .map(c => ({
       mealId: c.meal,
-      winningBid: c.winner === 'A' ? c.playerABid : c.playerBBid,
       winner: c.winner
     }))
     .filter(c => menuIds.includes(c.mealId))
-    .sort((a, b) => a.winningBid - b.winningBid); // Lowest bids first
+    .sort(() => Math.random() - 0.5); // Random order
 
   let currentMenu = [...menuIds];
   let currentCost = totalCost;
@@ -325,13 +278,11 @@ export function advanceDay(state) {
       A: {
         ...state.players.A,
         picks: [],
-        tokens: {},
         ready: false
       },
       B: {
         ...state.players.B,
         picks: [],
-        tokens: {},
         ready: false
       }
     },

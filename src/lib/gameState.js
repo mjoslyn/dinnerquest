@@ -13,7 +13,6 @@ import { generateId } from './urlCodec.js';
  * @property {number} dietPreference - 1 (veggie) to 5 (meaty)
  * @property {Array} upgrades - Array of upgrade objects
  * @property {number[]} picks - Array of meal IDs
- * @property {Object.<number, number>} tokens - Map of mealId -> token count
  * @property {boolean} locked
  */
 
@@ -65,7 +64,6 @@ export function createInitialState(playerName, settings) {
         dietPreference: 3,
         upgrades: [],
         picks: [],
-        tokens: {},
         locked: false
       },
       B: null
@@ -97,7 +95,6 @@ export function addPlayerB(state, playerName) {
         dietPreference: 3,
         upgrades: [],
         picks: [],
-        tokens: {},
         locked: false
       }
     },
@@ -176,26 +173,6 @@ export function updatePlayerPicks(state, playerId, picks) {
       [playerId]: {
         ...state.players[playerId],
         picks
-      }
-    }
-  };
-}
-
-/**
- * Update player's token distribution
- * @param {GameState} state
- * @param {string} playerId
- * @param {Object.<number, number>} tokens
- * @returns {GameState}
- */
-export function updatePlayerTokens(state, playerId, tokens) {
-  return {
-    ...state,
-    players: {
-      ...state.players,
-      [playerId]: {
-        ...state.players[playerId],
-        tokens
       }
     }
   };

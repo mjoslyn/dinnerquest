@@ -61,7 +61,7 @@ Example: `src/pages/api/submit-pick.js` validates picks, updates state, redirect
 
 - **No TypeScript** - Uses JSDoc for type hints in pure JavaScript
 - **HTMX** - Handles dynamic content updates without page reloads
-- **Alpine.js** - Lightweight reactivity for UI interactions (token sliders, form validation)
+- **Alpine.js** - Lightweight reactivity for UI interactions (sliders, form validation)
 - **Hybrid rendering** - Static pre-rendering for landing pages, on-demand rendering for game pages (`prerender = false`)
 - **URL-based state** - Game state passed as individual URL parameters, no JSON encoding needed
 - **Netlify deployment** - Uses @astrojs/netlify adapter for serverless functions and on-demand rendering

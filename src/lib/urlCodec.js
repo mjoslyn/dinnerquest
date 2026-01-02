@@ -27,13 +27,6 @@ export function encodeGameState(state) {
     if (state.players.A.picks.length > 0) {
       params.set('pAP', state.players.A.picks.join(','));
     }
-    if (Object.keys(state.players.A.tokens).length > 0) {
-      // Encode as mealId:tokens pairs
-      const tokenStr = Object.entries(state.players.A.tokens)
-        .map(([id, count]) => `${id}:${count}`)
-        .join(',');
-      params.set('pAT', tokenStr);
-    }
     if (state.players.A.locked) {
       params.set('pAL', '1');
     }
@@ -48,12 +41,6 @@ export function encodeGameState(state) {
     }
     if (state.players.B.picks.length > 0) {
       params.set('pBP', state.players.B.picks.join(','));
-    }
-    if (Object.keys(state.players.B.tokens).length > 0) {
-      const tokenStr = Object.entries(state.players.B.tokens)
-        .map(([id, count]) => `${id}:${count}`)
-        .join(',');
-      params.set('pBT', tokenStr);
     }
     if (state.players.B.locked) {
       params.set('pBL', '1');
@@ -99,6 +86,11 @@ export function encodeGameState(state) {
     params.set('pBAP', state.playerBAllPicks.join(','));
   }
 
+  // Shopping list checked items
+  if (state.checkedIngredients && state.checkedIngredients.length > 0) {
+    params.set('chk', state.checkedIngredients.join('|'));
+  }
+
   return params;
 }
 
@@ -128,22 +120,12 @@ export function decodeGameState(params) {
     if (params.has('pAN')) {
       const upgradesStr = params.get('pAU');
       const picksStr = params.get('pAP');
-      const tokensStr = params.get('pAT');
-
-      const tokens = {};
-      if (tokensStr) {
-        tokensStr.split(',').forEach(pair => {
-          const [id, count] = pair.split(':');
-          tokens[parseInt(id)] = parseInt(count);
-        });
-      }
 
       playerA = {
         name: params.get('pAN'),
         dietPreference: parseInt(params.get('pAD') || '3'),
         upgrades: upgradesStr ? upgradesStr.split(',').map(id => ({ id })) : [],
         picks: picksStr ? picksStr.split(',').map(Number) : [],
-        tokens,
         locked: params.get('pAL') === '1'
       };
     }
@@ -153,22 +135,12 @@ export function decodeGameState(params) {
     if (params.has('pBN')) {
       const upgradesStr = params.get('pBU');
       const picksStr = params.get('pBP');
-      const tokensStr = params.get('pBT');
-
-      const tokens = {};
-      if (tokensStr) {
-        tokensStr.split(',').forEach(pair => {
-          const [id, count] = pair.split(':');
-          tokens[parseInt(id)] = parseInt(count);
-        });
-      }
 
       playerB = {
         name: params.get('pBN'),
         dietPreference: parseInt(params.get('pBD') || '3'),
         upgrades: upgradesStr ? upgradesStr.split(',').map(id => ({ id })) : [],
         picks: picksStr ? picksStr.split(',').map(Number) : [],
-        tokens,
         locked: params.get('pBL') === '1'
       };
     }

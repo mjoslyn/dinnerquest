@@ -92,12 +92,12 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         allergies
       };
 
-      // Create initial game state without a name (will be set on waiting page)
+      // Create initial game state without a name (will be set on game page)
       const state = createInitialState('', settings);
 
-      // Encode and navigate to waiting room
+      // Encode and navigate to game
       const encodedState = encodeGameState(state);
-      window.location.href = `/waiting?${encodedState.toString()}`;
+      window.location.href = `/game?${encodedState.toString()}&player=A`;
     });
   </script>
 
@@ -163,7 +163,7 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
     }
 
     .option-text {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--text-dim);
     }
 
@@ -174,7 +174,7 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
     }
 
     .option-desc {
-      font-size: 9px;
+      font-size: 12px;
       color: var(--text-dim);
       text-align: center;
     }
@@ -193,7 +193,7 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
       border: 1px solid var(--border);
       background: var(--bg-dark);
       cursor: pointer;
-      font-size: 11px;
+      font-size: 12px;
     }
 
     .allergen-checkbox input[type="checkbox"]:checked {

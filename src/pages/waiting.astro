@@ -22,8 +22,9 @@ const player = state.players[currentPlayer];
 // Generate share URL for Player B
 const shareUrl = `${Astro.url.origin}${import.meta.env.BASE_URL}/waiting?${params.toString()}&player=B`;
 
-// Get random upgrades for display
+// Get random upgrades for display (for whoever is on the setup screen)
 let upgrades = [];
+// Generate upgrades if we're showing the setup form
 if (playerBJoined || currentPlayer === 'A') {
   upgrades = await getRandomUpgrades(2);
 }
