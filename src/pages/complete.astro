@@ -16,19 +16,28 @@ const currentPlayer = params.get('player') || 'A';
 
 // Fetch full meal data
 const allMeals = await getAllMeals();
-const finalMeals = state.results.finalMenu.map(id =>
-  allMeals.find(m => m.id === id)
-);
+const allFinalMeals = state.results.finalMenu.map(id => allMeals.find(m => m.id === id));
 
-// Generate shopping list
+// Filter out undefined meals (takeout) for shopping list and display
+const finalMeals = allFinalMeals.filter(meal => meal !== undefined);
+
+// Generate shopping list (only for non-takeout meals)
 const shoppingList = await generateShoppingList(finalMeals);
 
 // Get checked items from URL
 const checkedParam = params.get('checked') || '';
 const checkedItems = checkedParam ? checkedParam.split(',') : [];
 
-// Calculate total USD cost
-const totalUSD = finalMeals.reduce((sum, meal) => sum + (meal?.estimatedPrice || 0), 0);
+// Calculate total USD cost (including takeout meals at $30 each)
+const totalUSD = state.results.finalMenu.reduce((sum, id) => {
+  const meal = allMeals.find(m => m.id === id);
+  if (meal) {
+    return sum + (meal.estimatedPrice || 0);
+  } else {
+    // Takeout meal - $$$
+    return sum + 30;
+  }
+}, 0);
 const peopleCount = 2;
 const totalCost = totalUSD * peopleCount;
 ---

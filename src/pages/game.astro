@@ -76,8 +76,10 @@ if (player.dietPreference === 1) {
   );
 }
 
-// Get harmonies for display
-const harmonyMeals = state.harmoniesSoFar.map(id => allMeals.find(m => m.id === id));
+// Get harmonies for display (filter out undefined for takeout meals that don't persist)
+const harmonyMeals = state.harmoniesSoFar
+  .map(id => allMeals.find(m => m.id === id))
+  .filter(meal => meal !== undefined);
 
 // Budget is total across all rounds
 const budgetLimit = getBudgetPoints(state.settings.budgetCap, state.settings.mealCount);
@@ -187,6 +189,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
 
+    // Track takeout meals (id -> meal object) for cost calculations
+    const takeoutMeals = new Map();
+
     // Hydrate upgrades with full data (they're stored as just IDs in URL)
     const allUpgrades = await getAllUpgrades();
     if (state.players.A?.upgrades) {
@@ -236,11 +241,11 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     // Fetch all meals since harmonies are removed from pool in later rounds
     const allMeals = await getAllMeals();
     const harmoniesCost = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
-      const meal = allMeals.find(m => m.id === mealId);
+      const meal = allMeals.find(m => m.id === mealId) || takeoutMeals.get(mealId);
       return sum + (meal ? getCostPoints(meal.cost) : 0);
     }, 0);
     const harmoniesUsdTotal = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
-      const meal = allMeals.find(m => m.id === mealId);
+      const meal = allMeals.find(m => m.id === mealId) || takeoutMeals.get(mealId);
       return sum + (meal?.estimatedPrice || 0);
     }, 0);
 
@@ -1002,6 +1007,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
             cuisine: 'Takeout'
           };
 
+          // Store takeout meal for cost calculations
+          takeoutMeals.set(takeoutId, takeoutMeal);
+
           // Add to harmonies immediately
           if (!state.harmoniesSoFar.includes(takeoutId)) {
             state.harmoniesSoFar = [...state.harmoniesSoFar, takeoutId];
@@ -1041,6 +1049,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
             undoBtn.addEventListener('click', () => {
               // Remove from harmonies
               state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== takeoutId);
+
+              // Remove from takeout meals map
+              takeoutMeals.delete(takeoutId);
 
               // Remove harmony card
               const harmonyCardToRemove = document.querySelector(`.takeout-harmony-card[data-meal-id="${takeoutId}"]`);
