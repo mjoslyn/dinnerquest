@@ -8,6 +8,7 @@ const mealsCollection = defineCollection({
     emoji: z.string(),
     time: z.number(),
     cost: z.enum(['$', '$$', '$$$']),
+    estimatedPrice: z.number().optional(),
     cuisine: z.string(),
     tags: z.array(z.string()).default([]),
     allergens: z.array(z.enum(['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs'])).default([]),
@@ -22,8 +23,9 @@ const upgradesCollection = defineCollection({
     id: z.string(),
     name: z.string(),
     emoji: z.string(),
-    type: z.enum(['token-boost', 'reroll', 'cost-reduction', 'special']),
+    type: z.enum(['theme']),
     effect: z.string(),
+    themeStyle: z.string().optional(),
   }),
 });
 
