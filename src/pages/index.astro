@@ -17,7 +17,8 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
 
 <GameLayout>
   <div class="panel">
-    <div class="panel-title">DINNER QUEST</div>
+    <div class="panel-title" id="panel-title">DINNER QUEST</div>
+    <div class="panel-subtitle" id="panel-subtitle">A meal planning roguelike</div>
 
     <form id="setup-form" class="setup-form">
       <div class="form-section">
@@ -78,6 +79,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
     // Theme content
     const themeContent = {
       'theme-fantasy': {
+        title: 'DINNER QUEST',
+        subtitle: 'A culinary adventure',
+        ogDescription: 'Embark on an epic culinary quest! Two heroes, one legendary meal plan. Will you forge harmony or summon the dragons of discord?',
+        ogImage: '/og-fantasy.png',
         narrative: [
           'The realm calls to you, brave adventurer.',
           'Two heroes. One legendary quest. A week of feasts to secure.',
@@ -86,6 +91,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Begin the Quest'
       },
       'theme-cyberpunk': {
+        title: 'SUSTENANCE.EXE',
+        subtitle: 'A meal planning simulation',
+        ogDescription: 'Jack into the Grid. Two netrunners, one meal database. Will you achieve sync or crash into takeout chaos?',
+        ogImage: '/og-cyberpunk.png',
         narrative: [
           'Welcome to the Grid. Systems online.',
           'Two netrunners. One database. Seven days of sustenance protocols.',
@@ -94,6 +103,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Initialize Protocol'
       },
       'theme-western': {
+        title: 'GRUB SHOWDOWN',
+        subtitle: 'A meal wrangling game',
+        ogDescription: 'Head west, partner. Two gunslingers, one saloon, a week of grub to wrangle. Will you ride together or face off at high noon?',
+        ogImage: '/og-western.png',
         narrative: [
           'The frontier stretches wide, partner.',
           'Two gunslingers. One saloon. A week of grub to wrangle.',
@@ -102,6 +115,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Draw Your Hand'
       },
       'theme-noir': {
+        title: 'CASE: MISSING MEALS',
+        subtitle: 'A culinary mystery',
+        ogDescription: 'A dark mystery unfolds. Two detectives, seven missing meals. Will you crack the case or let it go cold?',
+        ogImage: '/og-noir.png',
         narrative: [
           'It was a dark and stormy night. The case file lay open.',
           'Two detectives. One mystery. Seven meals missing from the week.',
@@ -110,6 +127,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Open the Case'
       },
       'theme-pirate': {
+        title: 'HIGH SEAS FEAST',
+        subtitle: 'A meal treasure hunt',
+        ogDescription: 'Ahoy, matey! Two pirates, one ship, a week of plunder to claim. Will ye sail as mates or walk the plank?',
+        ogImage: '/og-pirate.png',
         narrative: [
           'Ahoy there, ye scurvy dogs! The seas be callin\'.',
           'Two pirates. One ship. A week of plunder to claim.',
@@ -118,6 +139,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Set Sail'
       },
       'theme-medieval': {
+        title: 'THE FEAST DECREE',
+        subtitle: 'A royal banquet quest',
+        ogDescription: 'Hear ye! The royal court assembles. Two nobles, one banquet hall. Will thy choices bring harmony or courtly dispute?',
+        ogImage: '/og-medieval.png',
         narrative: [
           'Hear ye, hear ye! The royal court assembles.',
           'Two nobles. One banquet hall. A week of feasts to decree.',
@@ -126,6 +151,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Herald the Banquet'
       },
       'theme-space': {
+        title: 'MISSION: SUSTENANCE',
+        subtitle: 'A deep space meal protocol',
+        ogDescription: 'Mission Control to crew: systems go. Two astronauts, one vessel, seven days of rations. Will you align or drift into the void?',
+        ogImage: '/og-space.png',
         narrative: [
           'Mission Control to crew: systems are go.',
           'Two astronauts. One vessel. Seven days of rations to secure.',
@@ -134,6 +163,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
         buttonText: 'Launch Mission'
       },
       'theme-horror': {
+        title: 'THE CURSED KITCHEN',
+        subtitle: 'A haunted meal quest',
+        ogDescription: 'The mansion groans. Something stirs. Two souls, one haunted week, seven cursed meals. Will you survive together or become ghosts?',
+        ogImage: '/og-horror.png',
         narrative: [
           'The old mansion groans. Something stirs in the shadows.',
           'Two souls. One haunted week. Seven cursed meals await.',
@@ -150,10 +183,22 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
 
     // Apply themed content
     const content = themeContent[randomTheme];
+    document.getElementById('panel-title').textContent = content.title;
+    document.getElementById('panel-subtitle').textContent = content.subtitle;
+    document.querySelector('.header .subtitle').textContent = content.subtitle;
+    document.querySelector('.header .title-link').textContent = `🍽️ ${content.title}`;
     document.getElementById('narrative-1').innerHTML = content.narrative[0];
     document.getElementById('narrative-2').innerHTML = content.narrative[1];
     document.getElementById('narrative-3').innerHTML = content.narrative[2];
     document.querySelector('.btn-primary').textContent = content.buttonText;
+
+    // Update Open Graph tags
+    document.querySelector('meta[property="og:title"]').setAttribute('content', content.title);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', content.ogDescription);
+    document.querySelector('meta[property="og:image"]').setAttribute('content', content.ogImage);
+    document.querySelector('meta[name="twitter:title"]').setAttribute('content', content.title);
+    document.querySelector('meta[name="twitter:description"]').setAttribute('content', content.ogDescription);
+    document.querySelector('meta[name="twitter:image"]').setAttribute('content', content.ogImage);
 
     const form = document.getElementById('setup-form');
 
