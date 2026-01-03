@@ -239,7 +239,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
       // Live validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
-      const validation = validateDraft(state, currentPlayer);
+      const validation = validateDraft(state, currentPlayer, allMeals);
 
       // Check if quest will be completed
       let questComplete = false;
@@ -453,7 +453,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       // Final validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
 
-      const validation = validateDraft(state, currentPlayer);
+      const validation = validateDraft(state, currentPlayer, allMeals);
       if (!validation.valid) {
         alert('Draft is invalid. Please fix errors first.');
         return;
@@ -567,9 +567,9 @@ import GameLayout from '../layouts/GameLayout.astro';
         // Check if we have enough meals
         if (allHarmonies.length >= state.settings.mealCount) {
           // Game complete! Prioritize full harmonies (current round) over partial (previous rounds)
-          // harmonies = current round full harmonies
+          // newHarmoniesFromB = current round full harmonies
           // state.harmoniesSoFar = previous partial harmonies
-          const prioritizedHarmonies = [...harmonies, ...state.harmoniesSoFar];
+          const prioritizedHarmonies = [...newHarmoniesFromB, ...state.harmoniesSoFar];
 
           state = {
             ...state,
@@ -675,7 +675,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       // Update state with current selections
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
 
-      const validation = validateDraft(state, currentPlayer);
+      const validation = validateDraft(state, currentPlayer, allMeals);
       if (!validation.valid) {
         alert('Draft is invalid. Please fix errors first.');
         return;
@@ -757,7 +757,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
         if (allHarmonies.length >= state.settings.mealCount) {
           // Prioritize full harmonies (current round) over partial (previous rounds)
-          const prioritizedHarmonies = [...harmonies, ...state.harmoniesSoFar];
+          const prioritizedHarmonies = [...newHarmoniesFromB, ...state.harmoniesSoFar];
 
           state = {
             ...state,
@@ -818,7 +818,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       // Update state with current selections
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
 
-      const validation = validateDraft(state, currentPlayer);
+      const validation = validateDraft(state, currentPlayer, allMeals);
       if (!validation.valid) {
         alert('Draft is invalid. Please fix errors first.');
         return;
@@ -901,7 +901,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
         if (allHarmonies.length >= state.settings.mealCount) {
           // Prioritize full harmonies (current round) over partial (previous rounds)
-          const prioritizedHarmonies = [...harmonies, ...state.harmoniesSoFar];
+          const prioritizedHarmonies = [...newHarmoniesFromB, ...state.harmoniesSoFar];
 
           state = {
             ...state,

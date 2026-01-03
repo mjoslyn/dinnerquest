@@ -4,9 +4,10 @@ import { getCostPoints, getBudgetPoints } from './gameDataClient.js';
  * Validate a player's draft
  * @param {import('./gameState.js').GameState} state
  * @param {string} playerId - 'A' or 'B'
+ * @param {Array} [allMeals] - Optional array of all meals for looking up harmonies (since they're removed from pool)
  * @returns {{ valid: boolean, errors: string[] }}
  */
-export function validateDraft(state, playerId) {
+export function validateDraft(state, playerId, allMeals = null) {
   const player = state.players[playerId];
   const { settings } = state;
   const errors = [];
@@ -37,8 +38,10 @@ export function validateDraft(state, playerId) {
   }, 0);
 
   // Add cost of harmonies already locked in
+  // Use allMeals if provided (harmonies are removed from pool in later rounds)
+  const mealsForLookup = allMeals || state.pool;
   const harmoniesCost = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
-    const meal = state.pool.find(m => m.id === mealId);
+    const meal = mealsForLookup.find(m => m.id === mealId);
     return sum + (meal ? getCostPoints(meal.cost) : 0);
   }, 0);
 
