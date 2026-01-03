@@ -276,7 +276,9 @@ import GameLayout from '../layouts/GameLayout.astro';
       const cumulativeCost = harmoniesCost + currentPicksCost;
       const cumulativeUsd = harmoniesUsdTotal + currentPicksUsd;
 
-      const totalMealsSecured = state.harmoniesSoFar.length + selectedMeals.size;
+      // Calculate unique meals (deduplicate harmonies and selections)
+      const allMealIds = new Set([...state.harmoniesSoFar, ...Array.from(selectedMeals)]);
+      const totalMealsSecured = allMealIds.size;
       pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
       budgetDisplayEl.innerHTML = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'} <span class="usd-total">($${cumulativeUsd})</span>`;
 
@@ -293,12 +295,12 @@ import GameLayout from '../layouts/GameLayout.astro';
       if (currentPlayer === 'A') {
         const playerBAllPicks = state.playerBAllPicks || [];
         const newHarmonies = Array.from(selectedMeals).filter(mealId => playerBAllPicks.includes(mealId));
-        const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
+        const allHarmonies = [...new Set([...state.harmoniesSoFar, ...newHarmonies])];
         questComplete = allHarmonies.length >= mealCount;
       } else if (currentPlayer === 'B') {
         const playerAPicks = state.players.A.picks;
         const harmonies = Array.from(selectedMeals).filter(mealId => playerAPicks.includes(mealId));
-        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
+        const allHarmonies = [...new Set([...state.harmoniesSoFar, ...harmonies])];
         questComplete = allHarmonies.length >= mealCount;
       }
 
@@ -606,8 +608,10 @@ import GameLayout from '../layouts/GameLayout.astro';
 
         // If we have enough harmonies, game is complete
         if (allHarmonies.length >= state.settings.mealCount) {
-          // Prioritize newest harmonies (newHarmonies) over older ones (harmoniesSoFar)
-          const prioritizedHarmonies = [...newHarmonies, ...state.harmoniesSoFar];
+          // Prioritize locked items and older harmonies first, then new ones
+          // Deduplicate to avoid counting same meal twice
+          const oldHarmonies = state.harmoniesSoFar.filter(id => !newHarmonies.includes(id));
+          const prioritizedHarmonies = [...oldHarmonies, ...newHarmonies];
 
           state = {
             ...state,
@@ -882,8 +886,10 @@ import GameLayout from '../layouts/GameLayout.astro';
 
         // If we have enough harmonies, game is complete
         if (allHarmonies.length >= state.settings.mealCount) {
-          // Prioritize newest harmonies (newHarmonies) over older ones (harmoniesSoFar)
-          const prioritizedHarmonies = [...newHarmonies, ...state.harmoniesSoFar];
+          // Prioritize locked items and older harmonies first, then new ones
+          // Deduplicate to avoid counting same meal twice
+          const oldHarmonies = state.harmoniesSoFar.filter(id => !newHarmonies.includes(id));
+          const prioritizedHarmonies = [...oldHarmonies, ...newHarmonies];
 
           state = {
             ...state,

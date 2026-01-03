@@ -123,8 +123,7 @@ import GameLayout from '../layouts/GameLayout.astro';
         </div>
       `).join('');
 
-      // Calculate total cost
-      const peopleCount = 2;
+      // Calculate total cost (prices already for 2 people)
       const totalUSD = finalMenuIds.reduce((sum, id) => {
         let meal;
         if (typeof id === 'string' && id.startsWith('takeout-')) {
@@ -134,10 +133,9 @@ import GameLayout from '../layouts/GameLayout.astro';
         }
         return sum + (meal?.estimatedPrice || 30); // $30 fallback
       }, 0);
-      const totalCost = totalUSD * peopleCount;
 
       document.getElementById('cost-breakdown').innerHTML =
-        `$${totalUSD.toFixed(2)} × ${peopleCount} people = <strong>$${totalCost.toFixed(2)}</strong>`;
+        `<strong>$${totalUSD.toFixed(2)}</strong> for 2 people`;
 
       // Fetch and render shopping list
       const mealIdsForShopping = finalMeals.map(m => m.id).join(',');

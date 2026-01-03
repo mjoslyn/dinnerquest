@@ -12,10 +12,12 @@ export function validateDraft(state, playerId, allMeals = null) {
   const { settings } = state;
   const errors = [];
 
-  // Check meal count (at least mealCount minus harmonies already secured)
-  const mealsNeeded = settings.mealCount - (state.harmoniesSoFar?.length || 0);
-  if (player.picks.length < mealsNeeded) {
-    errors.push(`Must pick at least ${mealsNeeded} meals`);
+  // Check meal count (deduplicate harmonies and picks to avoid counting partial harmonies twice)
+  const harmonies = state.harmoniesSoFar || [];
+  const totalUniqueMeals = new Set([...harmonies, ...player.picks]);
+  const mealsNeeded = settings.mealCount - totalUniqueMeals.size;
+  if (mealsNeeded > 0) {
+    errors.push(`Must pick at least ${mealsNeeded} more meals`);
   }
 
   // Check all picks are in pool
