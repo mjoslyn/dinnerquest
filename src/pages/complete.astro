@@ -66,6 +66,23 @@ import GameLayout from '../layouts/GameLayout.astro';
       document.body.className = state.theme;
     }
 
+    // Update subtitle based on theme
+    const themeSubtitles = {
+      'theme-fantasy': 'A culinary adventure',
+      'theme-cyberpunk': 'A meal planning simulation',
+      'theme-western': 'A meal wrangling game',
+      'theme-noir': 'A culinary mystery',
+      'theme-pirate': 'A meal treasure hunt',
+      'theme-medieval': 'A royal banquet quest',
+      'theme-space': 'A deep space meal protocol',
+      'theme-horror': 'A haunted meal quest'
+    };
+    const currentTheme = state.theme || 'theme-fantasy';
+    const subtitleEl = document.querySelector('.header .subtitle');
+    if (subtitleEl && themeSubtitles[currentTheme]) {
+      subtitleEl.textContent = themeSubtitles[currentTheme];
+    }
+
     // Fetch all meals and render
     async function initializePage() {
       const allMeals = await getAllMeals();

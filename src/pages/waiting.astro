@@ -74,6 +74,23 @@ import GameLayout from '../layouts/GameLayout.astro';
     // Apply theme from state (fallback to default if not set)
     document.body.className = state.theme || 'theme-fantasy';
 
+    // Update subtitle based on theme
+    const themeSubtitles = {
+      'theme-fantasy': 'A culinary adventure',
+      'theme-cyberpunk': 'A meal planning simulation',
+      'theme-western': 'A meal wrangling game',
+      'theme-noir': 'A culinary mystery',
+      'theme-pirate': 'A meal treasure hunt',
+      'theme-medieval': 'A royal banquet quest',
+      'theme-space': 'A deep space meal protocol',
+      'theme-horror': 'A haunted meal quest'
+    };
+    const currentTheme = state.theme || 'theme-fantasy';
+    const subtitleEl = document.querySelector('.header .subtitle');
+    if (subtitleEl && themeSubtitles[currentTheme]) {
+      subtitleEl.textContent = themeSubtitles[currentTheme];
+    }
+
     // Set player name in title
     const player = state.players[currentPlayer];
     const playerName = player?.name || state.playerBName || currentPlayer;

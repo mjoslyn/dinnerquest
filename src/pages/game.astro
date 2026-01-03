@@ -71,6 +71,23 @@ import GameLayout from '../layouts/GameLayout.astro';
       document.body.className = 'theme-fantasy';
     }
 
+    // Update subtitle based on theme
+    const themeSubtitles = {
+      'theme-fantasy': 'A culinary adventure',
+      'theme-cyberpunk': 'A meal planning simulation',
+      'theme-western': 'A meal wrangling game',
+      'theme-noir': 'A culinary mystery',
+      'theme-pirate': 'A meal treasure hunt',
+      'theme-medieval': 'A royal banquet quest',
+      'theme-space': 'A deep space meal protocol',
+      'theme-horror': 'A haunted meal quest'
+    };
+    const currentTheme = state?.theme || 'theme-fantasy';
+    const subtitleEl = document.querySelector('.header .subtitle');
+    if (subtitleEl && themeSubtitles[currentTheme]) {
+      subtitleEl.textContent = themeSubtitles[currentTheme];
+    }
+
     // Track takeout meals (id -> meal object) for cost calculations
     // Restore from state if available (persists across rounds)
     const takeoutMeals = new Map();
@@ -125,6 +142,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     const openLinkBtn = document.getElementById('open-link-btn');
     const copyLinkBtn = document.getElementById('copy-link-btn');
     const shareMessage = document.getElementById('share-message');
+    const draftActions = document.querySelector('.draft-actions');
 
     // Calculate cost of harmonies (already spent)
     // Fetch all meals since harmonies are removed from pool in later rounds
@@ -285,10 +303,12 @@ import GameLayout from '../layouts/GameLayout.astro';
         lockBtn.disabled = false;
         openLinkBtn.disabled = false;
         copyLinkBtn.disabled = false;
+        draftActions.classList.add('visible');
       } else {
         lockBtn.disabled = true;
         openLinkBtn.disabled = true;
         copyLinkBtn.disabled = true;
+        draftActions.classList.remove('visible');
       }
     }
 
@@ -711,6 +731,61 @@ import GameLayout from '../layouts/GameLayout.astro';
             newPool = [...newPool, ...filteredNewMeals];
           }
 
+          // Refresh upgrades for next round - replace used upgrades with new ones
+          const theme = state.theme || 'theme-fantasy';
+          const allUpgradesPool = await getAllUpgrades();
+
+          // Helper function to refresh a player's upgrades
+          const refreshPlayerUpgrades = (player) => {
+            if (!player?.upgrades) return player;
+
+            const newUpgrades = [...player.upgrades];
+            const usedIndices = [];
+
+            // Find which upgrades have been permanently used
+            player.upgrades.forEach((upgrade, index) => {
+              if (upgrade.type === 'theme' && player.usedThemeId === upgrade.id) {
+                usedIndices.push(index);
+              } else if (upgrade.type === 'lock' && player.usedLockId === upgrade.id) {
+                usedIndices.push(index);
+              } else if (upgrade.type === 'takeout' && player.usedTakeoutId === upgrade.id) {
+                usedIndices.push(index);
+              }
+            });
+
+            // Replace used upgrades with new random ones
+            usedIndices.forEach(index => {
+              // Get IDs of upgrades we already have
+              const existingIds = new Set(newUpgrades.map(u => u.id));
+
+              // Filter available upgrades to exclude what we already have
+              const availableUpgrades = allUpgradesPool.filter(u => {
+                if (existingIds.has(u.id)) return false;
+                // For non-theme upgrades, match the current theme
+                if (u.type !== 'theme') {
+                  const themeName = theme.replace('theme-', '');
+                  return u.id.endsWith(`-${themeName}`);
+                }
+                // Include all theme upgrades
+                return true;
+              });
+
+              // Pick a random new upgrade
+              if (availableUpgrades.length > 0) {
+                const randomUpgrade = availableUpgrades[Math.floor(Math.random() * availableUpgrades.length)];
+                newUpgrades[index] = randomUpgrade;
+              }
+            });
+
+            return {
+              ...player,
+              upgrades: newUpgrades,
+              // Clear theme usage tracking for new round
+              usedThemeRound: undefined,
+              usedThemeId: undefined
+            };
+          };
+
           // Unlock players and clear their picks for next round
           state = {
             ...state,
@@ -722,8 +797,8 @@ import GameLayout from '../layouts/GameLayout.astro';
             playerAAllPicks: playerAAllPicks,
             playerBAllPicks: playerBAllPicks,
             players: {
-              A: { ...state.players.A, picks: [], locked: false },
-              B: { ...state.players.B, picks: [], locked: false }
+              A: refreshPlayerUpgrades({ ...state.players.A, picks: [], locked: false }),
+              B: refreshPlayerUpgrades({ ...state.players.B, picks: [], locked: false })
             }
           };
 
@@ -1504,6 +1579,9 @@ import GameLayout from '../layouts/GameLayout.astro';
         }
       });
     }
+
+    // Initial display update to show correct meal count including locked items and takeout
+    updateDisplays();
   </script>
 
   <style is:global>
@@ -1550,6 +1628,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin: 20px 0;
+      padding-bottom: 320px;
     }
 
     @media (max-width: 768px) {
@@ -2330,9 +2409,28 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .draft-actions {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      max-width: 700px;
+      width: 100%;
       display: flex;
       gap: 12px;
-      margin-top: 20px;
+      padding: 20px;
+      background: var(--bg-dark);
+      border-top: 3px solid var(--border);
+      transition: transform 0.3s ease-out, border-color 0.3s;
+      z-index: 100;
+    }
+
+    .draft-actions.visible {
+      transform: translateX(-50%) translateY(0);
+      border-top-color: var(--accent);
+    }
+
+    .narrative {
+      margin-bottom: 320px;
     }
 
     .share-message {
