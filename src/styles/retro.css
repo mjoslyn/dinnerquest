@@ -502,3 +502,215 @@ body {
 /* Hide screens by default */
 .screen { display: none; }
 .screen.active { display: block; }
+
+/* ========================================
+   THEME STYLES
+   ======================================== */
+
+/* FANTASY - Epic Quest ⚔️ */
+body.theme-fantasy {
+  --bg-dark: #2a1a3a;
+  --bg-panel: #3a2a4a;
+  --border: #6a4a8a;
+  --text: #f0e0ff;
+  --text-dim: #a080c0;
+  --accent: #d4a0ff;
+  --accent-glow: #d4a0ff66;
+  --success: #80d480;
+  --danger: #ff6080;
+  --purple: #d4a0ff;
+}
+
+body.theme-fantasy .title {
+  text-shadow: 0 0 30px #d4a0ff, 0 0 60px #d4a0ff;
+}
+
+body.theme-fantasy .panel::before {
+  background: linear-gradient(90deg, transparent, #d4a0ff, transparent);
+}
+
+/* CYBERPUNK - Neon Nights 🌃 */
+body.theme-cyberpunk {
+  --bg-dark: #0a0a1a;
+  --bg-panel: #1a1a2a;
+  --border: #00ffff;
+  --text: #00ffff;
+  --text-dim: #0080a0;
+  --accent: #ff00ff;
+  --accent-glow: #ff00ff66;
+  --success: #00ff00;
+  --danger: #ff0080;
+  --purple: #ff00ff;
+}
+
+body.theme-cyberpunk .title {
+  text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff, 0 2px 0 #ff00ff;
+  animation: flicker 3s ease-in-out infinite;
+}
+
+body.theme-cyberpunk .panel {
+  box-shadow: 0 0 20px #00ffff33;
+}
+
+body.theme-cyberpunk .panel::before {
+  background: linear-gradient(90deg, transparent, #00ffff, #ff00ff, transparent);
+}
+
+/* WESTERN - Frontier Feast 🤠 */
+body.theme-western {
+  --bg-dark: #2a1a0a;
+  --bg-panel: #3a2a1a;
+  --border: #8a6a4a;
+  --text: #f0e0d0;
+  --text-dim: #a08060;
+  --accent: #d4a060;
+  --accent-glow: #d4a06044;
+  --success: #80c060;
+  --danger: #c04040;
+  --purple: #c08060;
+}
+
+body.theme-western .title {
+  font-style: italic;
+  text-shadow: 2px 2px 0 #1a0a00;
+}
+
+body.theme-western .panel {
+  border-style: double;
+  border-width: 3px;
+}
+
+/* NOIR - Case Files 🕵️ */
+body.theme-noir {
+  --bg-dark: #0a0a0a;
+  --bg-panel: #1a1a1a;
+  --border: #4a4a4a;
+  --text: #f0f0f0;
+  --text-dim: #808080;
+  --accent: #ff4040;
+  --accent-glow: #ff404044;
+  --success: #60c060;
+  --danger: #ff4040;
+  --purple: #c0c0c0;
+}
+
+body.theme-noir {
+  filter: contrast(1.2);
+}
+
+body.theme-noir .title {
+  text-shadow: 3px 3px 0 #000000;
+  letter-spacing: 4px;
+}
+
+body.theme-noir .panel {
+  box-shadow: 8px 8px 0 #00000044;
+}
+
+/* PIRATE - High Seas 🏴‍☠️ */
+body.theme-pirate {
+  --bg-dark: #0a1a2a;
+  --bg-panel: #1a2a3a;
+  --border: #4a6a8a;
+  --text: #f0f0e0;
+  --text-dim: #8090a0;
+  --accent: #ffd700;
+  --accent-glow: #ffd70066;
+  --success: #60d4a0;
+  --danger: #c04040;
+  --purple: #6080c0;
+}
+
+body.theme-pirate .title {
+  text-shadow: 0 0 20px #ffd700;
+  transform: rotate(-2deg);
+}
+
+body.theme-pirate .panel::before {
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 10px,
+    #ffd700 10px,
+    #ffd700 12px
+  );
+}
+
+/* MEDIEVAL - Royal Banquet 👑 */
+body.theme-medieval {
+  --bg-dark: #1a0a1a;
+  --bg-panel: #2a1a2a;
+  --border: #8a6a4a;
+  --text: #f0e0d0;
+  --text-dim: #a08070;
+  --accent: #ffd700;
+  --accent-glow: #ffd70066;
+  --success: #60c080;
+  --danger: #c04060;
+  --purple: #8060c0;
+}
+
+body.theme-medieval .title {
+  text-shadow: 0 0 30px #ffd700;
+  font-style: italic;
+}
+
+body.theme-medieval .panel {
+  border-style: double;
+  border-width: 4px;
+  box-shadow: inset 0 0 20px #00000033;
+}
+
+/* SPACE - Cosmic Voyage 🚀 */
+body.theme-space {
+  --bg-dark: #000010;
+  --bg-panel: #0a0a20;
+  --border: #4060a0;
+  --text: #e0e0ff;
+  --text-dim: #6080c0;
+  --accent: #60a0ff;
+  --accent-glow: #60a0ff66;
+  --success: #40d480;
+  --danger: #ff4060;
+  --purple: #a060ff;
+}
+
+body.theme-space {
+  background: radial-gradient(circle at center, #000020 0%, #000000 100%);
+}
+
+body.theme-space .title {
+  text-shadow: 0 0 40px #60a0ff, 0 0 80px #60a0ff;
+}
+
+body.theme-space .panel::before {
+  background: linear-gradient(90deg, transparent, #60a0ff, #a060ff, transparent);
+}
+
+/* HORROR - Midnight Manor 🦇 */
+body.theme-horror {
+  --bg-dark: #1a0a0a;
+  --bg-panel: #2a1a1a;
+  --border: #6a2a2a;
+  --text: #f0d0d0;
+  --text-dim: #a06060;
+  --accent: #ff4040;
+  --accent-glow: #ff404066;
+  --success: #60a060;
+  --danger: #ff4040;
+  --purple: #c04080;
+}
+
+body.theme-horror .title {
+  text-shadow: 0 0 40px #ff4040, 0 0 20px #000000;
+  animation: flicker 5s ease-in-out infinite;
+}
+
+body.theme-horror .panel {
+  box-shadow: inset 0 0 30px #00000066, 0 0 20px #ff404033;
+}
+
+body.theme-horror .panel::before {
+  background: linear-gradient(90deg, transparent, #ff4040, transparent);
+  animation: pulse 3s ease-in-out infinite;
+}
