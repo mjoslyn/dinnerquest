@@ -2,7 +2,7 @@
 import GameLayout from '../layouts/GameLayout.astro';
 import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
 import { createInitialState } from '../lib/gameState.js';
-import { getRandomUpgrades } from '../lib/gameData.js';
+import { getRandomUpgrades, getThemedPlayerNames } from '../lib/gameData.js';
 
 export const prerender = false;
 
@@ -14,14 +14,15 @@ const mealCountParam = params.get('mealCount');
 const budgetCapParam = params.get('budgetCap');
 
 if (mealCountParam && budgetCapParam) {
-  // New game from index page - create initial state
+  // New game from index page - create initial state with themed names
   const settings = {
     mealCount: parseInt(mealCountParam),
     budgetCap: budgetCapParam,
     allergies: params.get('allergies') ? params.get('allergies').split(',').filter(Boolean) : []
   };
   const theme = params.get('theme') || 'theme-fantasy';
-  state = createInitialState('', settings, theme);
+  const themedNames = getThemedPlayerNames(theme);
+  state = createInitialState(themedNames.A, settings, theme, themedNames.B);
 
   // Redirect to waiting page with encoded state
   const encoded = encodeGameState(state);
@@ -51,23 +52,9 @@ const upgrades = await getRandomUpgrades(2);
 
 <GameLayout>
   <div class="panel">
-    <div class="panel-title">{player?.name || currentPlayer} - CHOOSE YOUR PATH</div>
+    <div class="panel-title">{player?.name || state.playerBName || currentPlayer} - CHOOSE YOUR PATH</div>
 
       <form id="player-setup-form" class="player-setup">
-        {!player?.name && (
-          <div class="form-section">
-            <label class="form-label">Your Name</label>
-            <input
-              type="text"
-              name="playerName"
-              id="player-name-input"
-              class="name-input"
-              placeholder="Enter your name"
-              required
-            />
-          </div>
-        )}
-
         <div class="form-section">
           <label class="form-label">Diet Preference</label>
           <div class="diet-slider-container">
@@ -185,16 +172,10 @@ const upgrades = await getRandomUpgrades(2);
 
         const formData = new FormData(form);
         const dietPref = parseInt(formData.get('dietPreference'));
-        const playerName = formData.get('playerName');
 
-        // If Player B is joining for the first time, add them to state
-        if (playerName && currentPlayer === 'B' && !state.players.B) {
-          state = addPlayerB(state, playerName);
-        }
-
-        // Update name if provided for Player A on first setup
-        if (playerName && currentPlayer === 'A' && state.players.A && !state.players.A.name) {
-          state = { ...state, players: { ...state.players, A: { ...state.players.A, name: playerName } } };
+        // If Player B is joining for the first time, add them to state with their themed name
+        if (currentPlayer === 'B' && !state.players.B) {
+          state = addPlayerB(state); // Uses state.playerBName automatically
         }
 
         // Update state with preferences
@@ -307,22 +288,6 @@ const upgrades = await getRandomUpgrades(2);
       font-family: 'Press Start 2P', monospace;
       font-size: 14px;
       color: var(--primary);
-    }
-
-    .name-input {
-      width: 100%;
-      padding: 12px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 16px;
-      background: var(--bg-dark);
-      border: 2px solid var(--border);
-      color: var(--text);
-      transition: border-color 0.2s;
-    }
-
-    .name-input:focus {
-      outline: none;
-      border-color: var(--primary);
     }
 
     .diet-slider-container {

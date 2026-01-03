@@ -51,12 +51,13 @@ import { generateId } from './urlCodec.js';
 
 /**
  * Create initial game state with settings
- * @param {string} playerName
+ * @param {string} playerAName - Name for Player A
  * @param {GameSettings} settings
  * @param {string} [theme] - Optional theme class name
+ * @param {string} [playerBName] - Name for Player B (auto-generated themed name)
  * @returns {GameState}
  */
-export function createInitialState(playerName, settings, theme) {
+export function createInitialState(playerAName, settings, theme, playerBName) {
   const gameId = generateId();
 
   return {
@@ -64,7 +65,7 @@ export function createInitialState(playerName, settings, theme) {
     settings,
     players: {
       A: {
-        name: playerName,
+        name: playerAName,
         dietPreference: 3,
         upgrades: [],
         picks: [],
@@ -80,23 +81,25 @@ export function createInitialState(playerName, settings, theme) {
     usedMeals: [],
     playerAAllPicks: [],
     playerBAllPicks: [],
-    ...(theme && { theme })
+    ...(theme && { theme }),
+    ...(playerBName && { playerBName }) // Store Player B's name for when they join
   };
 }
 
 /**
  * Add player B to existing game
  * @param {GameState} state
- * @param {string} playerName
+ * @param {string} [playerName] - Optional name override (uses state.playerBName if not provided)
  * @returns {GameState}
  */
 export function addPlayerB(state, playerName) {
+  const name = playerName || state.playerBName || 'Player B';
   return {
     ...state,
     players: {
       ...state.players,
       B: {
-        name: playerName,
+        name,
         dietPreference: 3,
         upgrades: [],
         picks: [],
