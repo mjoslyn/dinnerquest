@@ -1088,6 +1088,150 @@ const senderName = player?.name || `Player ${currentPlayer}`;
           return;
         }
 
+        // Handle redraw upgrades
+        if (upgrade.type === 'redraw') {
+          // Save original pool for undo
+          const originalPool = [...state.pool];
+          const originalPoolCards = document.querySelector('.meal-pool').innerHTML;
+
+          // Get partial harmony IDs (other player's picks that aren't harmonized yet)
+          const otherPlayerAllPicks = currentPlayer === 'A'
+            ? (state.playerBAllPicks || [])
+            : (state.playerAAllPicks || []);
+          const partialHarmonyIds = otherPlayerAllPicks.filter(id => !state.harmoniesSoFar.includes(id));
+
+          // Keep partial harmonies in the pool
+          const mealsToKeep = state.pool.filter(meal => partialHarmonyIds.includes(meal.id));
+          const mealsToKeepIds = new Set(mealsToKeep.map(m => m.id));
+
+          // Calculate how many new meals we need
+          const targetPoolSize = (state.settings.mealCount - (state.harmoniesSoFar?.length || 0)) * 5;
+          const mealsNeeded = targetPoolSize - mealsToKeep.length;
+
+          // Fetch new meals
+          const avgDiet = (state.players.A?.dietPreference || 3 + state.players.B?.dietPreference || 3) / 2;
+          const newMeals = await getRandomMeals(mealsNeeded + 10, state.settings.allergies || [], avgDiet);
+
+          // Filter out meals we're keeping and already used meals
+          const usedMealIds = new Set([
+            ...mealsToKeepIds,
+            ...(state.harmoniesSoFar || []),
+            ...(state.usedMeals || [])
+          ]);
+          const filteredNewMeals = newMeals.filter(m => !usedMealIds.has(m.id)).slice(0, mealsNeeded);
+
+          // Create new pool
+          const newPool = [...mealsToKeep, ...filteredNewMeals];
+          state = { ...state, pool: newPool };
+
+          // Clear current selections (since pool is changing)
+          selectedMeals.clear();
+
+          // Update the meal pool UI
+          const mealPoolEl = document.querySelector('.meal-pool');
+          mealPoolEl.innerHTML = '';
+
+          for (const meal of newPool) {
+            const isPartial = partialHarmonyIds.includes(meal.id);
+            const mealCard = document.createElement('div');
+            mealCard.className = 'meal-card';
+            mealCard.dataset.mealId = meal.id;
+            mealCard.dataset.cost = getCostPoints(meal.cost);
+            mealCard.dataset.usd = meal.estimatedPrice || 0;
+            mealCard.dataset.partial = isPartial ? 'true' : 'false';
+            mealCard.innerHTML = `
+              <div class="meal-header">
+                <span class="meal-emoji">${meal.emoji}</span>
+                ${isPartial ? '<span class="partner-pick-star">✨</span>' : ''}
+              </div>
+              <div class="meal-name">${meal.name}</div>
+              <div class="meal-cost">${meal.cost}</div>
+              ${isPartial ? '<div class="partial-harmony-badge">Partial Harmony</div>' : ''}
+              <div class="meal-meta">
+                <span>${meal.time}min</span>
+                <span>${meal.cuisine}</span>
+              </div>
+            `;
+
+            // Add click handler
+            mealCard.addEventListener('click', () => {
+              const mealId = parseInt(mealCard.dataset.mealId);
+
+              // Handle lock selection mode
+              if (isSelectingToLock && activeLockUpgrade) {
+                // Same lock logic as before
+                return;
+              }
+
+              if (mealCard.classList.contains('locked')) return;
+
+              if (selectedMeals.has(mealId)) {
+                selectedMeals.delete(mealId);
+                mealCard.classList.remove('selected');
+              } else {
+                selectedMeals.add(mealId);
+                mealCard.classList.add('selected');
+              }
+              updateDisplays();
+            });
+
+            mealPoolEl.appendChild(mealCard);
+          }
+
+          // Disable the upgrade button
+          btn.disabled = true;
+          btn.textContent = '✓ Used';
+
+          // Create undo button
+          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
+          if (upgradeCard) {
+            const undoBtn = document.createElement('button');
+            undoBtn.className = 'btn-undo-lock';
+            undoBtn.textContent = upgrade.undoText || 'Undo';
+            undoBtn.addEventListener('click', () => {
+              // Restore original pool
+              state = { ...state, pool: originalPool };
+
+              // Clear selections
+              selectedMeals.clear();
+
+              // Restore original pool UI
+              mealPoolEl.innerHTML = originalPoolCards;
+
+              // Re-attach click handlers to restored cards
+              document.querySelectorAll('.meal-card').forEach(card => {
+                card.addEventListener('click', () => {
+                  const mealId = parseInt(card.dataset.mealId);
+
+                  if (isSelectingToLock && activeLockUpgrade) return;
+                  if (card.classList.contains('locked')) return;
+
+                  if (selectedMeals.has(mealId)) {
+                    selectedMeals.delete(mealId);
+                    card.classList.remove('selected');
+                  } else {
+                    selectedMeals.add(mealId);
+                    card.classList.add('selected');
+                  }
+                  updateDisplays();
+                });
+              });
+
+              undoBtn.remove();
+
+              // Re-enable the upgrade button
+              btn.disabled = false;
+              btn.textContent = 'Use';
+
+              updateDisplays();
+            });
+            upgradeCard.appendChild(undoBtn);
+          }
+
+          updateDisplays();
+          return;
+        }
+
         // Handle theme upgrades - one theme per round
         if (upgrade.type === 'theme') {
           if (player.usedThemeRound === state.currentRound) {

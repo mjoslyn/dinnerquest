@@ -105,16 +105,19 @@ export async function getRandomUpgrades(count = 2) {
   const selected = [];
   let hasTakeout = false;
   let hasLock = false;
+  let hasRedraw = false;
 
   for (const upgrade of shuffled) {
     // Skip if we already have max of this type
     if (upgrade.type === 'takeout' && hasTakeout) continue;
     if (upgrade.type === 'lock' && hasLock) continue;
+    if (upgrade.type === 'redraw' && hasRedraw) continue;
 
     selected.push(upgrade);
 
     if (upgrade.type === 'takeout') hasTakeout = true;
     if (upgrade.type === 'lock') hasLock = true;
+    if (upgrade.type === 'redraw') hasRedraw = true;
 
     if (selected.length >= count) break;
   }
