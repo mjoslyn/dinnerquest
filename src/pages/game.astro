@@ -1482,6 +1482,14 @@ import GameLayout from '../layouts/GameLayout.astro';
       line-height: 1.4;
     }
 
+    @media (max-width: 768px) {
+      .btn-undo-lock {
+        margin-top: 6px;
+        padding: 6px;
+        font-size: 10px;
+      }
+    }
+
     .btn-undo-lock:hover {
       opacity: 0.9;
       transform: translateY(-2px);
@@ -1628,7 +1636,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     .upgrades-section {
       margin: 20px 0;
-      padding: 16px;
+      padding: 12px;
       background: var(--bg-dark);
       border: 2px solid var(--accent);
     }
@@ -1646,6 +1654,34 @@ import GameLayout from '../layouts/GameLayout.astro';
       gap: 12px;
     }
 
+    @media (max-width: 768px) {
+      .upgrades-section {
+        padding: 10px;
+      }
+
+      .upgrades-grid {
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+      }
+
+      .upgrades-grid::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .upgrades-grid::-webkit-scrollbar-track {
+        background: var(--bg-panel);
+      }
+
+      .upgrades-grid::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 3px;
+      }
+    }
+
     .upgrade-card {
       padding: 16px;
       background: var(--bg-panel);
@@ -1654,6 +1690,16 @@ import GameLayout from '../layouts/GameLayout.astro';
       flex-direction: column;
       gap: 8px;
       transition: all 0.2s;
+    }
+
+    @media (max-width: 768px) {
+      .upgrade-card {
+        min-width: 160px;
+        max-width: 180px;
+        flex-shrink: 0;
+        padding: 12px;
+        gap: 6px;
+      }
     }
 
     .upgrade-card:hover {
@@ -1704,6 +1750,12 @@ import GameLayout from '../layouts/GameLayout.astro';
       text-align: center;
     }
 
+    @media (max-width: 768px) {
+      .upgrade-emoji {
+        font-size: 24px;
+      }
+    }
+
     .upgrade-name {
       font-size: 14px;
       font-weight: bold;
@@ -1711,11 +1763,28 @@ import GameLayout from '../layouts/GameLayout.astro';
       color: var(--accent);
     }
 
+    @media (max-width: 768px) {
+      .upgrade-name {
+        font-size: 12px;
+      }
+    }
+
     .upgrade-effect {
       font-size: 14px;
       color: var(--text-dim);
       text-align: center;
       line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .upgrade-effect {
+        font-size: 12px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
     }
 
     .btn-use-upgrade {
@@ -1736,6 +1805,14 @@ import GameLayout from '../layouts/GameLayout.astro';
       width: 100%;
       box-sizing: border-box;
       line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+      .btn-use-upgrade {
+        margin-top: 6px;
+        padding: 6px;
+        font-size: 10px;
+      }
     }
 
     .btn-use-upgrade:hover:not(:disabled) {
