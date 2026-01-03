@@ -309,7 +309,7 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
   <style>
     .final-menu h2 {
       font-size: 14px;
-      color: var(--primary);
+      color: var(--accent);
       margin-bottom: 16px;
       text-align: center;
     }
@@ -327,7 +327,13 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       gap: 16px;
       padding: 16px;
       background: var(--bg-dark);
-      border: 2px solid var(--primary);
+      border: 2px solid var(--accent);
+      transition: all 0.2s;
+    }
+
+    .menu-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .menu-emoji {
@@ -357,7 +363,7 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
 
     .shopping-list-section h3 {
       font-size: 14px;
-      color: var(--primary);
+      color: var(--accent);
       margin-bottom: 16px;
       text-align: center;
     }
@@ -382,7 +388,7 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
 
     .add-item-input:focus {
       outline: none;
-      border-color: var(--primary);
+      border-color: var(--accent);
     }
 
     .add-item-input::placeholder {
@@ -418,9 +424,9 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
     .share-message {
       margin-bottom: 16px;
       padding: 12px;
-      background: var(--bg-dark);
-      border: 2px solid var(--primary);
-      color: var(--primary);
+      background: var(--bg-panel);
+      border: 2px solid var(--accent);
+      color: var(--accent);
       font-size: 12px;
       text-align: center;
     }
@@ -428,14 +434,14 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
     .grocery-section {
       margin-bottom: 20px;
       padding: 16px;
-      background: var(--bg-dark);
+      background: var(--bg-panel);
       border: 2px solid var(--border);
     }
 
     .section-header {
       font-size: 13px;
       font-weight: bold;
-      color: var(--primary);
+      color: var(--accent);
       margin-bottom: 8px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
@@ -475,14 +481,15 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       align-items: center;
       gap: 8px;
       padding: 8px;
-      background: var(--bg);
+      background: var(--bg-dark);
       font-size: 12px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
 
     .ingredient-item:hover {
-      background: var(--bg-dark);
+      background: var(--bg-panel);
+      transform: translateX(4px);
     }
 
     .ingredient-item input[type="checkbox"] {
@@ -514,7 +521,7 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
     }
 
     .item-text:hover {
-      color: var(--primary);
+      color: var(--accent);
     }
 
     .edit-item-input {
@@ -523,13 +530,14 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       font-family: 'VT323', monospace;
       font-size: 12px;
       background: var(--bg-dark);
-      border: 1px solid var(--primary);
+      border: 1px solid var(--accent);
       color: var(--text);
     }
 
     .edit-item-input:focus {
       outline: none;
       border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
     }
 
     .delete-btn {
@@ -572,22 +580,28 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
     }
 
     .btn-primary {
-      background: var(--primary);
-      color: var(--bg);
+      background: var(--accent);
+      color: var(--bg-dark);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
+      background: var(--accent);
+      opacity: 0.9;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px var(--accent-glow);
     }
 
     .btn-secondary {
-      background: var(--bg-dark);
-      border: 2px solid var(--border);
-      color: var(--text);
+      background: var(--accent);
+      color: var(--bg-dark);
+      border: none;
     }
 
     .btn-secondary:hover {
-      border-color: var(--primary);
+      background: var(--accent);
+      opacity: 0.9;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px var(--accent-glow);
     }
   </style>
 </GameLayout>

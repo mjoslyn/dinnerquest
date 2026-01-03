@@ -819,7 +819,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
 
     .meal-card {
       padding: 12px;
-      background: var(--bg-dark);
+      background: var(--bg-panel);
       border: 2px solid var(--border);
       cursor: pointer;
       transition: all 0.2s;
@@ -829,13 +829,18 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .meal-card:hover {
-      border-color: var(--primary-dim);
+      border-color: var(--accent);
+      opacity: 0.9;
       transform: translateY(-2px);
     }
 
     .meal-card.selected {
-      border-color: var(--primary);
-      background: var(--primary-dim);
+      border-color: var(--accent);
+      border-width: 3px;
+      background: var(--bg-dark);
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      z-index: 10;
     }
 
     .meal-header {
@@ -866,12 +871,16 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .meal-card[data-partial="true"] {
-      background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.1) 100%);
+      background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(160, 96, 240, 0.15) 100%);
     }
 
     .meal-card[data-partial="true"].selected {
-      border-color: var(--primary);
-      background: linear-gradient(135deg, var(--primary-dim) 0%, rgba(160, 96, 240, 0.2) 100%);
+      border-color: var(--accent);
+      border-width: 3px;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.1) 100%);
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      z-index: 10;
     }
 
     .meal-name {
@@ -1039,12 +1048,15 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .btn-primary {
-      background: var(--primary);
-      color: var(--bg);
+      background: var(--accent);
+      color: var(--bg-dark);
     }
 
     .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
+      background: var(--accent);
+      opacity: 0.9;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px var(--accent-glow);
     }
 
     .btn-primary:disabled {
@@ -1053,13 +1065,14 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .btn-secondary {
-      background: var(--bg-dark);
+      background: var(--bg-panel);
       border: 2px solid var(--border);
       color: var(--text);
     }
 
     .btn-secondary:hover:not(:disabled) {
-      border-color: var(--primary);
+      border-color: var(--accent);
+      transform: translateY(-2px);
     }
 
     .btn-secondary:disabled {
@@ -1073,6 +1086,18 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       width: 52px;
       padding: 16px 12px;
       font-size: 18px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border: none;
+    }
+
+    #open-link-btn:hover:not(:disabled),
+    #copy-link-btn:hover:not(:disabled) {
+      background: var(--accent);
+      opacity: 0.9;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px var(--accent-glow);
+      border-color: var(--accent);
     }
   </style>
 </GameLayout>

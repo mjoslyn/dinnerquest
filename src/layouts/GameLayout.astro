@@ -45,11 +45,25 @@ const ogTitle = senderName && currentRound
 <body>
   <div class="container">
     <header class="header">
-      <h1 class="title">🍽️ DINNER QUEST</h1>
+      <h1 class="title"><a href="/" class="title-link">🍽️ DINNER QUEST</a></h1>
       <p class="subtitle">A meal planning roguelike</p>
     </header>
 
     <slot />
   </div>
+
+  <style>
+    .title-link {
+      color: inherit;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .title-link:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+  </style>
 </body>
 </html>

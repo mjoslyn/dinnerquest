@@ -138,17 +138,21 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
       gap: 8px;
       padding: 16px;
       border: 2px solid var(--border);
-      background: var(--bg-dark);
+      background: var(--bg-panel);
       transition: all 0.2s;
     }
 
     .option-card input[type="radio"]:checked + .option-content {
-      border-color: var(--primary);
-      background: var(--primary-dim);
+      border-color: var(--accent);
+      border-width: 3px;
+      background: var(--bg-dark);
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     }
 
     .option-card:hover .option-content {
       border-color: var(--primary-dim);
+      transform: translateY(-2px);
     }
 
     .option-number {
@@ -185,26 +189,36 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
       align-items: center;
       gap: 8px;
       padding: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      background: var(--bg-panel);
       cursor: pointer;
       font-size: 12px;
+      transition: all 0.2s;
     }
 
     .allergen-checkbox input[type="checkbox"]:checked {
-      accent-color: var(--primary);
+      accent-color: var(--accent);
+    }
+
+    .allergen-checkbox:has(input[type="checkbox"]:checked) {
+      border-color: var(--accent);
+      border-width: 3px;
+      background: var(--bg-dark);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     .allergen-checkbox:hover {
       border-color: var(--primary-dim);
+      transform: translateY(-2px);
     }
 
     .btn-primary {
       margin-top: 20px;
       padding: 16px;
       font-size: 14px;
-      background: var(--primary);
-      color: var(--bg);
+      background: var(--accent);
+      color: var(--bg-dark);
       border: none;
       cursor: pointer;
       font-family: 'Press Start 2P', monospace;
@@ -212,8 +226,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
     }
 
     .btn-primary:hover {
-      background: var(--primary-dim);
-      transform: translateY(-2px);
+      background: var(--accent);
+      opacity: 0.9;
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px var(--accent-glow);
     }
 
     .highlight {
