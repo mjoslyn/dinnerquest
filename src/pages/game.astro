@@ -322,6 +322,13 @@ import GameLayout from '../layouts/GameLayout.astro';
             }
           });
 
+          // Update the lock upgrade button to show used state
+          const lockUpgradeBtn = document.querySelector(`.upgrade-card[data-upgrade-id="${activeLockUpgrade.id}"] .btn-use-upgrade`);
+          if (lockUpgradeBtn) {
+            lockUpgradeBtn.textContent = 'Used';
+            lockUpgradeBtn.classList.add('btn-used');
+          }
+
           // Create undo button
           const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${activeLockUpgrade.id}"]`);
           if (upgradeCard) {
@@ -389,6 +396,7 @@ import GameLayout from '../layouts/GameLayout.astro';
               if (lockBtn) {
                 lockBtn.disabled = false;
                 lockBtn.textContent = 'Use';
+                lockBtn.classList.remove('btn-used');
               }
 
               // Update displays after unlock
@@ -1042,7 +1050,8 @@ import GameLayout from '../layouts/GameLayout.astro';
 
           // Disable the upgrade button
           btn.disabled = true;
-          btn.textContent = '✓ Used';
+          btn.textContent = 'Used';
+          btn.classList.add('btn-used');
 
           // Create undo button
           const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
@@ -1078,6 +1087,7 @@ import GameLayout from '../layouts/GameLayout.astro';
               // Re-enable the upgrade button
               btn.disabled = false;
               btn.textContent = 'Use';
+              btn.classList.remove('btn-used');
 
               // Update displays after removing takeout
               updateDisplays();
@@ -1182,7 +1192,8 @@ import GameLayout from '../layouts/GameLayout.astro';
 
           // Disable the upgrade button
           btn.disabled = true;
-          btn.textContent = '✓ Used';
+          btn.textContent = 'Used';
+          btn.classList.add('btn-used');
 
           // Create undo button
           const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
@@ -1224,6 +1235,7 @@ import GameLayout from '../layouts/GameLayout.astro';
               // Re-enable the upgrade button
               btn.disabled = false;
               btn.textContent = 'Use';
+              btn.classList.remove('btn-used');
 
               updateDisplays();
             });
@@ -1262,7 +1274,8 @@ import GameLayout from '../layouts/GameLayout.astro';
             if (btnUpgrade?.type === 'theme') {
               b.disabled = true;
               if (b.dataset.upgradeId === upgradeId) {
-                b.textContent = '✗';
+                b.textContent = 'Used';
+                b.classList.add('btn-used');
                 const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
                 if (card) card.classList.add('used');
               } else {
@@ -1282,7 +1295,8 @@ import GameLayout from '../layouts/GameLayout.astro';
         if (btnUpgrade?.type === 'theme') {
           btn.disabled = true;
           if (btn.dataset.upgradeId === player.usedThemeId) {
-            btn.textContent = '✗';
+            btn.textContent = 'Used';
+            btn.classList.add('btn-used');
             const card = document.querySelector(`.upgrade-card[data-upgrade-id="${player.usedThemeId}"]`);
             if (card) card.classList.add('used');
           } else {
@@ -1301,7 +1315,8 @@ import GameLayout from '../layouts/GameLayout.astro';
         // Check if this is the used lock upgrade
         if (btnUpgrade?.type === 'lock' && player.usedLockId === upgradeId) {
           btn.disabled = true;
-          btn.textContent = '✓ Used';
+          btn.textContent = 'Used';
+          btn.classList.add('btn-used');
           const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
           if (card) card.classList.add('used');
         }
@@ -1309,7 +1324,8 @@ import GameLayout from '../layouts/GameLayout.astro';
         // Check if this is the used takeout upgrade
         if (btnUpgrade?.type === 'takeout' && player.usedTakeoutId === upgradeId) {
           btn.disabled = true;
-          btn.textContent = '✓ Used';
+          btn.textContent = 'Used';
+          btn.classList.add('btn-used');
           const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
           if (card) card.classList.add('used');
         }
@@ -1773,7 +1789,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     .btn-use-upgrade {
       margin-top: 8px;
-      padding: 8px;
+      padding: 12px 16px;
       background: var(--accent);
       color: var(--bg-dark);
       border: none;
@@ -1793,9 +1809,9 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     @media (max-width: 768px) {
       .btn-use-upgrade {
-        margin-top: 6px;
-        padding: 6px;
-        font-size: 10px;
+        margin-top: 8px;
+        padding: 10px 12px;
+        font-size: 12px;
       }
     }
 
@@ -1812,6 +1828,13 @@ import GameLayout from '../layouts/GameLayout.astro';
       opacity: 0.5;
       transform: none;
       box-shadow: none;
+    }
+
+    .btn-use-upgrade.btn-used {
+      background: var(--bg-dark);
+      color: var(--text-dim);
+      border: 2px solid var(--border);
+      opacity: 0.7;
     }
 
     .draft-actions {
