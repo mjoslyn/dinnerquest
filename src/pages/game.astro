@@ -71,6 +71,7 @@ const budgetLimit = getBudgetPoints(state.settings.budgetCap, state.settings.mea
 
 // Calculate cost already spent on harmonies
 const harmoniesCost = harmonyMeals.reduce((sum, meal) => sum + (meal ? getCostPoints(meal.cost) : 0), 0);
+const harmoniesUsdTotal = harmonyMeals.reduce((sum, meal) => sum + (meal?.estimatedPrice || 0), 0);
 const budgetRemaining = budgetLimit ? budgetLimit - harmoniesCost : null;
 const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
 
@@ -104,7 +105,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
         </div>
         <div class="info-item">
           <span class="info-label">Budget:</span>
-          <span class="info-value" id="budget-display">{harmoniesCost} / {budgetText}</span>
+          <span class="info-value" id="budget-display">{harmoniesCost} / {budgetText} <span class="usd-total" id="usd-display">(${harmoniesUsdTotal})</span></span>
         </div>
       </div>
     </div>
@@ -112,7 +113,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
 
     <div class="meal-pool">
       {poolMeals.map(meal => (
-        <div class="meal-card" data-meal-id={meal.id} data-cost={getCostPoints(meal.cost)} data-partial={otherPlayerPicksSet.has(meal.id) ? "true" : "false"}>
+        <div class="meal-card" data-meal-id={meal.id} data-cost={getCostPoints(meal.cost)} data-usd={meal.estimatedPrice || 0} data-partial={otherPlayerPicksSet.has(meal.id) ? "true" : "false"}>
           <div class="meal-header">
             <span class="meal-emoji">{meal.emoji}</span>
             {otherPlayerPicksSet.has(meal.id) && <span class="partner-pick-star">✨</span>}
@@ -184,6 +185,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     // UI elements
     const pickCountEl = document.getElementById('pick-count');
     const budgetDisplayEl = document.getElementById('budget-display');
+    const usdDisplayEl = document.getElementById('usd-display');
     const lockBtn = document.getElementById('lock-btn');
     const openLinkBtn = document.getElementById('open-link-btn');
     const copyLinkBtn = document.getElementById('copy-link-btn');
@@ -196,6 +198,10 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       const meal = allMeals.find(m => m.id === mealId);
       return sum + (meal ? getCostPoints(meal.cost) : 0);
     }, 0);
+    const harmoniesUsdTotal = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
+      const meal = allMeals.find(m => m.id === mealId);
+      return sum + (meal?.estimatedPrice || 0);
+    }, 0);
 
     // Update displays and run live validation
     function updateDisplays() {
@@ -204,11 +210,17 @@ const senderName = player?.name || `Player ${currentPlayer}`;
         return sum + parseInt(card.dataset.cost);
       }, 0);
 
+      const currentPicksUsd = Array.from(selectedMeals).reduce((sum, id) => {
+        const card = document.querySelector(`[data-meal-id="${id}"]`);
+        return sum + parseInt(card.dataset.usd || 0);
+      }, 0);
+
       const cumulativeCost = harmoniesCost + currentPicksCost;
+      const cumulativeUsd = harmoniesUsdTotal + currentPicksUsd;
 
       const totalMealsSecured = state.harmoniesSoFar.length + selectedMeals.size;
       pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
-      budgetDisplayEl.textContent = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'}`;
+      budgetDisplayEl.innerHTML = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'} <span class="usd-total">($${cumulativeUsd})</span>`;
 
       // Color coding
       pickCountEl.style.color = totalMealsSecured >= mealCount ? 'var(--primary)' : '#d35d5d';
@@ -803,6 +815,13 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       font-size: 22px;
       font-weight: bold;
       color: var(--text);
+    }
+
+    .usd-total {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-left: 8px;
+      font-weight: normal;
     }
 
 
