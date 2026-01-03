@@ -16,6 +16,8 @@ import { generateId } from './urlCodec.js';
  * @property {boolean} locked
  * @property {number} [usedThemeRound] - Round number when theme was used (limits to one per round)
  * @property {string} [usedThemeId] - ID of the theme that was used
+ * @property {string} [usedLockId] - ID of the lock upgrade that was permanently used
+ * @property {string} [usedTakeoutId] - ID of the takeout upgrade that was permanently used
  */
 
 /**

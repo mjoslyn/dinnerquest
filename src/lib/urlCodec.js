@@ -39,6 +39,12 @@ export function encodeGameState(state) {
     if (state.players.A.usedThemeId) {
       params.set('pATI', state.players.A.usedThemeId);
     }
+    if (state.players.A.usedLockId) {
+      params.set('pALI', state.players.A.usedLockId);
+    }
+    if (state.players.A.usedTakeoutId) {
+      params.set('pATO', state.players.A.usedTakeoutId);
+    }
   }
 
   // Player B
@@ -59,6 +65,12 @@ export function encodeGameState(state) {
     }
     if (state.players.B.usedThemeId) {
       params.set('pBTI', state.players.B.usedThemeId);
+    }
+    if (state.players.B.usedLockId) {
+      params.set('pBLI', state.players.B.usedLockId);
+    }
+    if (state.players.B.usedTakeoutId) {
+      params.set('pBTO', state.players.B.usedTakeoutId);
     }
   }
 
@@ -150,7 +162,9 @@ export function decodeGameState(params) {
         picks: picksStr ? picksStr.split(',').map(Number) : [],
         locked: params.get('pAL') === '1',
         usedThemeRound,
-        usedThemeId
+        usedThemeId,
+        usedLockId: params.get('pALI') || undefined,
+        usedTakeoutId: params.get('pATO') || undefined
       };
     }
 
@@ -169,7 +183,9 @@ export function decodeGameState(params) {
         picks: picksStr ? picksStr.split(',').map(Number) : [],
         locked: params.get('pBL') === '1',
         usedThemeRound,
-        usedThemeId
+        usedThemeId,
+        usedLockId: params.get('pBLI') || undefined,
+        usedTakeoutId: params.get('pBTO') || undefined
       };
     }
 

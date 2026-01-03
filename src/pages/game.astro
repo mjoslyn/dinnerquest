@@ -462,6 +462,32 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       });
     });
 
+    // Helper to persist used lock/takeout upgrades to player state
+    function persistUsedUpgrades() {
+      const player = state.players[currentPlayer];
+      let updates = {};
+
+      if (lockedMealId && activeLockUpgrade) {
+        updates.usedLockId = activeLockUpgrade.id;
+      }
+      if (activeTakeoutUpgrade) {
+        updates.usedTakeoutId = activeTakeoutUpgrade.id;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        state = {
+          ...state,
+          players: {
+            ...state.players,
+            [currentPlayer]: {
+              ...player,
+              ...updates
+            }
+          }
+        };
+      }
+    }
+
     // Lock button
     lockBtn.addEventListener('click', async () => {
       // Final validation
@@ -472,6 +498,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
         alert('Draft is invalid. Please fix errors first.');
         return;
       }
+
+      // Persist used lock/takeout upgrades before sealing
+      persistUsedUpgrades();
 
       // Lock in
       state = lockPlayerDraft(state, currentPlayer);
@@ -692,6 +721,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
         return;
       }
 
+      // Persist used lock/takeout upgrades before sealing
+      persistUsedUpgrades();
+
       state = lockPlayerDraft(state, currentPlayer);
 
       // Player A locks -> check if we have enough harmonies
@@ -832,6 +864,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
         return;
       }
 
+      // Persist used lock/takeout upgrades before sealing
+      persistUsedUpgrades();
+
       state = lockPlayerDraft(state, currentPlayer);
 
       // Player A locks -> check if we have enough harmonies
@@ -970,6 +1005,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     let isSelectingToLock = false;
     let activeLockUpgrade = null;
     let lockedMealId = null;
+    let activeTakeoutUpgrade = null;
 
     // Upgrade usage
     document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
@@ -998,6 +1034,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
 
         // Handle takeout upgrades
         if (upgrade.type === 'takeout') {
+          // Track the active takeout upgrade
+          activeTakeoutUpgrade = upgrade;
+
           // Create a fake meal ID for the takeout
           const takeoutId = `takeout-${Date.now()}`;
 
@@ -1057,6 +1096,9 @@ const senderName = player?.name || `Player ${currentPlayer}`;
 
               // Remove from takeout meals map
               takeoutMeals.delete(takeoutId);
+
+              // Clear active takeout tracking
+              activeTakeoutUpgrade = null;
 
               // Remove harmony card
               const harmonyCardToRemove = document.querySelector(`.takeout-harmony-card[data-meal-id="${takeoutId}"]`);
@@ -1133,17 +1175,40 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     const player = state.players[currentPlayer];
     if (player.usedThemeRound === state.currentRound && player.usedThemeId) {
       document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
-        btn.disabled = true;
-        if (btn.dataset.upgradeId === player.usedThemeId) {
-          // The one that was used
-          btn.textContent = '✗';
-          const card = document.querySelector(`.upgrade-card[data-upgrade-id="${player.usedThemeId}"]`);
+        const btnUpgrade = player.upgrades.find(u => u.id === btn.dataset.upgradeId);
+        if (btnUpgrade?.type === 'theme') {
+          btn.disabled = true;
+          if (btn.dataset.upgradeId === player.usedThemeId) {
+            btn.textContent = '✗';
+            const card = document.querySelector(`.upgrade-card[data-upgrade-id="${player.usedThemeId}"]`);
+            if (card) card.classList.add('used');
+          } else {
+            btn.textContent = btnUpgrade?.rejectionText || 'Not this time';
+          }
+        }
+      });
+    }
+
+    // Disable lock/takeout buttons if already used (persists across rounds)
+    if (player.usedLockId || player.usedTakeoutId) {
+      document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
+        const upgradeId = btn.dataset.upgradeId;
+        const btnUpgrade = player.upgrades.find(u => u.id === upgradeId);
+
+        // Check if this is the used lock upgrade
+        if (btnUpgrade?.type === 'lock' && player.usedLockId === upgradeId) {
+          btn.disabled = true;
+          btn.textContent = '✓ Used';
+          const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
           if (card) card.classList.add('used');
-        } else {
-          // The others - find their rejection text
-          const otherUpgradeId = btn.dataset.upgradeId;
-          const otherUpgrade = player.upgrades.find(u => u.id === otherUpgradeId);
-          btn.textContent = otherUpgrade?.rejectionText || 'Not this time';
+        }
+
+        // Check if this is the used takeout upgrade
+        if (btnUpgrade?.type === 'takeout' && player.usedTakeoutId === upgradeId) {
+          btn.disabled = true;
+          btn.textContent = '✓ Used';
+          const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
+          if (card) card.classList.add('used');
         }
       });
     }
