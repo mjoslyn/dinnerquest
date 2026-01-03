@@ -68,26 +68,92 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
     </form>
   </div>
 
-  <div class="narrative">
-    <p>The week stretches before you like an endless dungeon.</p>
-    <p>Two appetites. One kitchen. Infinite possibilities.</p>
-    <p>Will you find <span class="highlight">harmony</span>... or descend into takeout chaos?</p>
+  <div class="narrative" id="narrative">
+    <p id="narrative-1"></p>
+    <p id="narrative-2"></p>
+    <p id="narrative-3"></p>
   </div>
 
   <script>
+    // Theme content
+    const themeContent = {
+      'theme-fantasy': {
+        narrative: [
+          'The realm calls to you, brave adventurer.',
+          'Two heroes. One legendary quest. A week of feasts to secure.',
+          'Will your choices forge <span class="highlight">harmony</span>... or summon the dragons of discord?'
+        ],
+        buttonText: 'Begin the Quest'
+      },
+      'theme-cyberpunk': {
+        narrative: [
+          'Welcome to the Grid. Systems online.',
+          'Two netrunners. One database. Seven days of sustenance protocols.',
+          'Will you achieve <span class="highlight">sync</span>... or crash into takeout chaos?'
+        ],
+        buttonText: 'Initialize Protocol'
+      },
+      'theme-western': {
+        narrative: [
+          'The frontier stretches wide, partner.',
+          'Two gunslingers. One saloon. A week of grub to wrangle.',
+          'Will you ride together in <span class="highlight">harmony</span>... or face off at high noon?'
+        ],
+        buttonText: 'Draw Your Hand'
+      },
+      'theme-noir': {
+        narrative: [
+          'It was a dark and stormy night. The case file lay open.',
+          'Two detectives. One mystery. Seven meals missing from the week.',
+          'Will you crack the case with <span class="highlight">harmony</span>... or let it go cold?'
+        ],
+        buttonText: 'Open the Case'
+      },
+      'theme-pirate': {
+        narrative: [
+          'Ahoy there, ye scurvy dogs! The seas be callin\'.',
+          'Two pirates. One ship. A week of plunder to claim.',
+          'Will ye sail as mates in <span class="highlight">harmony</span>... or make each other walk the plank?'
+        ],
+        buttonText: 'Set Sail'
+      },
+      'theme-medieval': {
+        narrative: [
+          'Hear ye, hear ye! The royal court assembles.',
+          'Two nobles. One banquet hall. A week of feasts to decree.',
+          'Will thy choices bring <span class="highlight">harmony</span>... or spark a courtly dispute?'
+        ],
+        buttonText: 'Herald the Banquet'
+      },
+      'theme-space': {
+        narrative: [
+          'Mission Control to crew: systems are go.',
+          'Two astronauts. One vessel. Seven days of rations to secure.',
+          'Will your coordinates align in <span class="highlight">harmony</span>... or drift into the void?'
+        ],
+        buttonText: 'Launch Mission'
+      },
+      'theme-horror': {
+        narrative: [
+          'The old mansion groans. Something stirs in the shadows.',
+          'Two souls. One haunted week. Seven cursed meals await.',
+          'Will you survive together in <span class="highlight">harmony</span>... or become the next ghosts?'
+        ],
+        buttonText: 'Enter the Manor'
+      }
+    };
+
     // Apply random theme
-    const themes = [
-      'theme-fantasy',
-      'theme-cyberpunk',
-      'theme-western',
-      'theme-noir',
-      'theme-pirate',
-      'theme-medieval',
-      'theme-space',
-      'theme-horror'
-    ];
+    const themes = Object.keys(themeContent);
     const randomTheme = themes[Math.floor(Math.random() * themes.length)];
     document.body.className = randomTheme;
+
+    // Apply themed content
+    const content = themeContent[randomTheme];
+    document.getElementById('narrative-1').innerHTML = content.narrative[0];
+    document.getElementById('narrative-2').innerHTML = content.narrative[1];
+    document.getElementById('narrative-3').innerHTML = content.narrative[2];
+    document.querySelector('.btn-primary').textContent = content.buttonText;
 
     const form = document.getElementById('setup-form');
 
