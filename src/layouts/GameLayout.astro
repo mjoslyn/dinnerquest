@@ -1,7 +1,16 @@
 ---
 import '../styles/retro.css';
 
-const { title = "DINNER QUEST · A Meal Planning Roguelike" } = Astro.props;
+const {
+  title = "DINNER QUEST · A Meal Planning Roguelike",
+  senderName,
+  currentRound
+} = Astro.props;
+
+// Build dynamic OG title with sender and round if available
+const ogTitle = senderName && currentRound
+  ? `${senderName} invites you to Dinner Quest - Round ${currentRound}`
+  : "Dinner Quest - A Roguelike for Couples";
 ---
 
 <!DOCTYPE html>
@@ -13,7 +22,7 @@ const { title = "DINNER QUEST · A Meal Planning Roguelike" } = Astro.props;
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Dinner Quest - A Roguelike for Couples">
+  <meta property="og:title" content={ogTitle}>
   <meta property="og:description" content="A text-based RPG roguelike for couples to decide on dinner for the week. Draft, bid, and resolve your way to the perfect meal plan.">
   <meta property="og:image" content="/share-card.png">
   <meta property="og:image:width" content="1200">
@@ -21,7 +30,7 @@ const { title = "DINNER QUEST · A Meal Planning Roguelike" } = Astro.props;
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Dinner Quest - A Roguelike for Couples">
+  <meta name="twitter:title" content={ogTitle}>
   <meta name="twitter:description" content="A text-based RPG roguelike for couples to decide on dinner for the week. Draft, bid, and resolve your way to the perfect meal plan.">
   <meta name="twitter:image" content="/share-card.png">
 

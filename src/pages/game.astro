@@ -39,23 +39,25 @@ const otherPlayer = state.players[otherPlayerId];
 // Fetch full meal data for pool
 const allMeals = await getAllMeals();
 
-// Get the other player's previous picks (partial harmonies)
-const otherPlayerAllPicks = currentPlayer === 'A'
-  ? (state.playerBAllPicks || [])
-  : (state.playerAAllPicks || []);
+// Get the other player's previous picks (partial harmonies) - only from Round 2 onwards
+const otherPlayerAllPicks = state.currentRound > 1
+  ? (currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
+  : [];
 const partialHarmonyIds = otherPlayerAllPicks.filter(id => !state.harmoniesSoFar.includes(id));
 const partialHarmonyMeals = partialHarmonyIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
 
-// Combine pool with other player's picks
+// Combine pool with other player's picks, excluding harmonies
 const poolMealIds = state.pool.map(m => m.id);
 const combinedPoolIds = [...new Set([...poolMealIds, ...partialHarmonyIds])];
-let poolMeals = combinedPoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
+// Filter out meals that are already harmonies (locked in)
+const availablePoolIds = combinedPoolIds.filter(id => !state.harmoniesSoFar.includes(id));
+let poolMeals = availablePoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
 
-// Filter by current player's diet preference (exclude meat if vegetarian)
+// Filter by current player's diet preference (exclude meat if strict vegetarian)
 // BUT keep partial harmonies regardless of diet preference
 const otherPlayerPicksSet = new Set(partialHarmonyIds);
-if (player.dietPreference <= 2) {
-  // Vegetarian - exclude meat dishes (dietScore >= 3) unless they're partial harmonies
+if (player.dietPreference === 1) {
+  // Strict vegetarian - exclude meat dishes (dietScore >= 3) unless they're partial harmonies
   poolMeals = poolMeals.filter(meal =>
     meal.dietScore <= 2 || otherPlayerPicksSet.has(meal.id)
   );
@@ -71,9 +73,12 @@ const budgetLimit = getBudgetPoints(state.settings.budgetCap, state.settings.mea
 const harmoniesCost = harmonyMeals.reduce((sum, meal) => sum + (meal ? getCostPoints(meal.cost) : 0), 0);
 const budgetRemaining = budgetLimit ? budgetLimit - harmoniesCost : null;
 const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
+
+// Get sender name for OG tags (the current player who is sharing)
+const senderName = player?.name || `Player ${currentPlayer}`;
 ---
 
-<GameLayout>
+<GameLayout senderName={senderName} currentRound={state.currentRound}>
   <div class="panel">
     <div class="panel-title">{player?.name || `Player ${currentPlayer}`} - ROUND {state.currentRound}</div>
 
@@ -137,27 +142,6 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       </button>
     </div>
     <div id="share-message" class="share-message" style="display: none;"></div>
-  </div>
-
-  <!-- Share Card Modal -->
-  <div id="share-modal" class="share-modal" style="display: none;">
-    <div class="share-modal-content">
-      <div class="share-modal-header">
-        <h2>Share with Partner</h2>
-        <button id="close-modal-btn" class="close-modal-btn">&times;</button>
-      </div>
-      <div class="share-modal-body">
-        <p id="share-modal-message">Send this link to your partner:</p>
-        <div class="share-link-container">
-          <input type="text" id="share-link-input" readonly class="share-link-input" />
-        </div>
-        <div class="share-actions">
-          <button id="modal-copy-btn" class="btn btn-primary">Copy Link</button>
-          <button id="modal-sms-btn" class="btn btn-secondary">Send SMS</button>
-          <button id="modal-open-btn" class="btn btn-secondary">Open Link</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div class="narrative">
@@ -306,6 +290,14 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         const newHarmonies = playerAPicks.filter(mealId => playerBAllPicks.includes(mealId));
         const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
 
+        // Update playerAAllPicks and harmoniesSoFar immediately
+        const updatedPlayerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        state = {
+          ...state,
+          harmoniesSoFar: allHarmonies,
+          playerAAllPicks: updatedPlayerAAllPicks
+        };
+
         // If we have enough harmonies, game is complete
         if (allHarmonies.length >= state.settings.mealCount) {
           // Prioritize newest harmonies (newHarmonies) over older ones (harmoniesSoFar)
@@ -366,14 +358,23 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         // Find harmonies (meals both players picked)
         const playerAPicks = state.players.A.picks;
         const playerBPicks = state.players.B.picks;
-        const harmonies = playerAPicks.filter(mealId => playerBPicks.includes(mealId));
-
-        // Add harmonies to accumulated list
-        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
-
-        // Track all picks for each player
-        const playerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        const playerAAllPicks = state.playerAAllPicks || []; // Already updated by Player A
         const playerBAllPicks = [...(state.playerBAllPicks || []), ...playerBPicks];
+
+        // Find NEW harmonies from Player B's picks (Player A's harmonies already counted)
+        const newHarmoniesFromB = playerBPicks.filter(mealId =>
+          playerAAllPicks.includes(mealId) && !state.harmoniesSoFar.includes(mealId)
+        );
+
+        // Add new harmonies to accumulated list
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmoniesFromB];
+
+        // Update playerBAllPicks
+        state = {
+          ...state,
+          playerBAllPicks,
+          harmoniesSoFar: allHarmonies
+        };
 
         // Only remove harmonies from pool, keep partial picks available
         const allPickedMeals = new Set([...playerAPicks, ...playerBPicks]);
@@ -507,6 +508,14 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         const newHarmonies = playerAPicks.filter(mealId => playerBAllPicks.includes(mealId));
         const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
 
+        // Update playerAAllPicks and harmoniesSoFar immediately
+        const updatedPlayerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        state = {
+          ...state,
+          harmoniesSoFar: allHarmonies,
+          playerAAllPicks: updatedPlayerAAllPicks
+        };
+
         // If we have enough harmonies, game is complete
         if (allHarmonies.length >= state.settings.mealCount) {
           // Prioritize newest harmonies (newHarmonies) over older ones (harmoniesSoFar)
@@ -538,11 +547,23 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       if (currentPlayer === 'B') {
         const playerAPicks = state.players.A.picks;
         const playerBPicks = state.players.B.picks;
-        const harmonies = playerAPicks.filter(mealId => playerBPicks.includes(mealId));
-        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
-
-        const playerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        const playerAAllPicks = state.playerAAllPicks || []; // Already updated by Player A
         const playerBAllPicks = [...(state.playerBAllPicks || []), ...playerBPicks];
+
+        // Find NEW harmonies from Player B's picks (Player A's harmonies already counted)
+        const newHarmoniesFromB = playerBPicks.filter(mealId =>
+          playerAAllPicks.includes(mealId) && !state.harmoniesSoFar.includes(mealId)
+        );
+
+        // Add new harmonies to accumulated list
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmoniesFromB];
+
+        // Update playerBAllPicks
+        state = {
+          ...state,
+          playerBAllPicks,
+          harmoniesSoFar: allHarmonies
+        };
 
         const allPickedMeals = new Set([...playerAPicks, ...playerBPicks]);
         const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
@@ -627,6 +648,14 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
         const newHarmonies = playerAPicks.filter(mealId => playerBAllPicks.includes(mealId));
         const allHarmonies = [...state.harmoniesSoFar, ...newHarmonies];
 
+        // Update playerAAllPicks and harmoniesSoFar immediately
+        const updatedPlayerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        state = {
+          ...state,
+          harmoniesSoFar: allHarmonies,
+          playerAAllPicks: updatedPlayerAAllPicks
+        };
+
         // If we have enough harmonies, game is complete
         if (allHarmonies.length >= state.settings.mealCount) {
           state = {
@@ -659,11 +688,23 @@ const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
       if (currentPlayer === 'B') {
         const playerAPicks = state.players.A.picks;
         const playerBPicks = state.players.B.picks;
-        const harmonies = playerAPicks.filter(mealId => playerBPicks.includes(mealId));
-        const allHarmonies = [...state.harmoniesSoFar, ...harmonies];
-
-        const playerAAllPicks = [...(state.playerAAllPicks || []), ...playerAPicks];
+        const playerAAllPicks = state.playerAAllPicks || []; // Already updated by Player A
         const playerBAllPicks = [...(state.playerBAllPicks || []), ...playerBPicks];
+
+        // Find NEW harmonies from Player B's picks (Player A's harmonies already counted)
+        const newHarmoniesFromB = playerBPicks.filter(mealId =>
+          playerAAllPicks.includes(mealId) && !state.harmoniesSoFar.includes(mealId)
+        );
+
+        // Add new harmonies to accumulated list
+        const allHarmonies = [...state.harmoniesSoFar, ...newHarmoniesFromB];
+
+        // Update playerBAllPicks
+        state = {
+          ...state,
+          playerBAllPicks,
+          harmoniesSoFar: allHarmonies
+        };
 
         const allPickedMeals = new Set([...playerAPicks, ...playerBPicks]);
         const usedMeals = [...state.usedMeals, ...Array.from(allPickedMeals)];
