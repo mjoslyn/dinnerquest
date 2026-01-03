@@ -30,6 +30,12 @@ export function encodeGameState(state) {
     if (state.players.A.locked) {
       params.set('pAL', '1');
     }
+    if (state.players.A.usedThemeRound) {
+      params.set('pATR', state.players.A.usedThemeRound.toString());
+    }
+    if (state.players.A.usedThemeId) {
+      params.set('pATI', state.players.A.usedThemeId);
+    }
   }
 
   // Player B
@@ -44,6 +50,12 @@ export function encodeGameState(state) {
     }
     if (state.players.B.locked) {
       params.set('pBL', '1');
+    }
+    if (state.players.B.usedThemeRound) {
+      params.set('pBTR', state.players.B.usedThemeRound.toString());
+    }
+    if (state.players.B.usedThemeId) {
+      params.set('pBTI', state.players.B.usedThemeId);
     }
   }
 
@@ -120,13 +132,17 @@ export function decodeGameState(params) {
     if (params.has('pAN')) {
       const upgradesStr = params.get('pAU');
       const picksStr = params.get('pAP');
+      const usedThemeRound = params.get('pATR') ? parseInt(params.get('pATR')) : undefined;
+      const usedThemeId = params.get('pATI') || undefined;
 
       playerA = {
         name: params.get('pAN'),
         dietPreference: parseInt(params.get('pAD') || '3'),
         upgrades: upgradesStr ? upgradesStr.split(',').map(id => ({ id })) : [],
         picks: picksStr ? picksStr.split(',').map(Number) : [],
-        locked: params.get('pAL') === '1'
+        locked: params.get('pAL') === '1',
+        usedThemeRound,
+        usedThemeId
       };
     }
 
@@ -135,13 +151,17 @@ export function decodeGameState(params) {
     if (params.has('pBN')) {
       const upgradesStr = params.get('pBU');
       const picksStr = params.get('pBP');
+      const usedThemeRound = params.get('pBTR') ? parseInt(params.get('pBTR')) : undefined;
+      const usedThemeId = params.get('pBTI') || undefined;
 
       playerB = {
         name: params.get('pBN'),
         dietPreference: parseInt(params.get('pBD') || '3'),
         upgrades: upgradesStr ? upgradesStr.split(',').map(id => ({ id })) : [],
         picks: picksStr ? picksStr.split(',').map(Number) : [],
-        locked: params.get('pBL') === '1'
+        locked: params.get('pBL') === '1',
+        usedThemeRound,
+        usedThemeId
       };
     }
 

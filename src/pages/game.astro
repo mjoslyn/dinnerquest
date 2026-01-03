@@ -1,7 +1,7 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
 import { decodeGameState } from '../lib/urlCodec.js';
-import { getAllMeals, getCostPoints, getBudgetPoints, getRandomUpgrades } from '../lib/gameData.js';
+import { getAllMeals, getAllUpgrades, getCostPoints, getBudgetPoints, getRandomUpgrades } from '../lib/gameData.js';
 
 export const prerender = false;
 
@@ -30,6 +30,19 @@ if (!state.players[currentPlayer]) {
       }
     }
   };
+}
+
+// Hydrate upgrades with full data (they're stored as just IDs in URL)
+const allUpgrades = await getAllUpgrades();
+if (state.players.A?.upgrades) {
+  state.players.A.upgrades = state.players.A.upgrades.map(u =>
+    allUpgrades.find(full => full.id === u.id) || u
+  );
+}
+if (state.players.B?.upgrades) {
+  state.players.B.upgrades = state.players.B.upgrades.map(u =>
+    allUpgrades.find(full => full.id === u.id) || u
+  );
 }
 
 const player = state.players[currentPlayer];
@@ -168,11 +181,24 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
     import { updatePlayerPicks, lockPlayerDraft } from '../lib/gameState.js';
     import { validateDraft, resolveDraft } from '../lib/gameLogic.js';
-    import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals, getAllMeals } from '../lib/gameDataClient.js';
+    import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals, getAllMeals, getAllUpgrades } from '../lib/gameDataClient.js';
 
     const params = new URLSearchParams(window.location.search);
     let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
+
+    // Hydrate upgrades with full data (they're stored as just IDs in URL)
+    const allUpgrades = await getAllUpgrades();
+    if (state.players.A?.upgrades) {
+      state.players.A.upgrades = state.players.A.upgrades.map(u =>
+        allUpgrades.find(full => full.id === u.id) || u
+      );
+    }
+    if (state.players.B?.upgrades) {
+      state.players.B.upgrades = state.players.B.upgrades.map(u =>
+        allUpgrades.find(full => full.id === u.id) || u
+      );
+    }
 
     // Initialize player if they don't exist
     if (!state.players[currentPlayer]) {
@@ -800,48 +826,72 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       }
     });
 
-    // Upgrade usage
+    // Upgrade usage - one theme per round
     document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const upgradeId = btn.dataset.upgradeId;
         const player = state.players[currentPlayer];
-        const upgrade = player.upgrades.find(u => u.id === upgradeId);
 
+        // Check if already used a theme this round
+        if (player.usedThemeRound === state.currentRound) {
+          return;
+        }
+
+        const upgrade = player.upgrades.find(u => u.id === upgradeId);
         if (!upgrade) return;
 
         // Apply theme to body
         document.body.className = upgrade.themeStyle || 'theme-fantasy';
 
-        // Remove used upgrade and draw a new one
-        const remainingUpgrades = player.upgrades.filter(u => u.id !== upgradeId);
-        const newUpgrade = await getRandomUpgrades(1);
-
-        // Update state with new upgrades
+        // Mark theme as used for this round
         state = {
           ...state,
           players: {
             ...state.players,
             [currentPlayer]: {
               ...player,
-              upgrades: [...remainingUpgrades, ...newUpgrade]
+              usedThemeRound: state.currentRound,
+              usedThemeId: upgradeId
             }
           }
         };
 
-        // Update UI - remove old card and add new one
-        const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
-        if (upgradeCard && newUpgrade[0]) {
-          upgradeCard.dataset.upgradeId = newUpgrade[0].id;
-          upgradeCard.querySelector('.upgrade-emoji').textContent = newUpgrade[0].emoji;
-          upgradeCard.querySelector('.upgrade-name').textContent = newUpgrade[0].name;
-          upgradeCard.querySelector('.upgrade-effect').textContent = newUpgrade[0].effect;
-          upgradeCard.querySelector('.btn-use-upgrade').dataset.upgradeId = newUpgrade[0].id;
-        }
-
-        // Show notification
-        alert(`${upgrade.name} activated! Theme changed.`);
+        // Disable all theme buttons
+        document.querySelectorAll('.btn-use-upgrade').forEach(b => {
+          b.disabled = true;
+          if (b.dataset.upgradeId === upgradeId) {
+            // The one that was clicked
+            b.textContent = '✗';
+            const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
+            if (card) card.classList.add('used');
+          } else {
+            // The other ones - find their rejection text
+            const otherUpgradeId = b.dataset.upgradeId;
+            const otherUpgrade = player.upgrades.find(u => u.id === otherUpgradeId);
+            b.textContent = otherUpgrade?.rejectionText || 'Not this time';
+          }
+        });
       });
     });
+
+    // Disable theme buttons if already used this round
+    const player = state.players[currentPlayer];
+    if (player.usedThemeRound === state.currentRound && player.usedThemeId) {
+      document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.upgradeId === player.usedThemeId) {
+          // The one that was used
+          btn.textContent = '✗';
+          const card = document.querySelector(`.upgrade-card[data-upgrade-id="${player.usedThemeId}"]`);
+          if (card) card.classList.add('used');
+        } else {
+          // The others - find their rejection text
+          const otherUpgradeId = btn.dataset.upgradeId;
+          const otherUpgrade = player.upgrades.find(u => u.id === otherUpgradeId);
+          btn.textContent = otherUpgrade?.rejectionText || 'Not this time';
+        }
+      });
+    }
   </script>
 
   <style>
@@ -1135,6 +1185,44 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       transform: translateY(-2px);
     }
 
+    .upgrade-card.used {
+      opacity: 0.4;
+      position: relative;
+    }
+
+    .upgrade-card.used::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        to bottom right,
+        transparent 0%,
+        transparent calc(50% - 2px),
+        var(--danger) calc(50% - 2px),
+        var(--danger) calc(50% + 2px),
+        transparent calc(50% + 2px),
+        transparent 100%
+      ),
+      linear-gradient(
+        to top right,
+        transparent 0%,
+        transparent calc(50% - 2px),
+        var(--danger) calc(50% - 2px),
+        var(--danger) calc(50% + 2px),
+        transparent calc(50% + 2px),
+        transparent 100%
+      );
+      pointer-events: none;
+    }
+
+    .upgrade-card.used:hover {
+      transform: none;
+      border-color: var(--border);
+    }
+
     .upgrade-emoji {
       font-size: 32px;
       text-align: center;
@@ -1166,10 +1254,17 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       transition: all 0.2s;
     }
 
-    .btn-use-upgrade:hover {
+    .btn-use-upgrade:hover:not(:disabled) {
       opacity: 0.9;
       transform: translateY(-2px);
       box-shadow: 0 4px 8px var(--accent-glow);
+    }
+
+    .btn-use-upgrade:disabled {
+      background: var(--text-dim);
+      color: var(--bg-panel);
+      cursor: not-allowed;
+      opacity: 0.5;
     }
 
     .draft-actions {

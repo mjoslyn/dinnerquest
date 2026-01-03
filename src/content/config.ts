@@ -26,6 +26,7 @@ const upgradesCollection = defineCollection({
     type: z.enum(['theme']),
     effect: z.string(),
     themeStyle: z.string().optional(),
+    rejectionText: z.string().optional(),
   }),
 });
 

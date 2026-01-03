@@ -16,6 +16,18 @@ export async function getAllMeals() {
 }
 
 /**
+ * Fetch all upgrades from API
+ * @returns {Promise<Array>}
+ */
+export async function getAllUpgrades() {
+  const response = await fetch('/api/upgrades?all=true');
+  if (!response.ok) {
+    throw new Error('Failed to fetch upgrades');
+  }
+  return response.json();
+}
+
+/**
  * Fetch random upgrades from API
  * @param {number} count
  * @returns {Promise<Array>}

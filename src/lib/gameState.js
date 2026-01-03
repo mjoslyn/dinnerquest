@@ -14,6 +14,8 @@ import { generateId } from './urlCodec.js';
  * @property {Array} upgrades - Array of upgrade objects
  * @property {number[]} picks - Array of meal IDs
  * @property {boolean} locked
+ * @property {number} [usedThemeRound] - Round number when theme was used (limits to one per round)
+ * @property {string} [usedThemeId] - ID of the theme that was used
  */
 
 /**

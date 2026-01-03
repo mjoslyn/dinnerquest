@@ -1,9 +1,21 @@
-import { getRandomUpgrades } from '../../lib/gameData.js';
+import { getRandomUpgrades, getAllUpgrades } from '../../lib/gameData.js';
 
 export const prerender = false;
 
 export async function GET({ url }) {
   try {
+    const all = url.searchParams.get('all') === 'true';
+
+    if (all) {
+      const upgrades = await getAllUpgrades();
+      return new Response(JSON.stringify(upgrades), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
     const count = parseInt(url.searchParams.get('count') || '2');
     const upgrades = await getRandomUpgrades(count);
 
