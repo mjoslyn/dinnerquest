@@ -95,10 +95,12 @@ export async function getAllUpgrades() {
 /**
  * Fetch random upgrades from API
  * @param {number} count
+ * @param {string} theme - Theme class name (e.g., 'theme-fantasy')
  * @returns {Promise<Array>}
  */
-export async function getRandomUpgrades(count = 2) {
-  const response = await fetch(`/api/upgrades?count=${count}`);
+export async function getRandomUpgrades(count = 2, theme = null) {
+  const themeParam = theme ? `&theme=${encodeURIComponent(theme)}` : '';
+  const response = await fetch(`/api/upgrades?count=${count}${themeParam}`);
   if (!response.ok) {
     throw new Error('Failed to fetch upgrades');
   }

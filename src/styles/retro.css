@@ -86,7 +86,7 @@ body {
 
 .panel-subtitle {
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 14px;
   color: var(--text-dim);
   margin-bottom: 20px;
   letter-spacing: 0.5px;
@@ -130,8 +130,6 @@ body {
 
 /* Meal cards */
 .meal-grid {
-  display: grid;
-  gap: 15px;
   margin-bottom: 20px;
 }
 
@@ -141,16 +139,18 @@ body {
   padding: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: grid;
-  grid-template-columns: 60px 1fr auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 15px;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
 }
 
 .meal-card:hover {
   border-color: var(--accent);
   box-shadow: 0 0 20px var(--accent-glow);
-  transform: translateX(5px);
+  transform: scale(1.02);
 }
 
 .meal-card.selected {
@@ -172,10 +172,10 @@ body {
 .meal-meta {
   color: var(--text-dim);
   font-size: 16px;
-}
-
-.meal-meta span {
-  margin-right: 15px;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .meal-select {
@@ -501,11 +501,6 @@ body {
 
 /* Responsive */
 @media (max-width: 600px) {
-  .title { font-size: 16px; }
-  .meal-card { grid-template-columns: 50px 1fr; }
-  .meal-select { display: none; }
-  .week-grid { grid-template-columns: repeat(4, 1fr); }
-  .stats-grid { grid-template-columns: 1fr; }
 }
 
 /* Hide screens by default */

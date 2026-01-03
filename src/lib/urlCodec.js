@@ -123,6 +123,14 @@ export function encodeGameState(state) {
     params.set('pBNm', state.playerBName);
   }
 
+  // Takeout meals (encode as: id:name:emoji:cost:price)
+  if (state.takeoutMeals && state.takeoutMeals.length > 0) {
+    const takeoutStr = state.takeoutMeals
+      .map(meal => `${meal.id}:${meal.name}:${meal.emoji}:${meal.cost}:${meal.estimatedPrice}`)
+      .join('|');
+    params.set('to', takeoutStr);
+  }
+
   return params;
 }
 
@@ -221,10 +229,32 @@ export function decodeGameState(params) {
     }
 
     const currentRound = parseInt(params.get('round') || '1');
-    const harmoniesSoFar = params.get('harms') ? params.get('harms').split(',').map(Number) : [];
+    const harmoniesSoFar = params.get('harms') ? params.get('harms').split(',').map(id => {
+      // Handle both numeric meal IDs and string takeout IDs
+      const numId = parseInt(id);
+      return isNaN(numId) ? id : numId;
+    }) : [];
     const usedMeals = params.get('used') ? params.get('used').split(',').map(Number) : [];
     const playerAAllPicks = params.get('pAAP') ? params.get('pAAP').split(',').map(Number) : [];
     const playerBAllPicks = params.get('pBAP') ? params.get('pBAP').split(',').map(Number) : [];
+
+    // Decode takeout meals
+    const takeoutStr = params.get('to');
+    const takeoutMeals = [];
+    if (takeoutStr) {
+      takeoutStr.split('|').forEach(mealStr => {
+        const [id, name, emoji, cost, estimatedPrice] = mealStr.split(':');
+        takeoutMeals.push({
+          id,
+          name,
+          emoji,
+          cost,
+          estimatedPrice: parseInt(estimatedPrice),
+          time: 0,
+          cuisine: 'Takeout'
+        });
+      });
+    }
 
     const theme = params.get('th');
     const playerBName = params.get('pBNm');
@@ -244,6 +274,7 @@ export function decodeGameState(params) {
       usedMeals,
       playerAAllPicks,
       playerBAllPicks,
+      takeoutMeals,
       ...(theme && { theme }),
       ...(playerBName && { playerBName })
     };

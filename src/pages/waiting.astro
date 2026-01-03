@@ -71,10 +71,8 @@ import GameLayout from '../layouts/GameLayout.astro';
       window.location.href = '/';
     }
 
-    // Apply theme from state
-    if (state.theme) {
-      document.body.className = state.theme;
-    }
+    // Apply theme from state (fallback to default if not set)
+    document.body.className = state.theme || 'theme-fantasy';
 
     // Set player name in title
     const player = state.players[currentPlayer];
@@ -92,7 +90,8 @@ import GameLayout from '../layouts/GameLayout.astro';
     // Load upgrades client-side
     let currentUpgrades = [];
     async function loadInitialUpgrades() {
-      currentUpgrades = await getRandomUpgrades(2);
+      const theme = state.theme || 'theme-fantasy';
+      currentUpgrades = await getRandomUpgrades(2, theme);
       renderUpgrades(currentUpgrades);
     }
 
@@ -100,6 +99,10 @@ import GameLayout from '../layouts/GameLayout.astro';
       const container = document.getElementById('upgrades-container');
       container.innerHTML = upgrades.map(upgrade => `
         <div class="upgrade-card">
+          ${upgrade.type === 'theme' ? '<div class="theme-badge">THEME</div>' : ''}
+          ${upgrade.type === 'takeout' ? '<div class="takeout-badge">TAKEOUT</div>' : ''}
+          ${upgrade.type === 'lock' ? '<div class="lock-badge">LOCK AN ITEM</div>' : ''}
+          ${upgrade.type === 'redraw' ? '<div class="redraw-badge">REDRAW</div>' : ''}
           <div class="upgrade-emoji">${upgrade.emoji}</div>
           <div class="upgrade-name">${upgrade.name}</div>
           <div class="upgrade-effect">${upgrade.effect}</div>
@@ -120,7 +123,8 @@ import GameLayout from '../layouts/GameLayout.astro';
     const redrawBtn = document.getElementById('redraw-btn');
     if (redrawBtn) {
       redrawBtn.addEventListener('click', async () => {
-        currentUpgrades = await getRandomUpgrades(2);
+        const theme = state.theme || 'theme-fantasy';
+        currentUpgrades = await getRandomUpgrades(2, theme);
         renderUpgrades(currentUpgrades);
       });
     }
@@ -309,6 +313,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .upgrade-card {
+      position: relative;
       padding: 16px;
       background: var(--bg-dark);
       border: 2px solid var(--primary);
@@ -331,6 +336,104 @@ import GameLayout from '../layouts/GameLayout.astro';
     .upgrade-effect {
       font-size: 14px;
       color: var(--text-dim);
+    }
+
+    .theme-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .takeout-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .lock-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .redraw-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+      .theme-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .takeout-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .lock-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .redraw-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
     }
 
     .upgrades-header {

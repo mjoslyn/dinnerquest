@@ -36,6 +36,17 @@ import { generateId } from './urlCodec.js';
  */
 
 /**
+ * @typedef {Object} TakeoutMeal
+ * @property {string} id - Unique takeout meal ID (e.g., 'takeout-123456')
+ * @property {string} name
+ * @property {string} emoji
+ * @property {string} cost - '$', '$$', or '$$$'
+ * @property {number} estimatedPrice
+ * @property {number} time
+ * @property {string} cuisine
+ */
+
+/**
  * @typedef {Object} GameState
  * @property {string} id
  * @property {GameSettings} settings
@@ -48,6 +59,7 @@ import { generateId } from './urlCodec.js';
  * @property {number[]} usedMeals - Meals that have been drafted (removed from pool)
  * @property {number[]} playerAAllPicks - All meals Player A has picked across all rounds
  * @property {number[]} playerBAllPicks - All meals Player B has picked across all rounds
+ * @property {TakeoutMeal[]} [takeoutMeals] - Takeout meals created from upgrades
  * @property {string} [theme] - Theme class name (e.g., 'theme-fantasy')
  */
 
@@ -83,6 +95,7 @@ export function createInitialState(playerAName, settings, theme, playerBName) {
     usedMeals: [],
     playerAAllPicks: [],
     playerBAllPicks: [],
+    takeoutMeals: [],
     ...(theme && { theme }),
     ...(playerBName && { playerBName }) // Store Player B's name for when they join
   };

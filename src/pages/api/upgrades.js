@@ -17,7 +17,8 @@ export async function GET({ url }) {
     }
 
     const count = parseInt(url.searchParams.get('count') || '2');
-    const upgrades = await getRandomUpgrades(count);
+    const theme = url.searchParams.get('theme');
+    const upgrades = await getRandomUpgrades(count, theme);
 
     return new Response(JSON.stringify(upgrades), {
       status: 200,

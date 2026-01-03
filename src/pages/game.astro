@@ -64,13 +64,21 @@ import GameLayout from '../layouts/GameLayout.astro';
     let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
 
-    // Apply theme from state
-    if (state.theme) {
+    // Apply theme from state (fallback to default if not set)
+    if (state && state.theme) {
       document.body.className = state.theme;
+    } else {
+      document.body.className = 'theme-fantasy';
     }
 
     // Track takeout meals (id -> meal object) for cost calculations
+    // Restore from state if available (persists across rounds)
     const takeoutMeals = new Map();
+    if (state.takeoutMeals && state.takeoutMeals.length > 0) {
+      state.takeoutMeals.forEach(meal => {
+        takeoutMeals.set(meal.id, meal);
+      });
+    }
 
     // Hydrate upgrades with full data (they're stored as just IDs in URL)
     const allUpgrades = await getAllUpgrades();
@@ -87,7 +95,8 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     // Initialize player if they don't exist
     if (!state.players[currentPlayer]) {
-      const upgrades = await getRandomUpgrades(2);
+      const theme = state.theme || 'theme-fantasy';
+      const upgrades = await getRandomUpgrades(2, theme);
       state = {
         ...state,
         players: {
@@ -145,9 +154,15 @@ import GameLayout from '../layouts/GameLayout.astro';
     // Set narrative
     document.getElementById('meal-count-text').textContent = `at least ${mealCount} meals`;
 
-    // Render harmonies
+    // Render harmonies (include both regular meals and takeout meals)
     const harmonyMeals = (state.harmoniesSoFar || [])
-      .map(id => allMeals.find(m => m.id === id))
+      .map(id => {
+        // Check if it's a numeric ID (regular meal) or string ID (takeout)
+        if (typeof id === 'string' && id.startsWith('takeout-')) {
+          return takeoutMeals.get(id);
+        }
+        return allMeals.find(m => m.id === id);
+      })
       .filter(meal => meal !== undefined);
 
     if (harmonyMeals.length > 0) {
@@ -169,6 +184,10 @@ import GameLayout from '../layouts/GameLayout.astro';
       upgradesSection.style.display = 'block';
       upgradesGrid.innerHTML = player.upgrades.map(upgrade => `
         <div class="upgrade-card" data-upgrade-id="${upgrade.id}">
+          ${upgrade.type === 'theme' ? '<div class="theme-badge">THEME</div>' : ''}
+          ${upgrade.type === 'takeout' ? '<div class="takeout-badge">TAKEOUT</div>' : ''}
+          ${upgrade.type === 'lock' ? '<div class="lock-badge">LOCK AN ITEM</div>' : ''}
+          ${upgrade.type === 'redraw' ? '<div class="redraw-badge">REDRAW</div>' : ''}
           <div class="upgrade-emoji">${upgrade.emoji}</div>
           <div class="upgrade-name">${upgrade.name}</div>
           <div class="upgrade-effect">${upgrade.effect}</div>
@@ -200,17 +219,17 @@ import GameLayout from '../layouts/GameLayout.astro';
     const mealPoolEl = document.getElementById('meal-pool');
     mealPoolEl.innerHTML = poolMeals.map(meal => `
       <div class="meal-card" data-meal-id="${meal.id}" data-cost="${getCostPoints(meal.cost)}" data-usd="${meal.estimatedPrice || 0}" data-partial="${otherPlayerPicksSet.has(meal.id) ? "true" : "false"}">
-        <div class="meal-header">
-          <span class="meal-emoji">${meal.emoji}</span>
-          ${otherPlayerPicksSet.has(meal.id) ? '<span class="partner-pick-star">✨</span>' : ''}
+        ${otherPlayerPicksSet.has(meal.id) ? '<span class="partner-pick-star">✨</span>' : ''}
+        <span class="meal-emoji">${meal.emoji}</span>
+        <div class="meal-title-row">
+          <span class="meal-name">${meal.name}</span>
+          <span class="meal-cost">(${meal.cost})</span>
         </div>
-        <div class="meal-name">${meal.name}</div>
-        <div class="meal-cost">${meal.cost}</div>
-        ${otherPlayerPicksSet.has(meal.id) ? '<div class="partial-harmony-badge">Partial Harmony</div>' : ''}
         <div class="meal-meta">
           <span>${meal.time}min</span>
           <span>${meal.cuisine}</span>
         </div>
+        ${otherPlayerPicksSet.has(meal.id) ? '<div class="partial-harmony-badge">Partial Harmony</div>' : ''}
       </div>
     `).join('');
 
@@ -278,6 +297,70 @@ import GameLayout from '../layouts/GameLayout.astro';
       card.addEventListener('click', async (e) => {
         const mealId = parseInt(card.dataset.mealId);
 
+        // Handle partial harmony - immediately lock into harmonies but keep in draft list
+        if (otherPlayerPicksSet.has(mealId)) {
+          // Find the meal data
+          const partialMeal = (await getAllMeals()).find(m => m.id === mealId);
+          if (!partialMeal) return;
+
+          // Toggle selection
+          if (selectedMeals.has(mealId)) {
+            // Uncheck - remove from harmonies and selections
+            selectedMeals.delete(mealId);
+            card.classList.remove('selected');
+            state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== mealId);
+
+            // Remove from harmony grid
+            const harmonyCard = document.querySelector(`.harmony-card[data-meal-id="${mealId}"]`);
+            if (harmonyCard) {
+              harmonyCard.remove();
+            }
+
+            // Hide harmonies section if empty
+            const harmoniesSection = document.querySelector('.harmonies-section');
+            if (harmoniesSection) {
+              const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+              if (harmonyGrid && harmonyGrid.children.length === 0) {
+                harmoniesSection.style.display = 'none';
+              }
+            }
+          } else {
+            // Check - add to harmonies and selections
+            selectedMeals.add(mealId);
+            card.classList.add('selected');
+
+            if (!state.harmoniesSoFar.includes(mealId)) {
+              state.harmoniesSoFar = [...state.harmoniesSoFar, mealId];
+            }
+
+            // Create or update harmonies section
+            let harmoniesSection = document.querySelector('.harmonies-section');
+            if (!harmoniesSection) {
+              harmoniesSection = document.createElement('div');
+              harmoniesSection.className = 'harmonies-section';
+              harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
+              const draftInfo = document.querySelector('.draft-info');
+              draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
+            }
+            harmoniesSection.style.display = 'block';
+
+            // Add harmony card
+            const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+            const harmonyCard = document.createElement('div');
+            harmonyCard.className = 'harmony-card locked';
+            harmonyCard.dataset.mealId = mealId;
+            harmonyCard.innerHTML = `
+              <span class="meal-emoji">${partialMeal.emoji}</span>
+              <div class="meal-name">${partialMeal.name}</div>
+            `;
+            harmonyGrid.appendChild(harmonyCard);
+          }
+
+          // Update displays
+          updateDisplays();
+          return;
+        }
+
         // Handle lock selection mode
         if (isSelectingToLock && activeLockUpgrade) {
           // Lock this meal
@@ -302,6 +385,7 @@ import GameLayout from '../layouts/GameLayout.astro';
             const draftInfo = document.querySelector('.draft-info');
             draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
           }
+          harmoniesSection.style.display = 'block';
 
           // Add harmony card
           const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
@@ -360,11 +444,11 @@ import GameLayout from '../layouts/GameLayout.astro';
               mealCard.dataset.cost = getCostPoints(lockedMeal.cost);
               mealCard.dataset.usd = lockedMeal.estimatedPrice || 0;
               mealCard.innerHTML = `
-                <div class="meal-header">
-                  <span class="meal-emoji">${lockedMeal.emoji}</span>
+                <span class="meal-emoji">${lockedMeal.emoji}</span>
+                <div class="meal-title-row">
+                  <span class="meal-name">${lockedMeal.name}</span>
+                  <span class="meal-cost">(${lockedMeal.cost})</span>
                 </div>
-                <div class="meal-name">${lockedMeal.name}</div>
-                <div class="meal-cost">${lockedMeal.cost}</div>
                 <div class="meal-meta">
                   <span>${lockedMeal.time}min</span>
                   <span>${lockedMeal.cuisine}</span>
@@ -1027,6 +1111,12 @@ import GameLayout from '../layouts/GameLayout.astro';
             state.harmoniesSoFar = [...state.harmoniesSoFar, takeoutId];
           }
 
+          // Persist takeout meal to state (so it survives across rounds)
+          state = {
+            ...state,
+            takeoutMeals: [...(state.takeoutMeals || []), takeoutMeal]
+          };
+
           // Create or update harmonies section
           let harmoniesSection = document.querySelector('.harmonies-section');
           if (!harmoniesSection) {
@@ -1036,6 +1126,7 @@ import GameLayout from '../layouts/GameLayout.astro';
             const draftInfo = document.querySelector('.draft-info');
             draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
           }
+          harmoniesSection.style.display = 'block';
 
           // Add harmony card
           const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
@@ -1065,6 +1156,12 @@ import GameLayout from '../layouts/GameLayout.astro';
 
               // Remove from takeout meals map
               takeoutMeals.delete(takeoutId);
+
+              // Remove from state (persisted takeout meals)
+              state = {
+                ...state,
+                takeoutMeals: (state.takeoutMeals || []).filter(meal => meal.id !== takeoutId)
+              };
 
               // Clear active takeout tracking
               activeTakeoutUpgrade = null;
@@ -1105,16 +1202,26 @@ import GameLayout from '../layouts/GameLayout.astro';
           // Save original pool for undo
           const originalPool = [...state.pool];
           const originalPoolCards = document.querySelector('.meal-pool').innerHTML;
+          const originalSelections = new Set(selectedMeals); // Save current selections
 
           // Get partial harmony IDs (other player's picks that aren't harmonized yet)
-          const otherPlayerAllPicks = currentPlayer === 'A'
-            ? (state.playerBAllPicks || [])
-            : (state.playerAAllPicks || []);
+          // Don't show partial harmonies in Round 1
+          const otherPlayerAllPicks = state.currentRound > 1
+            ? (currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
+            : [];
           const partialHarmonyIds = otherPlayerAllPicks.filter(id => !state.harmoniesSoFar.includes(id));
 
-          // Keep partial harmonies in the pool
-          const mealsToKeep = state.pool.filter(meal => partialHarmonyIds.includes(meal.id));
-          const mealsToKeepIds = new Set(mealsToKeep.map(m => m.id));
+          // Keep partial harmonies AND selected meals in the pool
+          // Get IDs of meals to keep
+          const mealsToKeepIds = new Set([
+            ...partialHarmonyIds,
+            ...Array.from(selectedMeals)
+          ]);
+
+          // Fetch full meal objects from allMeals for the IDs we want to keep
+          const mealsToKeep = Array.from(mealsToKeepIds)
+            .map(id => allMeals.find(m => m.id === id))
+            .filter(meal => meal !== undefined);
 
           // Calculate how many new meals we need
           const targetPoolSize = (state.settings.mealCount - (state.harmoniesSoFar?.length || 0)) * 5;
@@ -1136,8 +1243,8 @@ import GameLayout from '../layouts/GameLayout.astro';
           const newPool = [...mealsToKeep, ...filteredNewMeals];
           state = { ...state, pool: newPool };
 
-          // Clear current selections (since pool is changing)
-          selectedMeals.clear();
+          // Keep selections (don't clear them)
+          // selectedMeals already contains the right IDs
 
           // Update the meal pool UI
           const mealPoolEl = document.querySelector('.meal-pool');
@@ -1145,29 +1252,97 @@ import GameLayout from '../layouts/GameLayout.astro';
 
           for (const meal of newPool) {
             const isPartial = partialHarmonyIds.includes(meal.id);
+            const isSelected = selectedMeals.has(meal.id); // Check if this meal was selected
             const mealCard = document.createElement('div');
             mealCard.className = 'meal-card';
+            if (isSelected) {
+              mealCard.classList.add('selected'); // Restore selected state
+            }
             mealCard.dataset.mealId = meal.id;
             mealCard.dataset.cost = getCostPoints(meal.cost);
             mealCard.dataset.usd = meal.estimatedPrice || 0;
             mealCard.dataset.partial = isPartial ? 'true' : 'false';
             mealCard.innerHTML = `
-              <div class="meal-header">
-                <span class="meal-emoji">${meal.emoji}</span>
-                ${isPartial ? '<span class="partner-pick-star">✨</span>' : ''}
+              ${isPartial ? '<span class="partner-pick-star">✨</span>' : ''}
+              <span class="meal-emoji">${meal.emoji}</span>
+              <div class="meal-title-row">
+                <span class="meal-name">${meal.name}</span>
+                <span class="meal-cost">(${meal.cost})</span>
               </div>
-              <div class="meal-name">${meal.name}</div>
-              <div class="meal-cost">${meal.cost}</div>
-              ${isPartial ? '<div class="partial-harmony-badge">Partial Harmony</div>' : ''}
               <div class="meal-meta">
                 <span>${meal.time}min</span>
                 <span>${meal.cuisine}</span>
               </div>
+              ${isPartial ? '<div class="partial-harmony-badge">Partial Harmony</div>' : ''}
             `;
 
             // Add click handler
-            mealCard.addEventListener('click', () => {
+            mealCard.addEventListener('click', async () => {
               const mealId = parseInt(mealCard.dataset.mealId);
+
+              // Handle partial harmony - immediately lock into harmonies but keep in draft list
+              if (partialHarmonyIds.includes(mealId)) {
+                // Find the meal data
+                const partialMeal = (await getAllMeals()).find(m => m.id === mealId);
+                if (!partialMeal) return;
+
+                // Toggle selection
+                if (selectedMeals.has(mealId)) {
+                  // Uncheck - remove from harmonies and selections
+                  selectedMeals.delete(mealId);
+                  mealCard.classList.remove('selected');
+                  state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== mealId);
+
+                  // Remove from harmony grid
+                  const harmonyCard = document.querySelector(`.harmony-card[data-meal-id="${mealId}"]`);
+                  if (harmonyCard) {
+                    harmonyCard.remove();
+                  }
+
+                  // Hide harmonies section if empty
+                  const harmoniesSection = document.querySelector('.harmonies-section');
+                  if (harmoniesSection) {
+                    const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+                    if (harmonyGrid && harmonyGrid.children.length === 0) {
+                      harmoniesSection.style.display = 'none';
+                    }
+                  }
+                } else {
+                  // Check - add to harmonies and selections
+                  selectedMeals.add(mealId);
+                  mealCard.classList.add('selected');
+
+                  if (!state.harmoniesSoFar.includes(mealId)) {
+                    state.harmoniesSoFar = [...state.harmoniesSoFar, mealId];
+                  }
+
+                  // Create or update harmonies section
+                  let harmoniesSection = document.querySelector('.harmonies-section');
+                  if (!harmoniesSection) {
+                    harmoniesSection = document.createElement('div');
+                    harmoniesSection.className = 'harmonies-section';
+                    harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
+                    const draftInfo = document.querySelector('.draft-info');
+                    draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
+                  }
+                  harmoniesSection.style.display = 'block';
+
+                  // Add harmony card
+                  const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+                  const harmonyCard = document.createElement('div');
+                  harmonyCard.className = 'harmony-card locked';
+                  harmonyCard.dataset.mealId = mealId;
+                  harmonyCard.innerHTML = `
+                    <span class="meal-emoji">${partialMeal.emoji}</span>
+                    <div class="meal-name">${partialMeal.name}</div>
+                  `;
+                  harmonyGrid.appendChild(harmonyCard);
+                }
+
+                // Update displays
+                updateDisplays();
+                return;
+              }
 
               // Handle lock selection mode
               if (isSelectingToLock && activeLockUpgrade) {
@@ -1205,8 +1380,9 @@ import GameLayout from '../layouts/GameLayout.astro';
               // Restore original pool
               state = { ...state, pool: originalPool };
 
-              // Clear selections
+              // Restore original selections
               selectedMeals.clear();
+              originalSelections.forEach(id => selectedMeals.add(id));
 
               // Restore original pool UI
               mealPoolEl.innerHTML = originalPoolCards;
@@ -1246,18 +1422,15 @@ import GameLayout from '../layouts/GameLayout.astro';
           return;
         }
 
-        // Handle theme upgrades - one theme per round
+        // Handle theme upgrades - can be changed anytime
         if (upgrade.type === 'theme') {
-          if (player.usedThemeRound === state.currentRound) {
-            return;
-          }
-
           // Apply theme to body
           document.body.className = upgrade.themeStyle || 'theme-fantasy';
 
-          // Mark theme as used for this round
+          // Save theme to state (persists across rounds)
           state = {
             ...state,
+            theme: upgrade.themeStyle || 'theme-fantasy',
             players: {
               ...state.players,
               [currentPlayer]: {
@@ -1268,19 +1441,22 @@ import GameLayout from '../layouts/GameLayout.astro';
             }
           };
 
-          // Disable all theme buttons
+          // Mark only this theme button as used
           document.querySelectorAll('.btn-use-upgrade').forEach(b => {
             const btnUpgrade = player.upgrades.find(u => u.id === b.dataset.upgradeId);
             if (btnUpgrade?.type === 'theme') {
-              b.disabled = true;
               if (b.dataset.upgradeId === upgradeId) {
-                b.textContent = 'Used';
+                b.textContent = 'Active';
                 b.classList.add('btn-used');
                 const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
                 if (card) card.classList.add('used');
               } else {
-                const otherUpgrade = player.upgrades.find(u => u.id === b.dataset.upgradeId);
-                b.textContent = otherUpgrade?.rejectionText || 'Not this time';
+                // Reset other theme buttons to allow switching
+                b.textContent = 'Use';
+                b.disabled = false;
+                b.classList.remove('btn-used');
+                const otherCard = document.querySelector(`.upgrade-card[data-upgrade-id="${b.dataset.upgradeId}"]`);
+                if (otherCard) otherCard.classList.remove('used');
               }
             }
           });
@@ -1288,19 +1464,16 @@ import GameLayout from '../layouts/GameLayout.astro';
       });
     });
 
-    // Disable theme buttons if already used this round
-    if (player.usedThemeRound === state.currentRound && player.usedThemeId) {
+    // Mark active theme button if a theme was used
+    if (player.usedThemeId) {
       document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
         const btnUpgrade = player.upgrades.find(u => u.id === btn.dataset.upgradeId);
         if (btnUpgrade?.type === 'theme') {
-          btn.disabled = true;
           if (btn.dataset.upgradeId === player.usedThemeId) {
-            btn.textContent = 'Used';
+            btn.textContent = 'Active';
             btn.classList.add('btn-used');
             const card = document.querySelector(`.upgrade-card[data-upgrade-id="${player.usedThemeId}"]`);
             if (card) card.classList.add('used');
-          } else {
-            btn.textContent = btnUpgrade?.rejectionText || 'Not this time';
           }
         }
       });
@@ -1333,7 +1506,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
   </script>
 
-  <style>
+  <style is:global>
     .draft-info {
       margin: 20px 0;
       padding: 16px;
@@ -1386,13 +1559,15 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .meal-card {
+      position: relative;
       padding: 12px;
       background: var(--bg-panel);
       border: 2px solid var(--border);
       cursor: pointer;
       transition: all 0.2s;
-      display: flex;
-      flex-direction: column;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
       gap: 8px;
       min-width: 0;
       overflow: hidden;
@@ -1413,32 +1588,34 @@ import GameLayout from '../layouts/GameLayout.astro';
       z-index: 10;
     }
 
-    .meal-header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    @media (max-width: 768px) {
-      .meal-header {
-        margin-bottom: 4px;
-      }
-    }
-
     .meal-emoji {
       font-size: 40px;
+      text-align: center;
+      display: block;
+    }
+
+    .meal-title-row {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      width: 100% !important;
     }
 
     .meal-cost {
       font-size: 14px;
       font-weight: bold;
       color: var(--primary);
-      text-align: center;
+      white-space: nowrap;
     }
 
     .partner-pick-star {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       font-size: 18px;
       animation: sparkle 2s ease-in-out infinite;
+      z-index: 10;
     }
 
     @keyframes sparkle {
@@ -1489,17 +1666,19 @@ import GameLayout from '../layouts/GameLayout.astro';
     .btn-undo-lock {
       margin-top: 8px;
       padding: 8px;
-      background: var(--danger);
-      color: var(--text);
+      background: var(--danger) !important;
+      color: var(--text) !important;
       border: none;
       border-radius: 0;
       font-family: 'Press Start 2P', monospace;
       font-size: 14px;
+      font-weight: normal;
       cursor: pointer;
       transition: all 0.2s;
       -webkit-appearance: none;
       appearance: none;
       text-transform: none;
+      text-decoration: none;
       letter-spacing: normal;
       width: 100%;
       box-sizing: border-box;
@@ -1510,7 +1689,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       .btn-undo-lock {
         margin-top: 6px;
         padding: 6px;
-        font-size: 10px;
+        font-size: 14px;
       }
     }
 
@@ -1525,6 +1704,8 @@ import GameLayout from '../layouts/GameLayout.astro';
       font-weight: bold;
       overflow-wrap: break-word;
       word-break: break-word;
+      flex: 1;
+      min-width: 0;
     }
 
     .partial-harmony-badge {
@@ -1541,10 +1722,11 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .meal-meta {
-      display: flex;
+      display: flex !important;
       justify-content: space-between;
       font-size: 14px;
       color: var(--text-dim);
+      width: 100% !important;
     }
 
     .harmonies-section {
@@ -1692,6 +1874,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .upgrade-card {
+      position: relative;
       padding: 16px;
       background: var(--bg-panel);
       border: 2px solid var(--border);
@@ -1751,6 +1934,104 @@ import GameLayout from '../layouts/GameLayout.astro';
       border-color: var(--border);
     }
 
+    .theme-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .takeout-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .lock-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    .redraw-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+      .theme-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .takeout-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .lock-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .redraw-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+    }
+
     .upgrade-emoji {
       font-size: 32px;
       text-align: center;
@@ -1771,7 +2052,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     @media (max-width: 768px) {
       .upgrade-name {
-        font-size: 12px;
+        font-size: 14px;
       }
     }
 
@@ -1784,7 +2065,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     @media (max-width: 768px) {
       .upgrade-effect {
-        font-size: 12px;
+        font-size: 14px;
         line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 3;
@@ -1794,19 +2075,21 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .btn-use-upgrade {
-      margin-top: 8px;
+      margin-top: auto;
       padding: 12px 16px;
-      background: var(--accent);
-      color: var(--bg-dark);
+      background: var(--accent) !important;
+      color: var(--bg-dark) !important;
       border: none;
       border-radius: 0;
       font-family: 'Press Start 2P', monospace;
       font-size: 14px;
+      font-weight: normal;
       cursor: pointer;
       transition: all 0.2s;
       -webkit-appearance: none;
       appearance: none;
       text-transform: none;
+      text-decoration: none;
       letter-spacing: normal;
       width: 100%;
       box-sizing: border-box;
@@ -1815,9 +2098,8 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     @media (max-width: 768px) {
       .btn-use-upgrade {
-        margin-top: 8px;
         padding: 10px 12px;
-        font-size: 12px;
+        font-size: 14px;
       }
     }
 
@@ -1828,8 +2110,8 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .btn-use-upgrade:disabled {
-      background: var(--text-dim);
-      color: var(--bg-panel);
+      background: var(--text-dim) !important;
+      color: var(--bg-panel) !important;
       cursor: not-allowed;
       opacity: 0.5;
       transform: none;
@@ -1837,10 +2119,214 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .btn-use-upgrade.btn-used {
-      background: var(--bg-dark);
-      color: var(--text-dim);
+      background: var(--bg-dark) !important;
+      color: var(--text-dim) !important;
       border: 2px solid var(--border);
       opacity: 0.7;
+    }
+
+    /* Theme-specific button styling */
+
+    /* Fantasy Theme - Mystical purple */
+    body.theme-fantasy .btn-use-upgrade {
+      background: linear-gradient(135deg, #d4a0ff, #b080ff) !important;
+      box-shadow: 0 0 15px rgba(212, 160, 255, 0.3);
+    }
+
+    body.theme-fantasy .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 0 0 25px rgba(212, 160, 255, 0.5), 0 4px 12px rgba(212, 160, 255, 0.4);
+      animation: shimmer 2s ease-in-out infinite;
+    }
+
+    body.theme-fantasy .btn-undo-lock {
+      box-shadow: 0 0 10px rgba(212, 160, 255, 0.2);
+    }
+
+    /* Cyberpunk Theme - Neon digital */
+    body.theme-cyberpunk .btn-use-upgrade {
+      background: linear-gradient(135deg, #ff00ff, #ff0080) !important;
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 1px solid #ff00ff;
+    }
+
+    body.theme-cyberpunk .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 0 0 30px rgba(255, 0, 255, 0.6), 0 0 40px rgba(255, 0, 255, 0.3);
+      animation: glitch 0.3s ease-in-out infinite;
+    }
+
+    body.theme-cyberpunk .btn-undo-lock {
+      border: 1px solid #ff4040;
+      box-shadow: 0 0 15px rgba(255, 64, 64, 0.4);
+    }
+
+    /* Western Theme - Rustic frontier */
+    body.theme-western .btn-use-upgrade {
+      background: linear-gradient(135deg, #d4a060, #b08040) !important;
+      box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+      border: 2px solid #8a6030;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    body.theme-western .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(212, 160, 96, 0.3);
+      transform: translateY(-3px);
+    }
+
+    body.theme-western .btn-undo-lock {
+      border: 2px solid #8a3030;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Noir Theme - High contrast detective */
+    body.theme-noir .btn-use-upgrade {
+      background: #ff4040 !important;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8);
+      border: 2px solid #ffffff;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    body.theme-noir .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 64, 64, 0.5);
+      transform: translateY(-2px) translateX(-2px);
+    }
+
+    body.theme-noir .btn-undo-lock {
+      border: 2px solid #ffffff;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Pirate Theme - Nautical gold */
+    body.theme-pirate .btn-use-upgrade {
+      background: linear-gradient(135deg, #ffd700, #daa520) !important;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+      border: 2px solid #b8860b;
+      color: #0a1a2a !important;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    }
+
+    body.theme-pirate .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), 0 4px 12px rgba(255, 215, 0, 0.4);
+      animation: treasure-shine 1.5s ease-in-out infinite;
+    }
+
+    body.theme-pirate .btn-undo-lock {
+      border: 2px solid #8b4513;
+      box-shadow: 0 0 10px rgba(255, 64, 64, 0.3);
+    }
+
+    /* Medieval Theme - Royal heraldic */
+    body.theme-medieval .btn-use-upgrade {
+      background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 2px solid #8b4789;
+      color: #1a0a1a !important;
+      text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    body.theme-medieval .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 40px rgba(138, 71, 137, 0.4);
+      animation: royal-glow 2s ease-in-out infinite;
+    }
+
+    body.theme-medieval .btn-undo-lock {
+      border: 2px solid #8b4789;
+      box-shadow: 0 0 12px rgba(138, 71, 137, 0.3);
+    }
+
+    /* Space Theme - Sci-fi holographic */
+    body.theme-space .btn-use-upgrade {
+      background: linear-gradient(135deg, #60a0ff, #4080dd) !important;
+      box-shadow: 0 0 20px rgba(96, 160, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      border: 1px solid #60a0ff;
+    }
+
+    body.theme-space .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 0 0 30px rgba(96, 160, 255, 0.6), 0 0 40px rgba(96, 160, 255, 0.3);
+      animation: hologram 2s ease-in-out infinite;
+    }
+
+    body.theme-space .btn-undo-lock {
+      border: 1px solid #ff6060;
+      box-shadow: 0 0 15px rgba(255, 96, 96, 0.4);
+    }
+
+    /* Horror Theme - Dark pulse */
+    body.theme-horror .btn-use-upgrade {
+      background: linear-gradient(135deg, #ff4040, #cc0000) !important;
+      box-shadow: 0 0 20px rgba(255, 64, 64, 0.4), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+      border: 1px solid #8a0000;
+    }
+
+    body.theme-horror .btn-use-upgrade:hover:not(:disabled) {
+      box-shadow: 0 0 30px rgba(255, 64, 64, 0.6), 0 0 40px rgba(255, 64, 64, 0.4);
+      animation: horror-pulse 1.5s ease-in-out infinite;
+    }
+
+    body.theme-horror .btn-undo-lock {
+      border: 1px solid #8a0000;
+      box-shadow: 0 0 15px rgba(255, 64, 64, 0.5);
+      animation: horror-pulse 2s ease-in-out infinite;
+    }
+
+    /* Theme-specific animations */
+    @keyframes shimmer {
+      0%, 100% {
+        box-shadow: 0 0 25px rgba(212, 160, 255, 0.5), 0 4px 12px rgba(212, 160, 255, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 35px rgba(212, 160, 255, 0.7), 0 4px 16px rgba(212, 160, 255, 0.6);
+      }
+    }
+
+    @keyframes glitch {
+      0%, 100% {
+        transform: translateY(-2px);
+      }
+      25% {
+        transform: translateY(-2px) translateX(-2px);
+      }
+      75% {
+        transform: translateY(-2px) translateX(2px);
+      }
+    }
+
+    @keyframes treasure-shine {
+      0%, 100% {
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), 0 4px 12px rgba(255, 215, 0, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 35px rgba(255, 215, 0, 0.8), 0 4px 16px rgba(255, 215, 0, 0.6);
+      }
+    }
+
+    @keyframes royal-glow {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 0 40px rgba(138, 71, 137, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 50px rgba(138, 71, 137, 0.6);
+      }
+    }
+
+    @keyframes hologram {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(96, 160, 255, 0.6), 0 0 40px rgba(96, 160, 255, 0.3);
+        opacity: 1;
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(96, 160, 255, 0.8), 0 0 50px rgba(96, 160, 255, 0.5);
+        opacity: 0.95;
+      }
+    }
+
+    @keyframes horror-pulse {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 64, 64, 0.6), 0 0 40px rgba(255, 64, 64, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(255, 64, 64, 0.8), 0 0 50px rgba(255, 64, 64, 0.6);
+      }
     }
 
     .draft-actions {

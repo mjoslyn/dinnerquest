@@ -96,11 +96,26 @@ export async function getAllUpgrades() {
 /**
  * Get random upgrades for a player
  * @param {number} count
+ * @param {string} theme - Theme class name (e.g., 'theme-fantasy')
  * @returns {Promise<Array>}
  */
-export async function getRandomUpgrades(count = 2) {
+export async function getRandomUpgrades(count = 2, theme = null) {
   const allUpgrades = await getAllUpgrades();
-  const shuffled = allUpgrades.sort(() => Math.random() - 0.5);
+
+  // Filter upgrades: include ALL theme upgrades, but filter non-theme upgrades by current theme
+  let availableUpgrades = allUpgrades;
+  if (theme) {
+    // Extract theme name from class (e.g., 'theme-fantasy' -> 'fantasy')
+    const themeName = theme.replace('theme-', '');
+    availableUpgrades = allUpgrades.filter(upgrade => {
+      // Include all theme upgrades regardless of current theme
+      if (upgrade.type === 'theme') return true;
+      // For non-theme upgrades, only include ones matching current theme
+      return upgrade.id.endsWith(`-${themeName}`);
+    });
+  }
+
+  const shuffled = availableUpgrades.sort(() => Math.random() - 0.5);
 
   const selected = [];
   let hasTakeout = false;

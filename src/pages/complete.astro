@@ -49,7 +49,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     <p>The week is planned. The kitchen awaits. Your culinary adventure begins now!</p>
   </div>
 
-  <script type="module">
+  <script>
     import { decodeGameState } from '../lib/urlCodec.js';
     import { getAllMeals } from '../lib/gameDataClient.js';
 
@@ -69,11 +69,25 @@ import GameLayout from '../layouts/GameLayout.astro';
     // Fetch all meals and render
     async function initializePage() {
       const allMeals = await getAllMeals();
+
+      // Restore takeout meals from state
+      const takeoutMeals = new Map();
+      if (state.takeoutMeals && state.takeoutMeals.length > 0) {
+        state.takeoutMeals.forEach(meal => {
+          takeoutMeals.set(meal.id, meal);
+        });
+      }
+
       const finalMenuIds = state.results?.finalMenu || [];
 
-      // Get meal objects (filter out undefined for takeout)
+      // Get meal objects (check both allMeals and takeout meals)
       const finalMeals = finalMenuIds
-        .map(id => allMeals.find(m => m.id === id))
+        .map(id => {
+          if (typeof id === 'string' && id.startsWith('takeout-')) {
+            return takeoutMeals.get(id);
+          }
+          return allMeals.find(m => m.id === id);
+        })
         .filter(meal => meal !== undefined);
 
       // Render menu grid
@@ -95,8 +109,13 @@ import GameLayout from '../layouts/GameLayout.astro';
       // Calculate total cost
       const peopleCount = 2;
       const totalUSD = finalMenuIds.reduce((sum, id) => {
-        const meal = allMeals.find(m => m.id === id);
-        return sum + (meal?.estimatedPrice || 30); // $30 for takeout
+        let meal;
+        if (typeof id === 'string' && id.startsWith('takeout-')) {
+          meal = takeoutMeals.get(id);
+        } else {
+          meal = allMeals.find(m => m.id === id);
+        }
+        return sum + (meal?.estimatedPrice || 30); // $30 fallback
       }, 0);
       const totalCost = totalUSD * peopleCount;
 
@@ -237,7 +256,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
   </script>
 
-  <style>
+  <style is:global>
     .final-menu h2 {
       font-size: 14px;
       color: var(--accent);
@@ -363,13 +382,16 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     .ingredient-list {
-      list-style: none;
+      list-style: none !important;
+      list-style-type: none !important;
       padding: 0;
       margin: 0;
     }
 
     .ingredient-list li {
       margin: 4px 0;
+      list-style: none !important;
+      list-style-type: none !important;
     }
 
     .ingredient-item {
