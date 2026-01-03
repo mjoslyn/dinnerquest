@@ -1468,10 +1468,18 @@ import GameLayout from '../layouts/GameLayout.astro';
       background: var(--danger);
       color: var(--text);
       border: none;
+      border-radius: 0;
       font-family: 'Press Start 2P', monospace;
       font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+      text-transform: none;
+      letter-spacing: normal;
+      width: 100%;
+      box-sizing: border-box;
+      line-height: 1.4;
     }
 
     .btn-undo-lock:hover {
@@ -1716,10 +1724,18 @@ import GameLayout from '../layouts/GameLayout.astro';
       background: var(--accent);
       color: var(--bg-dark);
       border: none;
+      border-radius: 0;
       font-family: 'Press Start 2P', monospace;
       font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+      text-transform: none;
+      letter-spacing: normal;
+      width: 100%;
+      box-sizing: border-box;
+      line-height: 1.4;
     }
 
     .btn-use-upgrade:hover:not(:disabled) {
@@ -1733,6 +1749,8 @@ import GameLayout from '../layouts/GameLayout.astro';
       color: var(--bg-panel);
       cursor: not-allowed;
       opacity: 0.5;
+      transform: none;
+      box-shadow: none;
     }
 
     .draft-actions {
