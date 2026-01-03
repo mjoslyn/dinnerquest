@@ -152,7 +152,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
     import { updatePlayerPicks, lockPlayerDraft } from '../lib/gameState.js';
     import { validateDraft, resolveDraft } from '../lib/gameLogic.js';
-    import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals } from '../lib/gameDataClient.js';
+    import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals, getAllMeals } from '../lib/gameDataClient.js';
 
     const params = new URLSearchParams(window.location.search);
     let state = decodeGameState(params);
@@ -190,8 +190,10 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     const shareMessage = document.getElementById('share-message');
 
     // Calculate cost of harmonies (already spent)
+    // Fetch all meals since harmonies are removed from pool in later rounds
+    const allMeals = await getAllMeals();
     const harmoniesCost = (state.harmoniesSoFar || []).reduce((sum, mealId) => {
-      const meal = state.pool.find(m => m.id === mealId);
+      const meal = allMeals.find(m => m.id === mealId);
       return sum + (meal ? getCostPoints(meal.cost) : 0);
     }, 0);
 

@@ -70,51 +70,7 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
             <span class="section-name">{sectionName}</span>
           </div>
 
-          <div class="add-item-form">
-            <input
-              type="text"
-              x-model={`newItemBySection['${sectionName}']`}
-              @keyup.enter={`addCustomItem('${sectionName}')`}
-              placeholder="Add item..."
-              class="add-item-input"
-            />
-            <button @click={`addCustomItem('${sectionName}')`} class="btn btn-secondary">+</button>
-          </div>
-
           <ul class="ingredient-list">
-            <template x-for="(customItem, index) in getCustomItemsForSection('{sectionName}')" :key="'custom-' + index">
-              <li>
-                <div class="ingredient-item custom-item">
-                  <input
-                    type="checkbox"
-                    :checked="checkedItems.has('custom-' + customItem.id)"
-                    @change="toggleItem('custom-' + customItem.id)"
-                  />
-                  <template x-if="editingId !== customItem.id">
-                    <span
-                      :class="checkedItems.has('custom-' + customItem.id) ? 'line-through opacity-50' : ''"
-                      @dblclick="startEditing(customItem.id)"
-                      class="item-text"
-                    >
-                      <span x-text="customItem.text"></span>
-                    </span>
-                  </template>
-                  <template x-if="editingId === customItem.id">
-                    <input
-                      type="text"
-                      x-model="editText"
-                      @keyup.enter="saveEdit(customItem.id)"
-                      @keyup.escape="cancelEdit"
-                      @blur="saveEdit(customItem.id)"
-                      x-init="$el.focus()"
-                      class="edit-item-input"
-                    />
-                  </template>
-                  <button @click="deleteCustomItem(customItem.id)" class="delete-btn" title="Delete">×</button>
-                </div>
-              </li>
-            </template>
-
             {items.map(item => {
               const itemId = item.ingredient.toLowerCase().replace(/[^a-z0-9]/g, '-');
               return (
@@ -158,70 +114,8 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       const checkedParam = urlParams.get('checked') || '';
       const initialChecked = checkedParam ? checkedParam.split(',').filter(Boolean) : [];
 
-      // Get custom items from URL
-      const customParam = urlParams.get('custom') || '';
-      const initialCustom = customParam ? JSON.parse(decodeURIComponent(customParam)) : [];
-
       return {
         checkedItems: new Set(initialChecked),
-        customItems: initialCustom,
-        newItemBySection: {},
-        editingId: null,
-        editText: '',
-        nextId: initialCustom.length > 0 ? Math.max(...initialCustom.map(i => i.id || 0)) + 1 : 0,
-
-        getCustomItemsForSection(section) {
-          return this.customItems.filter(item => item.section === section);
-        },
-
-        addCustomItem(section) {
-          const text = (this.newItemBySection[section] || '').trim();
-          if (text) {
-            this.customItems.push({
-              id: this.nextId++,
-              text: text,
-              section: section
-            });
-            this.newItemBySection[section] = '';
-            this.updateURL();
-          }
-        },
-
-        startEditing(id) {
-          this.editingId = id;
-          const item = this.customItems.find(i => i.id === id);
-          this.editText = item ? item.text : '';
-        },
-
-        saveEdit(id) {
-          if (this.editingId === id) {
-            const text = this.editText.trim();
-            if (text) {
-              const item = this.customItems.find(i => i.id === id);
-              if (item) {
-                item.text = text;
-                this.updateURL();
-              }
-            }
-            this.editingId = null;
-            this.editText = '';
-          }
-        },
-
-        cancelEdit() {
-          this.editingId = null;
-          this.editText = '';
-        },
-
-        deleteCustomItem(id) {
-          const index = this.customItems.findIndex(i => i.id === id);
-          if (index !== -1) {
-            this.customItems.splice(index, 1);
-            // Remove from checked items if it was checked
-            this.checkedItems.delete('custom-' + id);
-            this.updateURL();
-          }
-        },
 
         toggleItem(itemId) {
           if (this.checkedItems.has(itemId)) {
@@ -240,13 +134,6 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
             urlParams.set('checked', Array.from(this.checkedItems).join(','));
           } else {
             urlParams.delete('checked');
-          }
-
-          // Update custom items
-          if (this.customItems.length > 0) {
-            urlParams.set('custom', encodeURIComponent(JSON.stringify(this.customItems)));
-          } else {
-            urlParams.delete('custom');
           }
 
           const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
@@ -368,44 +255,6 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       text-align: center;
     }
 
-    .add-item-form {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 20px;
-      width: 100%;
-    }
-
-    .add-item-input {
-      flex: 1;
-      min-width: 0;
-      padding: 12px;
-      font-family: 'VT323', monospace;
-      font-size: 16px;
-      background: var(--bg-dark);
-      border: 2px solid var(--border);
-      color: var(--text);
-    }
-
-    .add-item-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .add-item-input::placeholder {
-      color: var(--text-dim);
-    }
-
-    .add-item-form .btn-secondary {
-      flex-shrink: 0;
-      width: 48px;
-      height: 48px;
-      padding: 0;
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .share-actions {
       display: flex;
       gap: 12px;
@@ -445,21 +294,6 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       margin-bottom: 8px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
-    }
-
-    .grocery-section .add-item-form {
-      margin-bottom: 12px;
-    }
-
-    .grocery-section .add-item-input {
-      font-size: 12px;
-      padding: 8px;
-    }
-
-    .grocery-section .add-item-form .btn-secondary {
-      width: 36px;
-      height: 36px;
-      font-size: 18px;
     }
 
     .section-name {
@@ -508,60 +342,6 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       margin-left: auto;
       font-size: 11px;
       color: var(--text-dim);
-    }
-
-    .custom-item {
-      position: relative;
-      padding-right: 36px;
-    }
-
-    .item-text {
-      flex: 1;
-      cursor: pointer;
-    }
-
-    .item-text:hover {
-      color: var(--accent);
-    }
-
-    .edit-item-input {
-      flex: 1;
-      padding: 4px 8px;
-      font-family: 'VT323', monospace;
-      font-size: 12px;
-      background: var(--bg-dark);
-      border: 1px solid var(--accent);
-      color: var(--text);
-    }
-
-    .edit-item-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px var(--accent-glow);
-    }
-
-    .delete-btn {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: var(--danger);
-      font-size: 24px;
-      line-height: 1;
-      cursor: pointer;
-      padding: 0;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .delete-btn:hover {
-      color: var(--text);
-      background: var(--danger);
     }
 
     .action-buttons {
