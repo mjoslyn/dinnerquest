@@ -1,164 +1,39 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
-import { decodeGameState } from '../lib/urlCodec.js';
-import { getAllMeals, getAllUpgrades, getCostPoints, getBudgetPoints, getRandomUpgrades } from '../lib/gameData.js';
-
-export const prerender = false;
-
-const params = Astro.url.searchParams;
-let state = decodeGameState(params);
-
-if (!state || state.status !== 'drafting') {
-  return Astro.redirect('/');
-}
-
-const currentPlayer = params.get('player') || 'A';
-
-// Initialize player if they don't exist
-if (!state.players[currentPlayer]) {
-  const upgrades = await getRandomUpgrades(2);
-  state = {
-    ...state,
-    players: {
-      ...state.players,
-      [currentPlayer]: {
-        name: null,
-        dietPreference: 3,
-        upgrades: upgrades,
-        picks: [],
-        locked: false
-      }
-    }
-  };
-}
-
-// Hydrate upgrades with full data (they're stored as just IDs in URL)
-const allUpgrades = await getAllUpgrades();
-if (state.players.A?.upgrades) {
-  state.players.A.upgrades = state.players.A.upgrades.map(u =>
-    allUpgrades.find(full => full.id === u.id) || u
-  );
-}
-if (state.players.B?.upgrades) {
-  state.players.B.upgrades = state.players.B.upgrades.map(u =>
-    allUpgrades.find(full => full.id === u.id) || u
-  );
-}
-
-const player = state.players[currentPlayer];
-const otherPlayerId = currentPlayer === 'A' ? 'B' : 'A';
-const otherPlayer = state.players[otherPlayerId];
-
-// Fetch full meal data for pool
-const allMeals = await getAllMeals();
-
-// Get the other player's previous picks (partial harmonies) - only from Round 2 onwards
-const otherPlayerAllPicks = state.currentRound > 1
-  ? (currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
-  : [];
-const partialHarmonyIds = otherPlayerAllPicks.filter(id => !state.harmoniesSoFar.includes(id));
-const partialHarmonyMeals = partialHarmonyIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
-
-// Combine pool with other player's picks, excluding harmonies
-const poolMealIds = state.pool.map(m => m.id);
-const combinedPoolIds = [...new Set([...poolMealIds, ...partialHarmonyIds])];
-// Filter out meals that are already harmonies (locked in)
-const availablePoolIds = combinedPoolIds.filter(id => !state.harmoniesSoFar.includes(id));
-let poolMeals = availablePoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
-
-// Filter by current player's diet preference (exclude meat if strict vegetarian)
-// BUT keep partial harmonies regardless of diet preference
-const otherPlayerPicksSet = new Set(partialHarmonyIds);
-if (player.dietPreference === 1) {
-  // Strict vegetarian - exclude meat dishes (dietScore >= 3) unless they're partial harmonies
-  poolMeals = poolMeals.filter(meal =>
-    meal.dietScore <= 2 || otherPlayerPicksSet.has(meal.id)
-  );
-}
-
-// Get harmonies for display (filter out undefined for takeout meals that don't persist)
-const harmonyMeals = state.harmoniesSoFar
-  .map(id => allMeals.find(m => m.id === id))
-  .filter(meal => meal !== undefined);
-
-// Budget is total across all rounds
-const budgetLimit = getBudgetPoints(state.settings.budgetCap, state.settings.mealCount);
-
-// Calculate cost already spent on harmonies
-const harmoniesCost = harmonyMeals.reduce((sum, meal) => sum + (meal ? getCostPoints(meal.cost) : 0), 0);
-const harmoniesUsdTotal = harmonyMeals.reduce((sum, meal) => sum + (meal?.estimatedPrice || 0), 0);
-const budgetRemaining = budgetLimit ? budgetLimit - harmoniesCost : null;
-const budgetText = budgetLimit ? `${budgetLimit}` : 'No limit';
-
-// Get sender name for OG tags (the current player who is sharing)
-const senderName = player?.name || `Player ${currentPlayer}`;
 ---
 
-<GameLayout senderName={senderName} currentRound={state.currentRound}>
+<GameLayout>
   <div class="panel">
-    <div class="panel-title">{player?.name || `Player ${currentPlayer}`} - ROUND {state.currentRound}</div>
+    <div class="panel-title" id="panel-title">Loading...</div>
 
-    {harmonyMeals.length > 0 && (
-      <div class="harmonies-section">
-        <h3>Harmonies (Locked In)</h3>
-        <div class="harmony-grid">
-          {harmonyMeals.map(meal => (
-            <div class="harmony-card locked">
-              <span class="meal-emoji">{meal.emoji}</span>
-              <div class="meal-name">{meal.name}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+    <!-- Harmonies section - populated by client -->
+    <div class="harmonies-section" id="harmonies-section" style="display: none;">
+      <h3>Harmonies (Locked In)</h3>
+      <div class="harmony-grid" id="harmony-grid"></div>
+    </div>
 
     <div class="draft-info">
       <div class="info-row">
         <div class="info-item">
           <span class="info-label">Meals to Pick:</span>
-          <span class="info-value" id="pick-count">{state.harmoniesSoFar.length} / {state.settings.mealCount}</span>
+          <span class="info-value" id="pick-count">0 / 5</span>
         </div>
         <div class="info-item">
           <span class="info-label">Budget:</span>
-          <span class="info-value" id="budget-display">{harmoniesCost} / {budgetText} <span class="usd-total" id="usd-display">(${harmoniesUsdTotal})</span></span>
+          <span class="info-value" id="budget-display">0 / 0 <span class="usd-total" id="usd-display">($0)</span></span>
         </div>
       </div>
     </div>
 
-    {player?.upgrades && player.upgrades.length > 0 && (
-      <div class="upgrades-section">
-        <h3>Your Themes</h3>
-        <div class="upgrades-grid">
-          {player.upgrades.map(upgrade => (
-            <div class="upgrade-card" data-upgrade-id={upgrade.id}>
-              <div class="upgrade-emoji">{upgrade.emoji}</div>
-              <div class="upgrade-name">{upgrade.name}</div>
-              <div class="upgrade-effect">{upgrade.effect}</div>
-              <button class="btn-use-upgrade" data-upgrade-id={upgrade.id}>Use</button>
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
+    <!-- Upgrades section - populated by client -->
+    <div class="upgrades-section" id="upgrades-section" style="display: none;">
+      <h3>Your Themes</h3>
+      <div class="upgrades-grid" id="upgrades-grid"></div>
+    </div>
 
-    <div class="meal-pool">
-      {poolMeals.map(meal => (
-        <div class="meal-card" data-meal-id={meal.id} data-cost={getCostPoints(meal.cost)} data-usd={meal.estimatedPrice || 0} data-partial={otherPlayerPicksSet.has(meal.id) ? "true" : "false"}>
-          <div class="meal-header">
-            <span class="meal-emoji">{meal.emoji}</span>
-            {otherPlayerPicksSet.has(meal.id) && <span class="partner-pick-star">✨</span>}
-          </div>
-          <div class="meal-name">{meal.name}</div>
-          <div class="meal-cost">{meal.cost}</div>
-          {otherPlayerPicksSet.has(meal.id) && (
-            <div class="partial-harmony-badge">Partial Harmony</div>
-          )}
-          <div class="meal-meta">
-            <span>{meal.time}min</span>
-            <span>{meal.cuisine}</span>
-          </div>
-        </div>
-      ))}
+    <!-- Meal pool - populated by client -->
+    <div class="meal-pool" id="meal-pool">
+      <div class="loading-placeholder">Loading meals...</div>
     </div>
 
     <div class="draft-actions">
@@ -176,7 +51,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
   </div>
 
   <div class="narrative">
-    <p>Pick <strong>at least {state.settings.mealCount} meals</strong>.</p>
+    <p>Pick <strong id="meal-count-text">at least 5 meals</strong>.</p>
   </div>
 
   <script>
@@ -253,6 +128,91 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       const meal = allMeals.find(m => m.id === mealId) || takeoutMeals.get(mealId);
       return sum + (meal?.estimatedPrice || 0);
     }, 0);
+
+    // Redirect to home if no valid state or wrong status
+    if (!state || state.status !== 'drafting') {
+      window.location.href = '/';
+    }
+
+    const player = state.players[currentPlayer];
+
+    // --- Initialize page content ---
+
+    // Set title
+    document.getElementById('panel-title').textContent =
+      `${player?.name || `Player ${currentPlayer}`} - ROUND ${state.currentRound}`;
+
+    // Set narrative
+    document.getElementById('meal-count-text').textContent = `at least ${mealCount} meals`;
+
+    // Render harmonies
+    const harmonyMeals = (state.harmoniesSoFar || [])
+      .map(id => allMeals.find(m => m.id === id))
+      .filter(meal => meal !== undefined);
+
+    if (harmonyMeals.length > 0) {
+      const harmoniesSection = document.getElementById('harmonies-section');
+      const harmonyGrid = document.getElementById('harmony-grid');
+      harmoniesSection.style.display = 'block';
+      harmonyGrid.innerHTML = harmonyMeals.map(meal => `
+        <div class="harmony-card locked">
+          <span class="meal-emoji">${meal.emoji}</span>
+          <div class="meal-name">${meal.name}</div>
+        </div>
+      `).join('');
+    }
+
+    // Render upgrades
+    if (player?.upgrades && player.upgrades.length > 0) {
+      const upgradesSection = document.getElementById('upgrades-section');
+      const upgradesGrid = document.getElementById('upgrades-grid');
+      upgradesSection.style.display = 'block';
+      upgradesGrid.innerHTML = player.upgrades.map(upgrade => `
+        <div class="upgrade-card" data-upgrade-id="${upgrade.id}">
+          <div class="upgrade-emoji">${upgrade.emoji}</div>
+          <div class="upgrade-name">${upgrade.name}</div>
+          <div class="upgrade-effect">${upgrade.effect}</div>
+          <button class="btn-use-upgrade" data-upgrade-id="${upgrade.id}">Use</button>
+        </div>
+      `).join('');
+    }
+
+    // Calculate meal pool
+    const otherPlayerAllPicks = state.currentRound > 1
+      ? (currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
+      : [];
+    const partialHarmonyIds = otherPlayerAllPicks.filter(id => !(state.harmoniesSoFar || []).includes(id));
+    const otherPlayerPicksSet = new Set(partialHarmonyIds);
+
+    const poolMealIds = state.pool.map(m => m.id);
+    const combinedPoolIds = [...new Set([...poolMealIds, ...partialHarmonyIds])];
+    const availablePoolIds = combinedPoolIds.filter(id => !(state.harmoniesSoFar || []).includes(id));
+    let poolMeals = availablePoolIds.map(id => allMeals.find(m => m.id === id)).filter(m => m);
+
+    // Filter by diet preference (keep partial harmonies regardless)
+    if (player?.dietPreference === 1) {
+      poolMeals = poolMeals.filter(meal =>
+        meal.dietScore <= 2 || otherPlayerPicksSet.has(meal.id)
+      );
+    }
+
+    // Render meal pool
+    const mealPoolEl = document.getElementById('meal-pool');
+    mealPoolEl.innerHTML = poolMeals.map(meal => `
+      <div class="meal-card" data-meal-id="${meal.id}" data-cost="${getCostPoints(meal.cost)}" data-usd="${meal.estimatedPrice || 0}" data-partial="${otherPlayerPicksSet.has(meal.id) ? "true" : "false"}">
+        <div class="meal-header">
+          <span class="meal-emoji">${meal.emoji}</span>
+          ${otherPlayerPicksSet.has(meal.id) ? '<span class="partner-pick-star">✨</span>' : ''}
+        </div>
+        <div class="meal-name">${meal.name}</div>
+        <div class="meal-cost">${meal.cost}</div>
+        ${otherPlayerPicksSet.has(meal.id) ? '<div class="partial-harmony-badge">Partial Harmony</div>' : ''}
+        <div class="meal-meta">
+          <span>${meal.time}min</span>
+          <span>${meal.cuisine}</span>
+        </div>
+      </div>
+    `).join('');
 
     // Update displays and run live validation
     function updateDisplays() {
@@ -1316,7 +1276,6 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     });
 
     // Disable theme buttons if already used this round
-    const player = state.players[currentPlayer];
     if (player.usedThemeRound === state.currentRound && player.usedThemeId) {
       document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
         const btnUpgrade = player.upgrades.find(u => u.id === btn.dataset.upgradeId);

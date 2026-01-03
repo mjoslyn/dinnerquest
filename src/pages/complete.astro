@@ -1,45 +1,5 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
-import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
-import { getAllMeals, generateShoppingList } from '../lib/gameData.js';
-
-export const prerender = false;
-
-const params = Astro.url.searchParams;
-const state = decodeGameState(params);
-
-if (!state || state.status !== 'complete') {
-  return Astro.redirect('/');
-}
-
-const currentPlayer = params.get('player') || 'A';
-
-// Fetch full meal data
-const allMeals = await getAllMeals();
-const allFinalMeals = state.results.finalMenu.map(id => allMeals.find(m => m.id === id));
-
-// Filter out undefined meals (takeout) for shopping list and display
-const finalMeals = allFinalMeals.filter(meal => meal !== undefined);
-
-// Generate shopping list (only for non-takeout meals)
-const shoppingList = await generateShoppingList(finalMeals);
-
-// Get checked items from URL
-const checkedParam = params.get('checked') || '';
-const checkedItems = checkedParam ? checkedParam.split(',') : [];
-
-// Calculate total USD cost (including takeout meals at $30 each)
-const totalUSD = state.results.finalMenu.reduce((sum, id) => {
-  const meal = allMeals.find(m => m.id === id);
-  if (meal) {
-    return sum + (meal.estimatedPrice || 0);
-  } else {
-    // Takeout meal - $$$
-    return sum + 30;
-  }
-}, 0);
-const peopleCount = 2;
-const totalCost = totalUSD * peopleCount;
 ---
 
 <GameLayout>
@@ -48,30 +8,18 @@ const totalCost = totalUSD * peopleCount;
 
     <div class="final-menu">
       <h2>Your Final Menu</h2>
-      <div class="menu-grid">
-        {finalMeals.map(meal => (
-          <div class="menu-item">
-            <span class="menu-emoji">{meal?.emoji || '?'}</span>
-            <div class="menu-details">
-              <div class="menu-name">{meal?.name || 'Unknown'}</div>
-              <div class="menu-meta">
-                <span>{meal?.time}min</span>
-                <span>{meal?.cost}</span>
-                <span>{meal?.cuisine}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div class="menu-grid" id="menu-grid">
+        <div class="loading-placeholder">Loading menu...</div>
       </div>
 
       <div class="total-cost">
-        <div class="cost-breakdown">
-          ${totalUSD.toFixed(2)} × {peopleCount} people = <strong>${totalCost.toFixed(2)}</strong>
+        <div class="cost-breakdown" id="cost-breakdown">
+          Loading...
         </div>
       </div>
     </div>
 
-    <div class="shopping-list-section" x-data="shoppingListData()">
+    <div class="shopping-list-section" x-data="shoppingListData()" id="shopping-list-section">
       <h3>Shopping List</h3>
 
       <div class="share-actions">
@@ -84,36 +32,10 @@ const totalCost = totalUSD * peopleCount;
       </div>
       <div id="share-message" class="share-message" style="display: none;"></div>
 
-      {Object.entries(shoppingList.bySection).map(([sectionName, items]) => (
-        <div class="grocery-section">
-          <div class="section-header">
-            <span class="section-name">{sectionName}</span>
-          </div>
-
-          <ul class="ingredient-list">
-            {items.map(item => {
-              const itemId = item.ingredient.toLowerCase().replace(/[^a-z0-9]/g, '-');
-              return (
-                <li data-item-id={itemId}>
-                  <label class="ingredient-item">
-                    <input
-                      type="checkbox"
-                      :checked={`checkedItems.has('${itemId}')`}
-                      @change={`toggleItem('${itemId}')`}
-                    />
-                    <span :class={`checkedItems.has('${itemId}') ? 'line-through opacity-50' : ''`}>
-                      {item.ingredient}
-                    </span>
-                    <span class="meal-usage">
-                      ({item.meals.join(', ')})
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+      <!-- Shopping list sections rendered by client -->
+      <div id="shopping-sections">
+        <div class="loading-placeholder">Loading shopping list...</div>
+      </div>
     </div>
 
     <div class="action-buttons">
@@ -126,6 +48,108 @@ const totalCost = totalUSD * peopleCount;
   <div class="narrative">
     <p>The week is planned. The kitchen awaits. Your culinary adventure begins now!</p>
   </div>
+
+  <script type="module">
+    import { decodeGameState } from '../lib/urlCodec.js';
+    import { getAllMeals } from '../lib/gameDataClient.js';
+
+    const params = new URLSearchParams(window.location.search);
+    const state = decodeGameState(params);
+
+    // Redirect if no valid state
+    if (!state || state.status !== 'complete') {
+      window.location.href = '/';
+    }
+
+    // Apply theme
+    if (state.theme) {
+      document.body.className = state.theme;
+    }
+
+    // Fetch all meals and render
+    async function initializePage() {
+      const allMeals = await getAllMeals();
+      const finalMenuIds = state.results?.finalMenu || [];
+
+      // Get meal objects (filter out undefined for takeout)
+      const finalMeals = finalMenuIds
+        .map(id => allMeals.find(m => m.id === id))
+        .filter(meal => meal !== undefined);
+
+      // Render menu grid
+      const menuGrid = document.getElementById('menu-grid');
+      menuGrid.innerHTML = finalMeals.map(meal => `
+        <div class="menu-item">
+          <span class="menu-emoji">${meal.emoji || '?'}</span>
+          <div class="menu-details">
+            <div class="menu-name">${meal.name || 'Unknown'}</div>
+            <div class="menu-meta">
+              <span>${meal.time}min</span>
+              <span>${meal.cost}</span>
+              <span>${meal.cuisine}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Calculate total cost
+      const peopleCount = 2;
+      const totalUSD = finalMenuIds.reduce((sum, id) => {
+        const meal = allMeals.find(m => m.id === id);
+        return sum + (meal?.estimatedPrice || 30); // $30 for takeout
+      }, 0);
+      const totalCost = totalUSD * peopleCount;
+
+      document.getElementById('cost-breakdown').innerHTML =
+        `$${totalUSD.toFixed(2)} × ${peopleCount} people = <strong>$${totalCost.toFixed(2)}</strong>`;
+
+      // Fetch and render shopping list
+      const mealIdsForShopping = finalMeals.map(m => m.id).join(',');
+      if (mealIdsForShopping) {
+        const response = await fetch(`/api/shopping-list?ids=${mealIdsForShopping}`);
+        const shoppingList = await response.json();
+
+        const shoppingSections = document.getElementById('shopping-sections');
+        const checkedParam = params.get('checked') || '';
+        const checkedItems = new Set(checkedParam ? checkedParam.split(',').filter(Boolean) : []);
+
+        shoppingSections.innerHTML = Object.entries(shoppingList.bySection).map(([sectionName, items]) => `
+          <div class="grocery-section">
+            <div class="section-header">
+              <span class="section-name">${sectionName}</span>
+            </div>
+            <ul class="ingredient-list">
+              ${items.map(item => {
+                const itemId = item.ingredient.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                const isChecked = checkedItems.has(itemId);
+                return `
+                  <li data-item-id="${itemId}">
+                    <label class="ingredient-item">
+                      <input
+                        type="checkbox"
+                        ${isChecked ? 'checked' : ''}
+                        onchange="window.shoppingListData().toggleItem('${itemId}')"
+                      />
+                      <span class="${isChecked ? 'line-through opacity-50' : ''}">
+                        ${item.ingredient}
+                      </span>
+                      <span class="meal-usage">
+                        (${item.meals.join(', ')})
+                      </span>
+                    </label>
+                  </li>
+                `;
+              }).join('')}
+            </ul>
+          </div>
+        `).join('');
+      } else {
+        document.getElementById('shopping-sections').innerHTML = '<p>No shopping list needed.</p>';
+      }
+    }
+
+    initializePage();
+  </script>
 
   <script is:inline>
     window.shoppingListData = function() {
