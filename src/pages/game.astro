@@ -38,7 +38,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     <div class="draft-actions">
       <button id="lock-btn" class="btn btn-primary" disabled>
-        Seal & Dispatch
+        <!-- Text updated by JavaScript based on theme -->
       </button>
       <button id="open-link-btn" class="btn btn-secondary" disabled title="Open link">
         →
@@ -87,6 +87,42 @@ import GameLayout from '../layouts/GameLayout.astro';
     if (subtitleEl && themeSubtitles[currentTheme]) {
       subtitleEl.textContent = themeSubtitles[currentTheme];
     }
+
+    // Theme-specific button text
+    const themeButtonText = {
+      'theme-fantasy': {
+        inProgress: 'Seal & Dispatch',
+        complete: 'Return Triumphant'
+      },
+      'theme-cyberpunk': {
+        inProgress: 'Upload & Transmit',
+        complete: 'Mission Complete'
+      },
+      'theme-western': {
+        inProgress: 'Saddle Up & Ride',
+        complete: 'Ride Into Sunset'
+      },
+      'theme-noir': {
+        inProgress: 'File the Case',
+        complete: 'Case Closed'
+      },
+      'theme-pirate': {
+        inProgress: 'Chart the Course',
+        complete: 'Claim the Treasure'
+      },
+      'theme-medieval': {
+        inProgress: 'Send the Herald',
+        complete: 'Feast Declared'
+      },
+      'theme-space': {
+        inProgress: 'Transmit Coordinates',
+        complete: 'Mission Accomplished'
+      },
+      'theme-horror': {
+        inProgress: 'Seal the Pact',
+        complete: 'Survive the Week'
+      }
+    };
 
     // Track takeout meals (id -> meal object) for cost calculations
     // Restore from state if available (persists across rounds)
@@ -142,7 +178,14 @@ import GameLayout from '../layouts/GameLayout.astro';
     const openLinkBtn = document.getElementById('open-link-btn');
     const copyLinkBtn = document.getElementById('copy-link-btn');
     const shareMessage = document.getElementById('share-message');
+
+    // Set initial button text based on theme
+    const initialButtonTexts = themeButtonText[currentTheme] || themeButtonText['theme-fantasy'];
+    lockBtn.textContent = initialButtonTexts?.inProgress || 'Seal & Dispatch';
     const draftActions = document.querySelector('.draft-actions');
+    if (!draftActions) {
+      console.error('draft-actions element not found! Theme:', currentTheme);
+    }
 
     // Calculate cost of harmonies (already spent)
     // Fetch all meals since harmonies are removed from pool in later rounds
@@ -304,23 +347,28 @@ import GameLayout from '../layouts/GameLayout.astro';
         questComplete = allHarmonies.length >= mealCount;
       }
 
-      // Update button text based on quest completion
+      // Update button text based on quest completion and theme
+      const buttonTexts = themeButtonText[currentTheme] || themeButtonText['theme-fantasy'];
       if (questComplete) {
-        lockBtn.textContent = 'Return Triumphant';
+        lockBtn.textContent = buttonTexts?.complete || 'Return Triumphant';
       } else {
-        lockBtn.textContent = 'Seal & Dispatch';
+        lockBtn.textContent = buttonTexts?.inProgress || 'Seal & Dispatch';
       }
 
       if (validation.valid) {
         lockBtn.disabled = false;
         openLinkBtn.disabled = false;
         copyLinkBtn.disabled = false;
-        draftActions.classList.add('visible');
+        if (draftActions) {
+          draftActions.classList.add('visible');
+        }
       } else {
         lockBtn.disabled = true;
         openLinkBtn.disabled = true;
         copyLinkBtn.disabled = true;
-        draftActions.classList.remove('visible');
+        if (draftActions) {
+          draftActions.classList.remove('visible');
+        }
       }
     }
 

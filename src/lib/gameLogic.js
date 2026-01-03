@@ -20,9 +20,14 @@ export function validateDraft(state, playerId, allMeals = null) {
     errors.push(`Must pick at least ${mealsNeeded} more meals`);
   }
 
-  // Check all picks are in pool
+  // Check all picks are in pool (including partial harmonies from previous rounds)
   const poolIds = state.pool.map(m => m.id);
-  const invalidPicks = player.picks.filter(id => !poolIds.includes(id));
+  const otherPlayerAllPicks = state.currentRound > 1
+    ? (playerId === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
+    : [];
+  const partialHarmonyIds = otherPlayerAllPicks.filter(id => !harmonies.includes(id));
+  const validMealIds = new Set([...poolIds, ...partialHarmonyIds, ...harmonies]);
+  const invalidPicks = player.picks.filter(id => !validMealIds.has(id));
   if (invalidPicks.length > 0) {
     errors.push('Some picks are not in the meal pool');
   }
