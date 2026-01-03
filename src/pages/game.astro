@@ -1332,7 +1332,8 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
 
-    .meal-pool {
+    /* Global styles for dynamically created meal cards */
+    :global(.meal-pool) {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 12px;
@@ -1340,12 +1341,12 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     @media (max-width: 768px) {
-      .meal-pool {
+      :global(.meal-pool) {
         grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    .meal-card {
+    :global(.meal-card) {
       padding: 12px;
       background: var(--bg-panel);
       border: 2px solid var(--border);
@@ -1356,13 +1357,13 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       gap: 8px;
     }
 
-    .meal-card:hover {
+    :global(.meal-card:hover) {
       border-color: var(--accent);
       opacity: 0.9;
       transform: translateY(-2px);
     }
 
-    .meal-card.selected {
+    :global(.meal-card.selected) {
       border-color: var(--accent);
       border-width: 3px;
       background: var(--bg-dark);
@@ -1371,24 +1372,24 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       z-index: 10;
     }
 
-    .meal-header {
+    :global(.meal-header) {
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    .meal-emoji {
+    :global(.meal-emoji) {
       font-size: 40px;
     }
 
-    .meal-cost {
+    :global(.meal-cost) {
       font-size: 14px;
       font-weight: bold;
       color: var(--primary);
       text-align: center;
     }
 
-    .partner-pick-star {
+    :global(.partner-pick-star) {
       font-size: 18px;
       animation: sparkle 2s ease-in-out infinite;
     }
@@ -1398,11 +1399,11 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       50% { opacity: 0.7; transform: scale(1.1); }
     }
 
-    .meal-card[data-partial="true"] {
+    :global(.meal-card[data-partial="true"]) {
       background: linear-gradient(135deg, var(--bg-panel) 0%, rgba(160, 96, 240, 0.15) 100%);
     }
 
-    .meal-card[data-partial="true"].selected {
+    :global(.meal-card[data-partial="true"].selected) {
       border-color: var(--accent);
       border-width: 3px;
       background: linear-gradient(135deg, var(--bg-dark) 0%, rgba(160, 96, 240, 0.1) 100%);
@@ -1411,20 +1412,20 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       z-index: 10;
     }
 
-    .meal-card.lockable {
+    :global(.meal-card.lockable) {
       border-color: var(--accent);
       animation: pulse 1.5s ease-in-out infinite;
       cursor: pointer;
     }
 
-    .meal-card.locked {
+    :global(.meal-card.locked) {
       position: relative;
       border-color: var(--success);
       border-width: 3px;
       box-shadow: 0 0 20px var(--success);
     }
 
-    .lock-icon {
+    :global(.lock-icon) {
       position: absolute;
       top: 8px;
       right: 8px;
@@ -1438,7 +1439,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       50% { box-shadow: 0 0 20px var(--accent-glow), 0 0 30px var(--accent-glow); }
     }
 
-    .btn-undo-lock {
+    :global(.btn-undo-lock) {
       margin-top: 8px;
       padding: 8px;
       background: var(--danger);
@@ -1450,18 +1451,18 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       transition: all 0.2s;
     }
 
-    .btn-undo-lock:hover {
+    :global(.btn-undo-lock:hover) {
       opacity: 0.9;
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(255, 64, 64, 0.4);
     }
 
-    .meal-name {
+    :global(.meal-name) {
       font-size: 15px;
       font-weight: bold;
     }
 
-    .partial-harmony-badge {
+    :global(.partial-harmony-badge) {
       font-size: 14px;
       padding: 4px 8px;
       background: var(--purple);
@@ -1474,7 +1475,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       letter-spacing: 0.5px;
     }
 
-    .meal-meta {
+    :global(.meal-meta) {
       display: flex;
       justify-content: space-between;
       font-size: 14px;
