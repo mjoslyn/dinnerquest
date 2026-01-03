@@ -70,6 +70,16 @@ Example: `src/pages/api/submit-pick.js` validates picks, updates state, redirect
 
 - Follow the @RULESET.md
 
+### Upgrade System
+
+Upgrades are special abilities players draw at game start. There are three types:
+
+1. **Theme upgrades** - Visual UI themes, can be used once per round (`usedThemeRound`, `usedThemeId`)
+2. **Lock upgrades** - Lock a meal directly into harmonies, single-use across all rounds (`usedLockId`)
+3. **Takeout upgrades** - Add a takeout meal as instant harmony, single-use across all rounds (`usedTakeoutId`)
+
+Lock and takeout upgrades persist their "used" state across rounds via URL params (`pALI`, `pATO`, `pBLI`, `pBTO`). Once used and the draft is sealed, they cannot be used again in subsequent rounds.
+
 ## Deployment
 
 Deployed to Netlify with on-demand rendering:
