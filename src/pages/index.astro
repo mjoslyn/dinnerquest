@@ -18,7 +18,6 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
 <GameLayout>
   <div class="panel">
     <div class="panel-title" id="panel-title">DINNER QUEST</div>
-    <div class="panel-subtitle" id="panel-subtitle">A meal planning roguelike</div>
 
     <form id="setup-form" class="setup-form">
       <div class="form-section">
@@ -184,7 +183,6 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
     // Apply themed content
     const content = themeContent[randomTheme];
     document.getElementById('panel-title').textContent = content.title;
-    document.getElementById('panel-subtitle').textContent = content.subtitle;
     document.querySelector('.header .subtitle').textContent = content.subtitle;
     document.querySelector('.header .title-link').textContent = `🍽️ ${content.title}`;
     document.getElementById('narrative-1').innerHTML = content.narrative[0];

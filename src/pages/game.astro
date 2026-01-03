@@ -305,8 +305,138 @@ const senderName = player?.name || `Player ${currentPlayer}`;
 
     // Meal card selection
     document.querySelectorAll('.meal-card').forEach(card => {
-      card.addEventListener('click', (e) => {
+      card.addEventListener('click', async (e) => {
         const mealId = parseInt(card.dataset.mealId);
+
+        // Handle lock selection mode
+        if (isSelectingToLock && activeLockUpgrade) {
+          // Lock this meal
+          lockedMealId = mealId;
+          isSelectingToLock = false;
+
+          // Find the meal data
+          const lockedMeal = (await getAllMeals()).find(m => m.id === mealId);
+          if (!lockedMeal) return;
+
+          // Add to harmonies immediately
+          if (!state.harmoniesSoFar.includes(mealId)) {
+            state.harmoniesSoFar = [...state.harmoniesSoFar, mealId];
+          }
+
+          // Create or update harmonies section
+          let harmoniesSection = document.querySelector('.harmonies-section');
+          if (!harmoniesSection) {
+            harmoniesSection = document.createElement('div');
+            harmoniesSection.className = 'harmonies-section';
+            harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
+            const draftInfo = document.querySelector('.draft-info');
+            draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
+          }
+
+          // Add harmony card
+          const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+          const harmonyCard = document.createElement('div');
+          harmonyCard.className = 'harmony-card locked lock-harmony-card';
+          harmonyCard.dataset.mealId = mealId;
+          harmonyCard.innerHTML = `
+            <span class="meal-emoji">${activeLockUpgrade.emoji}${lockedMeal.emoji}</span>
+            <div class="meal-name">${lockedMeal.name}</div>
+          `;
+          harmonyGrid.appendChild(harmonyCard);
+
+          // Remove lockable class from all cards and remove the meal from pool
+          document.querySelectorAll('.meal-card').forEach(c => {
+            c.classList.remove('lockable');
+            if (c.dataset.mealId === mealId.toString()) {
+              c.remove(); // Remove from pool entirely
+            }
+          });
+
+          // Create undo button
+          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${activeLockUpgrade.id}"]`);
+          if (upgradeCard) {
+            const undoBtn = document.createElement('button');
+            undoBtn.className = 'btn-undo-lock';
+            undoBtn.textContent = activeLockUpgrade.undoText || 'Undo';
+            undoBtn.addEventListener('click', () => {
+              // Remove from harmonies
+              state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== mealId);
+
+              // Remove harmony card
+              const harmonyCardToRemove = document.querySelector(`.lock-harmony-card[data-meal-id="${mealId}"]`);
+              if (harmonyCardToRemove) {
+                harmonyCardToRemove.remove();
+              }
+
+              // Hide harmonies section if empty
+              const harmonyGrid = document.querySelector('.harmony-grid');
+              if (harmonyGrid && harmonyGrid.children.length === 0) {
+                const harmoniesSection = document.querySelector('.harmonies-section');
+                if (harmoniesSection) harmoniesSection.remove();
+              }
+
+              // Re-add meal to pool
+              const mealPool = document.querySelector('.meal-pool');
+              const mealCard = document.createElement('div');
+              mealCard.className = 'meal-card';
+              mealCard.dataset.mealId = mealId;
+              mealCard.dataset.cost = getCostPoints(lockedMeal.cost);
+              mealCard.dataset.usd = lockedMeal.estimatedPrice || 0;
+              mealCard.innerHTML = `
+                <div class="meal-header">
+                  <span class="meal-emoji">${lockedMeal.emoji}</span>
+                </div>
+                <div class="meal-name">${lockedMeal.name}</div>
+                <div class="meal-cost">${lockedMeal.cost}</div>
+                <div class="meal-meta">
+                  <span>${lockedMeal.time}min</span>
+                  <span>${lockedMeal.cuisine}</span>
+                </div>
+              `;
+
+              // Re-attach click handler
+              mealCard.addEventListener('click', (e) => {
+                const clickedMealId = parseInt(mealCard.dataset.mealId);
+                if (mealCard.classList.contains('locked')) return;
+
+                if (selectedMeals.has(clickedMealId)) {
+                  selectedMeals.delete(clickedMealId);
+                  mealCard.classList.remove('selected');
+                } else {
+                  selectedMeals.add(clickedMealId);
+                  mealCard.classList.add('selected');
+                }
+                updateDisplays();
+              });
+
+              mealPool.appendChild(mealCard);
+
+              lockedMealId = null;
+              undoBtn.remove();
+
+              // Re-enable the lock upgrade button
+              const lockBtn = upgradeCard.querySelector('.btn-use-upgrade');
+              if (lockBtn) {
+                lockBtn.disabled = false;
+                lockBtn.textContent = 'Use';
+              }
+
+              // Update displays after unlock
+              updateDisplays();
+            });
+            upgradeCard.appendChild(undoBtn);
+          }
+
+          // Update displays after locking
+          updateDisplays();
+          return;
+        }
+
+        // Normal selection
+        // Prevent deselecting locked meals
+        if (card.classList.contains('locked')) {
+          return;
+        }
 
         if (selectedMeals.has(mealId)) {
           // Deselect
@@ -826,51 +956,160 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       }
     });
 
-    // Upgrade usage - one theme per round
+    // Track lock state
+    let isSelectingToLock = false;
+    let activeLockUpgrade = null;
+    let lockedMealId = null;
+
+    // Upgrade usage
     document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const upgradeId = btn.dataset.upgradeId;
         const player = state.players[currentPlayer];
+        const upgrade = player.upgrades.find(u => u.id === upgradeId);
 
-        // Check if already used a theme this round
-        if (player.usedThemeRound === state.currentRound) {
+        if (!upgrade) return;
+
+        // Handle lock upgrades
+        if (upgrade.type === 'lock') {
+          isSelectingToLock = true;
+          activeLockUpgrade = upgrade;
+
+          // Update button to show selecting state
+          btn.textContent = 'Click a meal...';
+          btn.disabled = true;
+
+          // Add visual indicator to meal cards
+          document.querySelectorAll('.meal-card').forEach(card => {
+            card.classList.add('lockable');
+          });
           return;
         }
 
-        const upgrade = player.upgrades.find(u => u.id === upgradeId);
-        if (!upgrade) return;
+        // Handle takeout upgrades
+        if (upgrade.type === 'takeout') {
+          // Create a fake meal ID for the takeout
+          const takeoutId = `takeout-${Date.now()}`;
 
-        // Apply theme to body
-        document.body.className = upgrade.themeStyle || 'theme-fantasy';
+          // Create meal object from upgrade data
+          const takeoutMeal = {
+            id: takeoutId,
+            name: upgrade.mealName || 'Takeout',
+            emoji: upgrade.emoji,
+            cost: upgrade.mealCost || '$$$',
+            estimatedPrice: upgrade.mealCost === '$' ? 10 : upgrade.mealCost === '$$' ? 20 : 30,
+            time: 0,
+            cuisine: 'Takeout'
+          };
 
-        // Mark theme as used for this round
-        state = {
-          ...state,
-          players: {
-            ...state.players,
-            [currentPlayer]: {
-              ...player,
-              usedThemeRound: state.currentRound,
-              usedThemeId: upgradeId
+          // Add to harmonies immediately
+          if (!state.harmoniesSoFar.includes(takeoutId)) {
+            state.harmoniesSoFar = [...state.harmoniesSoFar, takeoutId];
+          }
+
+          // Create or update harmonies section
+          let harmoniesSection = document.querySelector('.harmonies-section');
+          if (!harmoniesSection) {
+            harmoniesSection = document.createElement('div');
+            harmoniesSection.className = 'harmonies-section';
+            harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
+            const draftInfo = document.querySelector('.draft-info');
+            draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
+          }
+
+          // Add harmony card
+          const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+          const harmonyCard = document.createElement('div');
+          harmonyCard.className = 'harmony-card locked takeout-harmony-card';
+          harmonyCard.dataset.mealId = takeoutId;
+          harmonyCard.innerHTML = `
+            <span class="meal-emoji">${takeoutMeal.emoji}</span>
+            <div class="meal-name">${takeoutMeal.name}</div>
+          `;
+          harmonyGrid.appendChild(harmonyCard);
+
+          // Disable the upgrade button
+          btn.disabled = true;
+          btn.textContent = '✓ Used';
+
+          // Create undo button
+          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
+          if (upgradeCard) {
+            const undoBtn = document.createElement('button');
+            undoBtn.className = 'btn-undo-lock';
+            undoBtn.textContent = upgrade.undoText || 'Undo';
+            undoBtn.addEventListener('click', () => {
+              // Remove from harmonies
+              state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== takeoutId);
+
+              // Remove harmony card
+              const harmonyCardToRemove = document.querySelector(`.takeout-harmony-card[data-meal-id="${takeoutId}"]`);
+              if (harmonyCardToRemove) {
+                harmonyCardToRemove.remove();
+              }
+
+              // Hide harmonies section if empty
+              const harmonyGrid = document.querySelector('.harmony-grid');
+              if (harmonyGrid && harmonyGrid.children.length === 0) {
+                const harmoniesSection = document.querySelector('.harmonies-section');
+                if (harmoniesSection) harmoniesSection.remove();
+              }
+
+              undoBtn.remove();
+
+              // Re-enable the upgrade button
+              btn.disabled = false;
+              btn.textContent = 'Use';
+
+              // Update displays after removing takeout
+              updateDisplays();
+            });
+            upgradeCard.appendChild(undoBtn);
+          }
+
+          // Update displays after adding takeout
+          updateDisplays();
+          return;
+        }
+
+        // Handle theme upgrades - one theme per round
+        if (upgrade.type === 'theme') {
+          if (player.usedThemeRound === state.currentRound) {
+            return;
+          }
+
+          // Apply theme to body
+          document.body.className = upgrade.themeStyle || 'theme-fantasy';
+
+          // Mark theme as used for this round
+          state = {
+            ...state,
+            players: {
+              ...state.players,
+              [currentPlayer]: {
+                ...player,
+                usedThemeRound: state.currentRound,
+                usedThemeId: upgradeId
+              }
             }
-          }
-        };
+          };
 
-        // Disable all theme buttons
-        document.querySelectorAll('.btn-use-upgrade').forEach(b => {
-          b.disabled = true;
-          if (b.dataset.upgradeId === upgradeId) {
-            // The one that was clicked
-            b.textContent = '✗';
-            const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
-            if (card) card.classList.add('used');
-          } else {
-            // The other ones - find their rejection text
-            const otherUpgradeId = b.dataset.upgradeId;
-            const otherUpgrade = player.upgrades.find(u => u.id === otherUpgradeId);
-            b.textContent = otherUpgrade?.rejectionText || 'Not this time';
-          }
-        });
+          // Disable all theme buttons
+          document.querySelectorAll('.btn-use-upgrade').forEach(b => {
+            const btnUpgrade = player.upgrades.find(u => u.id === b.dataset.upgradeId);
+            if (btnUpgrade?.type === 'theme') {
+              b.disabled = true;
+              if (b.dataset.upgradeId === upgradeId) {
+                b.textContent = '✗';
+                const card = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
+                if (card) card.classList.add('used');
+              } else {
+                const otherUpgrade = player.upgrades.find(u => u.id === b.dataset.upgradeId);
+                b.textContent = otherUpgrade?.rejectionText || 'Not this time';
+              }
+            }
+          });
+        }
       });
     });
 
@@ -1010,6 +1249,51 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       transform: translateY(-8px) scale(1.05);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
       z-index: 10;
+    }
+
+    .meal-card.lockable {
+      border-color: var(--accent);
+      animation: pulse 1.5s ease-in-out infinite;
+      cursor: pointer;
+    }
+
+    .meal-card.locked {
+      position: relative;
+      border-color: var(--success);
+      border-width: 3px;
+      box-shadow: 0 0 20px var(--success);
+    }
+
+    .lock-icon {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 32px;
+      z-index: 20;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 10px var(--accent-glow); }
+      50% { box-shadow: 0 0 20px var(--accent-glow), 0 0 30px var(--accent-glow); }
+    }
+
+    .btn-undo-lock {
+      margin-top: 8px;
+      padding: 8px;
+      background: var(--danger);
+      color: var(--text);
+      border: none;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-undo-lock:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 64, 64, 0.4);
     }
 
     .meal-name {

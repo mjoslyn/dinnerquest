@@ -522,7 +522,7 @@ body.theme-fantasy {
   --bg-panel: #3a2a4a;
   --border: #6a4a8a;
   --text: #f0e0ff;
-  --text-dim: #a080c0;
+  --text-dim: #c0a0e0;
   --accent: #d4a0ff;
   --accent-glow: #d4a0ff66;
   --success: #80d480;
@@ -544,7 +544,7 @@ body.theme-cyberpunk {
   --bg-panel: #1a1a2a;
   --border: #00ffff;
   --text: #00ffff;
-  --text-dim: #0080a0;
+  --text-dim: #40c0e0;
   --accent: #ff00ff;
   --accent-glow: #ff00ff66;
   --success: #00ff00;
@@ -571,7 +571,7 @@ body.theme-western {
   --bg-panel: #3a2a1a;
   --border: #8a6a4a;
   --text: #f0e0d0;
-  --text-dim: #a08060;
+  --text-dim: #c0a080;
   --accent: #d4a060;
   --accent-glow: #d4a06044;
   --success: #80c060;
@@ -622,7 +622,7 @@ body.theme-pirate {
   --bg-panel: #1a2a3a;
   --border: #4a6a8a;
   --text: #f0f0e0;
-  --text-dim: #8090a0;
+  --text-dim: #a0b0c0;
   --accent: #ffd700;
   --accent-glow: #ffd70066;
   --success: #60d4a0;
@@ -651,7 +651,7 @@ body.theme-medieval {
   --bg-panel: #2a1a2a;
   --border: #8a6a4a;
   --text: #f0e0d0;
-  --text-dim: #a08070;
+  --text-dim: #c0a090;
   --accent: #ffd700;
   --accent-glow: #ffd70066;
   --success: #60c080;
@@ -676,7 +676,7 @@ body.theme-space {
   --bg-panel: #0a0a20;
   --border: #4060a0;
   --text: #e0e0ff;
-  --text-dim: #6080c0;
+  --text-dim: #80a0e0;
   --accent: #60a0ff;
   --accent-glow: #60a0ff66;
   --success: #40d480;
@@ -702,7 +702,7 @@ body.theme-horror {
   --bg-panel: #2a1a1a;
   --border: #6a2a2a;
   --text: #f0d0d0;
-  --text-dim: #a06060;
+  --text-dim: #c08080;
   --accent: #ff4040;
   --accent-glow: #ff404066;
   --success: #60a060;

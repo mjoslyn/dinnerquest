@@ -99,9 +99,27 @@ export async function getAllUpgrades() {
  * @returns {Promise<Array>}
  */
 export async function getRandomUpgrades(count = 2) {
-  const upgrades = await getAllUpgrades();
-  const shuffled = upgrades.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+  const allUpgrades = await getAllUpgrades();
+  const shuffled = allUpgrades.sort(() => Math.random() - 0.5);
+
+  const selected = [];
+  let hasTakeout = false;
+  let hasLock = false;
+
+  for (const upgrade of shuffled) {
+    // Skip if we already have max of this type
+    if (upgrade.type === 'takeout' && hasTakeout) continue;
+    if (upgrade.type === 'lock' && hasLock) continue;
+
+    selected.push(upgrade);
+
+    if (upgrade.type === 'takeout') hasTakeout = true;
+    if (upgrade.type === 'lock') hasLock = true;
+
+    if (selected.length >= count) break;
+  }
+
+  return selected;
 }
 
 /**

@@ -26,6 +26,11 @@ const shoppingList = await generateShoppingList(finalMeals);
 // Get checked items from URL
 const checkedParam = params.get('checked') || '';
 const checkedItems = checkedParam ? checkedParam.split(',') : [];
+
+// Calculate total USD cost
+const totalUSD = finalMeals.reduce((sum, meal) => sum + (meal?.estimatedPrice || 0), 0);
+const peopleCount = 2;
+const totalCost = totalUSD * peopleCount;
 ---
 
 <GameLayout>
@@ -48,6 +53,12 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
             </div>
           </div>
         ))}
+      </div>
+
+      <div class="total-cost">
+        <div class="cost-breakdown">
+          ${totalUSD.toFixed(2)} × {peopleCount} people = <strong>${totalCost.toFixed(2)}</strong>
+        </div>
       </div>
     </div>
 
@@ -242,6 +253,24 @@ const checkedItems = checkedParam ? checkedParam.split(',') : [];
       gap: 12px;
       font-size: 12px;
       color: var(--text-dim);
+    }
+
+    .total-cost {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--bg-panel);
+      border: 2px solid var(--accent);
+      text-align: center;
+    }
+
+    .cost-breakdown {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .cost-breakdown strong {
+      color: var(--accent);
+      font-size: 16px;
     }
 
     .shopping-list-section {

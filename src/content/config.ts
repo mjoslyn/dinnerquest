@@ -23,10 +23,13 @@ const upgradesCollection = defineCollection({
     id: z.string(),
     name: z.string(),
     emoji: z.string(),
-    type: z.enum(['theme']),
+    type: z.enum(['theme', 'lock', 'takeout']),
     effect: z.string(),
     themeStyle: z.string().optional(),
     rejectionText: z.string().optional(),
+    undoText: z.string().optional(),
+    mealName: z.string().optional(),
+    mealCost: z.string().optional(),
   }),
 });
 
