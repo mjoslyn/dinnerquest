@@ -1358,7 +1358,7 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     .meal-pool {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin: 20px 0;
     }
@@ -1378,6 +1378,8 @@ import GameLayout from '../layouts/GameLayout.astro';
       display: flex;
       flex-direction: column;
       gap: 8px;
+      min-width: 0;
+      overflow: hidden;
     }
 
     .meal-card:hover {
@@ -1499,6 +1501,8 @@ import GameLayout from '../layouts/GameLayout.astro';
     .meal-name {
       font-size: 15px;
       font-weight: bold;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .partial-harmony-badge {
