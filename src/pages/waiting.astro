@@ -1,58 +1,10 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
-import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
-import { createInitialState } from '../lib/gameState.js';
-import { getRandomUpgrades, getThemedPlayerNames } from '../lib/gameData.js';
-
-export const prerender = false;
-
-const params = Astro.url.searchParams;
-
-// Check if we received raw settings (from index page) or encoded state
-let state;
-const mealCountParam = params.get('mealCount');
-const budgetCapParam = params.get('budgetCap');
-
-if (mealCountParam && budgetCapParam) {
-  // New game from index page - create initial state with themed names
-  const settings = {
-    mealCount: parseInt(mealCountParam),
-    budgetCap: budgetCapParam,
-    allergies: params.get('allergies') ? params.get('allergies').split(',').filter(Boolean) : []
-  };
-  const theme = params.get('theme') || 'theme-fantasy';
-  const themedNames = getThemedPlayerNames(theme);
-  state = createInitialState(themedNames.A, settings, theme, themedNames.B);
-
-  // Redirect to waiting page with encoded state
-  const encoded = encodeGameState(state);
-  return Astro.redirect(`/waiting?${encoded.toString()}&player=A`);
-} else {
-  // Existing game - decode state from URL
-  state = decodeGameState(params);
-  if (!state) {
-    return Astro.redirect('/');
-  }
-}
-
-// Check if Player B has joined
-const playerBJoined = state.players.B !== null;
-
-// Get current player from URL
-const currentPlayer = params.get('player') || 'A';
-const player = state.players[currentPlayer];
-
-// Generate share URL for Player B
-const shareUrl = `${Astro.url.origin}${import.meta.env.BASE_URL}/waiting?${params.toString()}&player=B`;
-
-// Get random upgrades for display (for whoever is on the setup screen)
-// Always generate upgrades since we're showing the full setup form to all players
-const upgrades = await getRandomUpgrades(2);
 ---
 
 <GameLayout>
   <div class="panel">
-    <div class="panel-title">{player?.name || state.playerBName || currentPlayer} - CHOOSE YOUR PATH</div>
+    <div class="panel-title" id="panel-title">CHOOSE YOUR PATH</div>
 
       <form id="player-setup-form" class="player-setup">
         <div class="form-section">
@@ -64,15 +16,13 @@ const upgrades = await getRandomUpgrades(2);
               name="dietPreference"
               min="1"
               max="5"
-              value={player?.dietPreference || 3}
+              value="3"
               class="diet-slider"
               id="diet-slider"
             />
             <span class="diet-label">Meaty 🥩</span>
           </div>
-          <div class="diet-value" id="diet-value">
-            {player?.dietPreference || 3}
-          </div>
+          <div class="diet-value" id="diet-value">3</div>
         </div>
 
         <div class="form-section">
@@ -83,13 +33,17 @@ const upgrades = await getRandomUpgrades(2);
             </button>
           </div>
           <div class="upgrades-grid" id="upgrades-container">
-            {upgrades.map(upgrade => (
-              <div class="upgrade-card">
-                <div class="upgrade-emoji">{upgrade.emoji}</div>
-                <div class="upgrade-name">{upgrade.name}</div>
-                <div class="upgrade-effect">{upgrade.effect}</div>
-              </div>
-            ))}
+            <!-- Upgrades loaded client-side -->
+            <div class="upgrade-card loading">
+              <div class="upgrade-emoji">⏳</div>
+              <div class="upgrade-name">Loading...</div>
+              <div class="upgrade-effect"></div>
+            </div>
+            <div class="upgrade-card loading">
+              <div class="upgrade-emoji">⏳</div>
+              <div class="upgrade-name">Loading...</div>
+              <div class="upgrade-effect"></div>
+            </div>
           </div>
         </div>
 
@@ -103,8 +57,6 @@ const upgrades = await getRandomUpgrades(2);
     <p>Configure your preferences. The meal pool will be tailored to both players' tastes.</p>
   </div>
 
-  <script id="server-upgrades" type="application/json" set:html={JSON.stringify(upgrades)}></script>
-
   <script>
     import { decodeGameState, encodeGameState } from '../lib/urlCodec.js';
     import { setDietPreference, setPlayerUpgrades, generateMealPool, bothPlayersLocked, addPlayerB } from '../lib/gameState.js';
@@ -114,32 +66,50 @@ const upgrades = await getRandomUpgrades(2);
     let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
 
+    // Redirect to home if no valid state
+    if (!state || !state.id) {
+      window.location.href = '/';
+    }
+
     // Apply theme from state
     if (state.theme) {
       document.body.className = state.theme;
     }
 
-    // Initialize upgrades from server-rendered data
-    const serverUpgradesEl = document.getElementById('server-upgrades');
-    let currentUpgrades = serverUpgradesEl ? JSON.parse(serverUpgradesEl.textContent) : [];
+    // Set player name in title
+    const player = state.players[currentPlayer];
+    const playerName = player?.name || state.playerBName || currentPlayer;
+    document.getElementById('panel-title').textContent = `${playerName} - CHOOSE YOUR PATH`;
 
-    // Copy link functionality
-    const copyBtn = document.getElementById('copy-btn');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', () => {
-        const input = document.getElementById('share-url');
-        input.select();
-        navigator.clipboard.writeText(input.value);
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy Link';
-        }, 2000);
-      });
-    }
-
-    // Diet slider display
+    // Set diet preference if player already has one
     const dietSlider = document.getElementById('diet-slider');
     const dietValue = document.getElementById('diet-value');
+    if (player?.dietPreference) {
+      dietSlider.value = player.dietPreference;
+      dietValue.textContent = player.dietPreference;
+    }
+
+    // Load upgrades client-side
+    let currentUpgrades = [];
+    async function loadInitialUpgrades() {
+      currentUpgrades = await getRandomUpgrades(2);
+      renderUpgrades(currentUpgrades);
+    }
+
+    function renderUpgrades(upgrades) {
+      const container = document.getElementById('upgrades-container');
+      container.innerHTML = upgrades.map(upgrade => `
+        <div class="upgrade-card">
+          <div class="upgrade-emoji">${upgrade.emoji}</div>
+          <div class="upgrade-name">${upgrade.name}</div>
+          <div class="upgrade-effect">${upgrade.effect}</div>
+        </div>
+      `).join('');
+    }
+
+    loadInitialUpgrades();
+
+    // Diet slider display
     if (dietSlider && dietValue) {
       dietSlider.addEventListener('input', (e) => {
         dietValue.textContent = e.target.value;
@@ -150,17 +120,8 @@ const upgrades = await getRandomUpgrades(2);
     const redrawBtn = document.getElementById('redraw-btn');
     if (redrawBtn) {
       redrawBtn.addEventListener('click', async () => {
-        const newUpgrades = await getRandomUpgrades(2);
-        currentUpgrades = newUpgrades;
-
-        const container = document.getElementById('upgrades-container');
-        container.innerHTML = newUpgrades.map(upgrade => `
-          <div class="upgrade-card">
-            <div class="upgrade-emoji">${upgrade.emoji}</div>
-            <div class="upgrade-name">${upgrade.name}</div>
-            <div class="upgrade-effect">${upgrade.effect}</div>
-          </div>
-        `).join('');
+        currentUpgrades = await getRandomUpgrades(2);
+        renderUpgrades(currentUpgrades);
       });
     }
 

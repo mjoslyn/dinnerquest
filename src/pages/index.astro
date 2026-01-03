@@ -1,9 +1,5 @@
 ---
 import GameLayout from '../layouts/GameLayout.astro';
-import { createInitialState } from '../lib/gameState.js';
-import { encodeGameState } from '../lib/urlCodec.js';
-
-export const prerender = false;
 
 const MEAL_COUNT_OPTIONS = [3, 5, 7, 10];
 const BUDGET_OPTIONS = [
@@ -75,6 +71,10 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
   </div>
 
   <script>
+    import { createInitialState } from '../lib/gameState.js';
+    import { encodeGameState } from '../lib/urlCodec.js';
+    import { getThemedPlayerNames } from '../lib/gameDataClient.js';
+
     // Theme content
     const themeContent = {
       'theme-fantasy': {
@@ -208,15 +208,18 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
       const budgetCap = formData.get('budgetCap');
       const allergies = formData.getAll('allergies');
 
-      // Navigate to waiting page with game settings and theme
-      const params = new URLSearchParams({
-        mealCount: mealCount.toString(),
+      // Create initial game state client-side
+      const settings = {
+        mealCount,
         budgetCap,
-        allergies: allergies.join(','),
-        theme: randomTheme
-      });
+        allergies
+      };
+      const themedNames = getThemedPlayerNames(randomTheme);
+      const state = createInitialState(themedNames.A, settings, randomTheme, themedNames.B);
 
-      window.location.href = `/waiting?${params.toString()}`;
+      // Encode state and navigate to waiting page
+      const encoded = encodeGameState(state);
+      window.location.href = `/waiting?${encoded.toString()}&player=A`;
     });
   </script>
 

@@ -4,6 +4,71 @@
  */
 
 /**
+ * Themed player name pairs for each theme
+ * Each theme has multiple name pair options for variety
+ */
+const themedPlayerNames = {
+  'theme-fantasy': [
+    { A: 'Sage', B: 'Knight' },
+    { A: 'Ranger', B: 'Mage' },
+    { A: 'Paladin', B: 'Rogue' },
+    { A: 'Druid', B: 'Warrior' }
+  ],
+  'theme-cyberpunk': [
+    { A: 'Neon', B: 'Glitch' },
+    { A: 'Cipher', B: 'Blaze' },
+    { A: 'Zero', B: 'Pulse' },
+    { A: 'Ghost', B: 'Virus' }
+  ],
+  'theme-western': [
+    { A: 'Dusty', B: 'Colt' },
+    { A: 'Tex', B: 'Bandit' },
+    { A: 'Marshal', B: 'Outlaw' },
+    { A: 'Rider', B: 'Maverick' }
+  ],
+  'theme-noir': [
+    { A: 'Shadow', B: 'Smoke' },
+    { A: 'Ace', B: 'Fedora' },
+    { A: 'Gumshoe', B: 'Dame' },
+    { A: 'Sleuth', B: 'Whisper' }
+  ],
+  'theme-pirate': [
+    { A: 'Captain', B: 'Bosun' },
+    { A: 'Jolly', B: 'Bones' },
+    { A: 'Anchor', B: 'Compass' },
+    { A: 'Storm', B: 'Tide' }
+  ],
+  'theme-medieval': [
+    { A: 'Lord', B: 'Lady' },
+    { A: 'Duke', B: 'Duchess' },
+    { A: 'Baron', B: 'Baroness' },
+    { A: 'Squire', B: 'Herald' }
+  ],
+  'theme-space': [
+    { A: 'Commander', B: 'Pilot' },
+    { A: 'Nova', B: 'Cosmo' },
+    { A: 'Orion', B: 'Vega' },
+    { A: 'Nebula', B: 'Comet' }
+  ],
+  'theme-horror': [
+    { A: 'Raven', B: 'Specter' },
+    { A: 'Shade', B: 'Wraith' },
+    { A: 'Crypt', B: 'Haunt' },
+    { A: 'Eerie', B: 'Dread' }
+  ]
+};
+
+/**
+ * Get a random themed player name pair
+ * @param {string} theme
+ * @returns {{ A: string, B: string }}
+ */
+export function getThemedPlayerNames(theme) {
+  const names = themedPlayerNames[theme] || themedPlayerNames['theme-fantasy'];
+  return names[Math.floor(Math.random() * names.length)];
+}
+
+/**
  * Fetch all meals from API
  * @returns {Promise<Array>}
  */
