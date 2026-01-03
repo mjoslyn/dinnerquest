@@ -46,15 +46,17 @@ import { generateId } from './urlCodec.js';
  * @property {number[]} usedMeals - Meals that have been drafted (removed from pool)
  * @property {number[]} playerAAllPicks - All meals Player A has picked across all rounds
  * @property {number[]} playerBAllPicks - All meals Player B has picked across all rounds
+ * @property {string} [theme] - Theme class name (e.g., 'theme-fantasy')
  */
 
 /**
  * Create initial game state with settings
  * @param {string} playerName
  * @param {GameSettings} settings
+ * @param {string} [theme] - Optional theme class name
  * @returns {GameState}
  */
-export function createInitialState(playerName, settings) {
+export function createInitialState(playerName, settings, theme) {
   const gameId = generateId();
 
   return {
@@ -77,7 +79,8 @@ export function createInitialState(playerName, settings) {
     harmoniesSoFar: [],
     usedMeals: [],
     playerAAllPicks: [],
-    playerBAllPicks: []
+    playerBAllPicks: [],
+    ...(theme && { theme })
   };
 }
 

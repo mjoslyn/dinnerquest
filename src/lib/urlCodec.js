@@ -9,6 +9,9 @@ export function encodeGameState(state) {
   // Basic game info
   params.set('id', state.id);
   params.set('status', state.status);
+  if (state.theme) {
+    params.set('th', state.theme);
+  }
 
   // Settings
   params.set('mc', state.settings.mealCount.toString());
@@ -202,6 +205,8 @@ export function decodeGameState(params) {
     const playerAAllPicks = params.get('pAAP') ? params.get('pAAP').split(',').map(Number) : [];
     const playerBAllPicks = params.get('pBAP') ? params.get('pBAP').split(',').map(Number) : [];
 
+    const theme = params.get('th');
+
     return {
       id: params.get('id') || generateId(),
       settings,
@@ -216,7 +221,8 @@ export function decodeGameState(params) {
       harmoniesSoFar,
       usedMeals,
       playerAAllPicks,
-      playerBAllPicks
+      playerBAllPicks,
+      ...(theme && { theme })
     };
   } catch (e) {
     console.error('Failed to decode game state:', e);

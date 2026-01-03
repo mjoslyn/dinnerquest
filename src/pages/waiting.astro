@@ -20,7 +20,8 @@ if (mealCountParam && budgetCapParam) {
     budgetCap: budgetCapParam,
     allergies: params.get('allergies') ? params.get('allergies').split(',').filter(Boolean) : []
   };
-  state = createInitialState('', settings);
+  const theme = params.get('theme') || 'theme-fantasy';
+  state = createInitialState('', settings, theme);
 
   // Redirect to waiting page with encoded state
   const encoded = encodeGameState(state);
@@ -126,6 +127,11 @@ const upgrades = await getRandomUpgrades(2);
     let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
 
+    // Apply theme from state
+    if (state.theme) {
+      document.body.className = state.theme;
+    }
+
     // Initialize upgrades from server-rendered data
     const serverUpgradesEl = document.getElementById('server-upgrades');
     let currentUpgrades = serverUpgradesEl ? JSON.parse(serverUpgradesEl.textContent) : [];
@@ -221,7 +227,7 @@ const upgrades = await getRandomUpgrades(2);
     }
 
     .share-label {
-      font-size: 11px;
+      font-size: 14px;
       color: var(--text-dim);
       margin-bottom: 10px;
     }
@@ -235,7 +241,7 @@ const upgrades = await getRandomUpgrades(2);
       flex: 1;
       padding: 12px;
       font-family: monospace;
-      font-size: 10px;
+      font-size: 14px;
       background: var(--bg-dark);
       border: 1px solid var(--border);
       color: var(--text);
@@ -249,7 +255,7 @@ const upgrades = await getRandomUpgrades(2);
     }
 
     .game-info h3 {
-      font-size: 12px;
+      font-size: 14px;
       margin-bottom: 12px;
       color: var(--primary);
     }
@@ -257,7 +263,7 @@ const upgrades = await getRandomUpgrades(2);
     .game-info ul {
       list-style: none;
       padding: 0;
-      font-size: 11px;
+      font-size: 14px;
     }
 
     .game-info li {
@@ -299,7 +305,7 @@ const upgrades = await getRandomUpgrades(2);
 
     .form-label {
       font-family: 'Press Start 2P', monospace;
-      font-size: 12px;
+      font-size: 14px;
       color: var(--primary);
     }
 
@@ -391,13 +397,13 @@ const upgrades = await getRandomUpgrades(2);
     }
 
     .upgrade-name {
-      font-size: 11px;
+      font-size: 14px;
       font-weight: bold;
       color: var(--primary);
     }
 
     .upgrade-effect {
-      font-size: 9px;
+      font-size: 14px;
       color: var(--text-dim);
     }
 
@@ -425,7 +431,7 @@ const upgrades = await getRandomUpgrades(2);
     .btn {
       padding: 12px 24px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
+      font-size: 14px;
       cursor: pointer;
       border: none;
       transition: all 0.2s;
@@ -453,7 +459,7 @@ const upgrades = await getRandomUpgrades(2);
     .btn {
       padding: 12px 24px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
+      font-size: 14px;
       cursor: pointer;
       border: none;
       transition: all 0.2s;

@@ -189,6 +189,11 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
 
+    // Apply theme from state
+    if (state.theme) {
+      document.body.className = state.theme;
+    }
+
     // Track takeout meals (id -> meal object) for cost calculations
     const takeoutMeals = new Map();
 
@@ -1296,7 +1301,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       color: var(--text);
       border: none;
       font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -1313,7 +1318,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .partial-harmony-badge {
-      font-size: 12px;
+      font-size: 14px;
       padding: 4px 8px;
       background: var(--purple);
       color: var(--bg);
@@ -1328,7 +1333,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     .meal-meta {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
+      font-size: 14px;
       color: var(--text-dim);
     }
 
@@ -1340,7 +1345,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .harmonies-section h3 {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--primary);
       margin-bottom: 12px;
     }
@@ -1372,7 +1377,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .banner-label {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--purple);
       font-weight: bold;
       white-space: nowrap;
@@ -1414,7 +1419,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .partial-harmonies-section h3 {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-dim);
       margin-bottom: 12px;
     }
@@ -1441,7 +1446,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .meal-name-small {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--text-dim);
     }
 
@@ -1453,7 +1458,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .upgrades-section h3 {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--accent);
       margin-bottom: 12px;
       text-transform: uppercase;
@@ -1531,7 +1536,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     }
 
     .upgrade-effect {
-      font-size: 11px;
+      font-size: 14px;
       color: var(--text-dim);
       text-align: center;
       line-height: 1.4;
@@ -1544,7 +1549,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       color: var(--bg-dark);
       border: none;
       font-family: 'Press Start 2P', monospace;
-      font-size: 10px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -1574,7 +1579,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       background: var(--bg-dark);
       border: 2px solid var(--primary);
       color: var(--primary);
-      font-size: 13px;
+      font-size: 14px;
       text-align: center;
     }
 
@@ -1582,7 +1587,7 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       flex: 1;
       padding: 16px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
       border: none;
       transition: all 0.2s;
