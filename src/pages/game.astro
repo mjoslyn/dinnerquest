@@ -110,6 +110,21 @@ const senderName = player?.name || `Player ${currentPlayer}`;
       </div>
     </div>
 
+    {player?.upgrades && player.upgrades.length > 0 && (
+      <div class="upgrades-section">
+        <h3>Your Themes</h3>
+        <div class="upgrades-grid">
+          {player.upgrades.map(upgrade => (
+            <div class="upgrade-card" data-upgrade-id={upgrade.id}>
+              <div class="upgrade-emoji">{upgrade.emoji}</div>
+              <div class="upgrade-name">{upgrade.name}</div>
+              <div class="upgrade-effect">{upgrade.effect}</div>
+              <button class="btn-use-upgrade" data-upgrade-id={upgrade.id}>Use</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
 
     <div class="meal-pool">
       {poolMeals.map(meal => (
@@ -784,6 +799,49 @@ const senderName = player?.name || `Player ${currentPlayer}`;
         }
       }
     });
+
+    // Upgrade usage
+    document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const upgradeId = btn.dataset.upgradeId;
+        const player = state.players[currentPlayer];
+        const upgrade = player.upgrades.find(u => u.id === upgradeId);
+
+        if (!upgrade) return;
+
+        // Apply theme to body
+        document.body.className = upgrade.themeStyle || 'theme-fantasy';
+
+        // Remove used upgrade and draw a new one
+        const remainingUpgrades = player.upgrades.filter(u => u.id !== upgradeId);
+        const newUpgrade = await getRandomUpgrades(1);
+
+        // Update state with new upgrades
+        state = {
+          ...state,
+          players: {
+            ...state.players,
+            [currentPlayer]: {
+              ...player,
+              upgrades: [...remainingUpgrades, ...newUpgrade]
+            }
+          }
+        };
+
+        // Update UI - remove old card and add new one
+        const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgradeId}"]`);
+        if (upgradeCard && newUpgrade[0]) {
+          upgradeCard.dataset.upgradeId = newUpgrade[0].id;
+          upgradeCard.querySelector('.upgrade-emoji').textContent = newUpgrade[0].emoji;
+          upgradeCard.querySelector('.upgrade-name').textContent = newUpgrade[0].name;
+          upgradeCard.querySelector('.upgrade-effect').textContent = newUpgrade[0].effect;
+          upgradeCard.querySelector('.btn-use-upgrade').dataset.upgradeId = newUpgrade[0].id;
+        }
+
+        // Show notification
+        alert(`${upgrade.name} activated! Theme changed.`);
+      });
+    });
   </script>
 
   <style>
@@ -1040,6 +1098,78 @@ const senderName = player?.name || `Player ${currentPlayer}`;
     .meal-name-small {
       font-size: 12px;
       color: var(--text-dim);
+    }
+
+    .upgrades-section {
+      margin: 20px 0;
+      padding: 16px;
+      background: var(--bg-dark);
+      border: 2px solid var(--accent);
+    }
+
+    .upgrades-section h3 {
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .upgrades-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .upgrade-card {
+      padding: 16px;
+      background: var(--bg-panel);
+      border: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .upgrade-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .upgrade-emoji {
+      font-size: 32px;
+      text-align: center;
+    }
+
+    .upgrade-name {
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .upgrade-effect {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .btn-use-upgrade {
+      margin-top: 8px;
+      padding: 8px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border: none;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-use-upgrade:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--accent-glow);
     }
 
     .draft-actions {
