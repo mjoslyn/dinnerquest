@@ -75,6 +75,20 @@ const ALLERGEN_OPTIONS = ['dairy', 'gluten', 'nuts', 'shellfish', 'soy', 'eggs']
   </div>
 
   <script>
+    // Apply random theme
+    const themes = [
+      'theme-fantasy',
+      'theme-cyberpunk',
+      'theme-western',
+      'theme-noir',
+      'theme-pirate',
+      'theme-medieval',
+      'theme-space',
+      'theme-horror'
+    ];
+    const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+    document.body.className = randomTheme;
+
     const form = document.getElementById('setup-form');
 
     form.addEventListener('submit', async (e) => {
