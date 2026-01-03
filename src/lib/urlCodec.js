@@ -106,6 +106,11 @@ export function encodeGameState(state) {
     params.set('chk', state.checkedIngredients.join('|'));
   }
 
+  // Player B's pre-assigned name (for when they join)
+  if (state.playerBName) {
+    params.set('pBNm', state.playerBName);
+  }
+
   return params;
 }
 
@@ -206,6 +211,7 @@ export function decodeGameState(params) {
     const playerBAllPicks = params.get('pBAP') ? params.get('pBAP').split(',').map(Number) : [];
 
     const theme = params.get('th');
+    const playerBName = params.get('pBNm');
 
     return {
       id: params.get('id') || generateId(),
@@ -222,7 +228,8 @@ export function decodeGameState(params) {
       usedMeals,
       playerAAllPicks,
       playerBAllPicks,
-      ...(theme && { theme })
+      ...(theme && { theme }),
+      ...(playerBName && { playerBName })
     };
   } catch (e) {
     console.error('Failed to decode game state:', e);
