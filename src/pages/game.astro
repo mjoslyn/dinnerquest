@@ -255,11 +255,21 @@ import GameLayout from '../layouts/GameLayout.astro';
     function updateDisplays() {
       const currentPicksCost = Array.from(selectedMeals).reduce((sum, id) => {
         const card = document.querySelector(`[data-meal-id="${id}"]`);
+        if (!card || !card.dataset.cost) {
+          // Fallback: look up meal in allMeals array
+          const meal = allMeals.find(m => m.id === id);
+          return sum + (meal ? getCostPoints(meal.cost) : 0);
+        }
         return sum + parseInt(card.dataset.cost);
       }, 0);
 
       const currentPicksUsd = Array.from(selectedMeals).reduce((sum, id) => {
         const card = document.querySelector(`[data-meal-id="${id}"]`);
+        if (!card || card.dataset.usd === undefined) {
+          // Fallback: look up meal in allMeals array
+          const meal = allMeals.find(m => m.id === id);
+          return sum + (meal ? (meal.estimatedPrice || 0) : 0);
+        }
         return sum + parseInt(card.dataset.usd || 0);
       }, 0);
 
