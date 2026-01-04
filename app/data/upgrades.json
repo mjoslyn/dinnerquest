@@ -1,0 +1,338 @@
+[
+  {
+    "id": "lock-cyberpunk",
+    "name": "Protocol Lock",
+    "emoji": "🔐",
+    "type": "lock",
+    "effect": "Hard-lock one meal into your database, bypassing all conflicts",
+    "rejectionText": "Access denied",
+    "undoText": "Unlock protocol",
+    "description": "Execute admin privileges to permanently lock one meal into your sustenance array. Encrypted. Immutable. Final."
+  },
+  {
+    "id": "lock-fantasy",
+    "name": "Seal of Destiny",
+    "emoji": "🔒",
+    "type": "lock",
+    "effect": "Lock one meal into your fate, securing it for the final quest",
+    "rejectionText": "Fate remains open",
+    "undoText": "Break the seal",
+    "description": "Channel ancient magic to seal your chosen meal. Once locked, not even the dragons of discord can remove it from your legendary menu."
+  },
+  {
+    "id": "lock-horror",
+    "name": "Blood Pact",
+    "emoji": "🩸",
+    "type": "lock",
+    "effect": "Seal one meal with a blood pact - bound by dark forces",
+    "rejectionText": "Pact broken",
+    "undoText": "Break pact",
+    "description": "The mansion demands a sacrifice. Bind one meal with ancient magic. Once sealed in blood, not even death can break this cursed agreement."
+  },
+  {
+    "id": "lock-medieval",
+    "name": "Royal Decree",
+    "emoji": "👑",
+    "type": "lock",
+    "effect": "Issue a royal decree to lock one meal into the banquet",
+    "rejectionText": "Decree nullified",
+    "undoText": "Revoke decree",
+    "description": "By royal proclamation, one meal shall be decreed into the feast. Let it be known throughout the kingdom - this dish is law."
+  },
+  {
+    "id": "lock-noir",
+    "name": "Case Closed",
+    "emoji": "📎",
+    "type": "lock",
+    "effect": "Close the case on one meal - no further investigation needed",
+    "rejectionText": "Case reopened",
+    "undoText": "Reopen case",
+    "description": "Sometimes a detective knows when the evidence is solid. Lock one meal into the case file. Closed. Solved. No disputes."
+  },
+  {
+    "id": "lock-pirate",
+    "name": "Captain's Orders",
+    "emoji": "⚓",
+    "type": "lock",
+    "effect": "By captain's decree, lock one meal into the ship's provisions",
+    "rejectionText": "Orders rescinded",
+    "undoText": "Rescind orders",
+    "description": "Ye be the captain of this vessel! Decree one meal as locked cargo. What the captain commands, the crew obeys. No mutiny can change it."
+  },
+  {
+    "id": "lock-space",
+    "name": "Mission Critical",
+    "emoji": "🔒",
+    "type": "lock",
+    "effect": "Mark one meal as mission-critical, locking it into rations",
+    "rejectionText": "Mission aborted",
+    "undoText": "Abort lock",
+    "description": "Mission Control authorizes priority lock. Designate one meal as mission-critical. Once locked, it's non-negotiable for mission success."
+  },
+  {
+    "id": "lock-western",
+    "name": "Claim Stake",
+    "emoji": "⚓",
+    "type": "lock",
+    "effect": "Stake your claim on one meal, partner - no disputes allowed",
+    "rejectionText": "Claim expired",
+    "undoText": "Abandon claim",
+    "description": "Plant your flag on one meal and stake your claim. Out here in the west, a claim stake is law. Nobody can take what's rightfully yours."
+  },
+  {
+    "id": "redraw-cyberpunk",
+    "name": "System Reboot",
+    "emoji": "🔄",
+    "type": "redraw",
+    "effect": "Refresh the menu database while keeping synced entries",
+    "rejectionText": "Connection refused",
+    "undoText": "Rollback",
+    "description": "Initiate a core dump and refresh the meal subroutines. Synchronized data points remain intact in the cloud."
+  },
+  {
+    "id": "redraw-fantasy",
+    "name": "Scroll of Fortune",
+    "emoji": "🔮",
+    "type": "redraw",
+    "effect": "Conjure new meal options while preserving your progress",
+    "rejectionText": "The scrolls remain sealed",
+    "undoText": "Uncast spell",
+    "description": "Invoke ancient arcane arts to reveal new culinary possibilities. Your harmonies and partial harmonies remain protected by magical wards."
+  },
+  {
+    "id": "redraw-horror",
+    "name": "Séance",
+    "emoji": "🕯️",
+    "type": "redraw",
+    "effect": "Summon new spirits while bound souls remain trapped",
+    "rejectionText": "The spirits are silent",
+    "undoText": "Break circle",
+    "description": "Light the candles and commune with the other side for new visions. Spirits already bound to this realm cannot escape."
+  },
+  {
+    "id": "redraw-medieval",
+    "name": "Royal Decree",
+    "emoji": "📜",
+    "type": "redraw",
+    "effect": "Command new dishes while preserving court agreements",
+    "rejectionText": "The crown refuses",
+    "undoText": "Revoke decree",
+    "description": "Issue a royal proclamation for new culinary offerings. Treaties already signed with the other court remain binding."
+  },
+  {
+    "id": "redraw-noir",
+    "name": "New Lead",
+    "emoji": "🗂️",
+    "type": "redraw",
+    "effect": "Dig up fresh options while keeping your evidence",
+    "rejectionText": "The case grows cold",
+    "undoText": "Close file",
+    "description": "Tap your sources and uncover new leads in this culinary mystery. Your solid evidence stays locked in the case file."
+  },
+  {
+    "id": "redraw-pirate",
+    "name": "Chart New Waters",
+    "emoji": "🗺️",
+    "type": "redraw",
+    "effect": "Discover new treasures while guarding your plunder",
+    "rejectionText": "Map be ruined",
+    "undoText": "Abandon course",
+    "description": "Set sail for uncharted waters and find new booty. Yer buried treasure and marked spots stay safe on the map."
+  },
+  {
+    "id": "redraw-space",
+    "name": "Scan New Sector",
+    "emoji": "📡",
+    "type": "redraw",
+    "effect": "Discover new provisions while maintaining docked cargo",
+    "rejectionText": "Sensors offline",
+    "undoText": "Abort scan",
+    "description": "Activate long-range scanners to detect new nutritional resources. Already synchronized cargo manifests remain in the ship's computer."
+  },
+  {
+    "id": "redraw-western",
+    "name": "New Frontier",
+    "emoji": "🌅",
+    "type": "redraw",
+    "effect": "Scout for new grub while keeping your claimed territory",
+    "rejectionText": "Trail's gone cold",
+    "undoText": "Turn back",
+    "description": "Ride out to explore new horizons and discover fresh vittles. Your staked claims and handshake deals stay honored."
+  },
+  {
+    "id": "takeout-cyberpunk",
+    "name": "Food Courier",
+    "emoji": "🥡",
+    "type": "takeout",
+    "effect": "Order delivery via neural link - instant harmony",
+    "rejectionText": "Connection failed",
+    "undoText": "Cancel order",
+    "mealName": "Neon Noodles",
+    "mealCost": "$$$",
+    "description": "Drone delivery inbound. Hot food arrives in 5 minutes. Skip cooking and jack in to flavor."
+  },
+  {
+    "id": "takeout-fantasy",
+    "name": "Tavern Delivery",
+    "emoji": "🍖",
+    "type": "takeout",
+    "effect": "Summon food from the local tavern - instant harmony",
+    "rejectionText": "The tavern is closed",
+    "undoText": "Cancel order",
+    "mealName": "Tavern Feast",
+    "mealCost": "$$$",
+    "description": "A mystical courier arrives bearing hot food from the village tavern. Skip the quest and feast immediately."
+  },
+  {
+    "id": "takeout-horror",
+    "name": "Mysterious Delivery",
+    "emoji": "🥩",
+    "type": "takeout",
+    "effect": "Accept the stranger's gift - instant harmony",
+    "rejectionText": "Door stays locked",
+    "undoText": "Refuse delivery",
+    "mealName": "Unknown Feast",
+    "mealCost": "$$$",
+    "description": "A pale figure leaves a warm meal at your door. Don't ask where it came from."
+  },
+  {
+    "id": "takeout-medieval",
+    "name": "Royal Courier",
+    "emoji": "🍗",
+    "type": "takeout",
+    "effect": "Summon the royal kitchens - instant harmony",
+    "rejectionText": "Kitchens closed",
+    "undoText": "Cancel order",
+    "mealName": "Royal Banquet",
+    "mealCost": "$$$",
+    "description": "The royal kitchens send a feast to your door. Let the servants handle dinner tonight."
+  },
+  {
+    "id": "takeout-noir",
+    "name": "Diner Delivery",
+    "emoji": "☕",
+    "type": "takeout",
+    "effect": "Call the corner diner - instant harmony",
+    "rejectionText": "Line's busy",
+    "undoText": "Cancel order",
+    "mealName": "Diner Blue Plate",
+    "mealCost": "$$$",
+    "description": "The diner on 5th sends over their special. Sometimes the case can wait."
+  },
+  {
+    "id": "takeout-pirate",
+    "name": "Port Provisions",
+    "emoji": "🦞",
+    "type": "takeout",
+    "effect": "Order from the port tavern - instant harmony",
+    "rejectionText": "Tavern's empty",
+    "undoText": "Cancel order",
+    "mealName": "Port Catch",
+    "mealCost": "$$$",
+    "description": "Fresh catch from the port tavern delivered to yer ship. No need to cook tonight matey."
+  },
+  {
+    "id": "takeout-space",
+    "name": "Ration Override",
+    "emoji": "🍱",
+    "type": "takeout",
+    "effect": "Access emergency rations - instant harmony",
+    "rejectionText": "Access denied",
+    "undoText": "Cancel order",
+    "mealName": "Emergency Rations",
+    "mealCost": "$$$",
+    "description": "Mission Control approves emergency ration deployment. Nutritionally complete meal incoming."
+  },
+  {
+    "id": "takeout-western",
+    "name": "Saloon Grub",
+    "emoji": "🌮",
+    "type": "takeout",
+    "effect": "Order from the saloon - instant harmony",
+    "rejectionText": "Kitchen's closed",
+    "undoText": "Cancel order",
+    "mealName": "Saloon Special",
+    "mealCost": "$$$",
+    "description": "The saloon's cook sends over a hot meal. No need to rustle up grub tonight."
+  },
+  {
+    "id": "theme-cyberpunk",
+    "name": "Neon Nights",
+    "emoji": "🌃",
+    "type": "theme",
+    "effect": "Enter a dystopian future of digital menus and chrome dreams",
+    "themeStyle": "theme-cyberpunk",
+    "rejectionText": "Connection lost",
+    "description": "Welcome to the Grid. Your meal selection becomes a hack through corporate food databases. Neon signs flicker as you navigate the digital sprawl of dinner options."
+  },
+  {
+    "id": "theme-fantasy",
+    "name": "Epic Quest",
+    "emoji": "⚔️",
+    "type": "theme",
+    "effect": "Transform your journey into an epic fantasy quest",
+    "themeStyle": "theme-fantasy",
+    "rejectionText": "Another quest awaits",
+    "description": "The realm calls to you. Your culinary quest becomes an epic journey through mystical lands, where meals are legendary treasures and harmony brings forth ancient power."
+  },
+  {
+    "id": "theme-horror",
+    "name": "Midnight Manor",
+    "emoji": "🦇",
+    "type": "theme",
+    "effect": "A haunted mansion where dinner choices lurk in shadows",
+    "themeStyle": "theme-horror",
+    "rejectionText": "Vanished",
+    "description": "The old mansion creaks. Something stirs in the kitchen. Your meal selections emerge from the darkness, and only through harmony can you escape before midnight strikes thirteen."
+  },
+  {
+    "id": "theme-medieval",
+    "name": "Royal Banquet",
+    "emoji": "👑",
+    "type": "theme",
+    "effect": "Prepare a feast fit for kings and queens",
+    "themeStyle": "theme-medieval",
+    "rejectionText": "Not by decree",
+    "description": "Hear ye, hear ye! The royal court assembles for the grandest banquet in all the kingdom. Your selections shall grace the table of nobility. Let the feast begin!"
+  },
+  {
+    "id": "theme-noir",
+    "name": "Case Files",
+    "emoji": "🕵️",
+    "type": "theme",
+    "effect": "A mystery unfolds in shadowy black and white",
+    "themeStyle": "theme-noir",
+    "rejectionText": "Case closed",
+    "description": "It was a dark and stormy night. The case of the missing dinner grows cold. You'll need to crack this mystery wide open, detective. Every meal is a clue, every harmony brings you closer to the truth."
+  },
+  {
+    "id": "theme-pirate",
+    "name": "High Seas",
+    "emoji": "🏴‍☠️",
+    "type": "theme",
+    "effect": "Set sail for adventure on the open ocean",
+    "themeStyle": "theme-pirate",
+    "rejectionText": "Sailed away",
+    "description": "Ahoy, matey! Ye be settin' sail on a grand voyage fer treasure. Each meal be a chest of gold, and harmonies make ye the richest scallywag on the seven seas."
+  },
+  {
+    "id": "theme-space",
+    "name": "Cosmic Voyage",
+    "emoji": "🚀",
+    "type": "theme",
+    "effect": "Journey through the stars on an interstellar mission",
+    "themeStyle": "theme-space",
+    "rejectionText": "Mission aborted",
+    "description": "Mission Control, do you read? Your deep space expedition requires careful meal planning across the galaxy. Navigate asteroid fields of choices and establish harmonies across the cosmos."
+  },
+  {
+    "id": "theme-western",
+    "name": "Frontier Feast",
+    "emoji": "🤠",
+    "type": "theme",
+    "effect": "Head out west to the dusty frontier saloon",
+    "themeStyle": "theme-western",
+    "rejectionText": "Rode into sunset",
+    "description": "Partner, this here's the Wild West. Your dinner decisions become high-noon showdowns at the saloon. Harmonies are struck like gold, conflicts settled with a duel at sunset."
+  }
+]

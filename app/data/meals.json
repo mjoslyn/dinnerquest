@@ -1,0 +1,4161 @@
+[
+  {
+    "id": 1,
+    "name": "Tacos",
+    "emoji": "🌮",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Mexican",
+    "tags": [
+      "quick",
+      "family-friendly",
+      "customizable"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "ground-beef",
+      "taco-shells",
+      "lettuce",
+      "tomato",
+      "cheese",
+      "sour-cream",
+      "salsa",
+      "taco-seasoning"
+    ],
+    "description": "A classic favorite with endless customization options. Ground beef or chicken, crispy shells or soft tortillas, load them up with all your favorite toppings."
+  },
+  {
+    "id": 2,
+    "name": "Spaghetti",
+    "emoji": "🍝",
+    "time": 30,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Italian",
+    "tags": [
+      "classic",
+      "comfort"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "spaghetti-pasta",
+      "marinara-sauce",
+      "ground-beef",
+      "garlic",
+      "onion",
+      "parmesan-cheese",
+      "basil",
+      "olive-oil"
+    ],
+    "description": "Timeless Italian comfort food. Simple marinara or rich meat sauce, topped with parmesan and fresh basil."
+  },
+  {
+    "id": 3,
+    "name": "Sushi",
+    "emoji": "🍣",
+    "time": 15,
+    "cost": "$$$",
+    "estimatedPrice": 35,
+    "cuisine": "Japanese",
+    "tags": [
+      "fresh",
+      "light",
+      "premium"
+    ],
+    "allergens": [],
+    "dietScore": 3,
+    "ingredients": [
+      "sushi-rice",
+      "nori-seaweed",
+      "salmon",
+      "tuna",
+      "avocado",
+      "cucumber",
+      "rice-vinegar",
+      "soy-sauce",
+      "wasabi",
+      "pickled-ginger"
+    ],
+    "description": "Fresh fish and perfectly seasoned rice. An elegant dining experience that feels special on any weeknight."
+  },
+  {
+    "id": 4,
+    "name": "Pizza",
+    "emoji": "🍕",
+    "time": 20,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Italian",
+    "tags": [
+      "crowd-pleaser",
+      "quick"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "pizza-dough",
+      "tomato-sauce",
+      "mozzarella-cheese",
+      "pepperoni",
+      "olive-oil",
+      "oregano",
+      "garlic",
+      "basil"
+    ],
+    "description": "Everyone's favorite. Whether homemade or delivered, pizza night never disappoints. Customize with your favorite toppings."
+  },
+  {
+    "id": 5,
+    "name": "Burger & Fries",
+    "emoji": "🍔",
+    "time": 25,
+    "cost": "$$",
+    "estimatedPrice": 15,
+    "cuisine": "American",
+    "tags": [
+      "satisfying",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-beef",
+      "burger-buns",
+      "cheese",
+      "lettuce",
+      "tomato",
+      "onion",
+      "pickles",
+      "potatoes",
+      "ketchup",
+      "mustard"
+    ],
+    "description": "Juicy burgers with crispy fries. A satisfying American classic that hits the spot every time."
+  },
+  {
+    "id": 6,
+    "name": "Pad Thai",
+    "emoji": "🍜",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Thai",
+    "tags": [
+      "flavorful",
+      "exotic"
+    ],
+    "allergens": [
+      "nuts",
+      "eggs",
+      "shellfish"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "rice-noodles",
+      "shrimp",
+      "eggs",
+      "bean-sprouts",
+      "peanuts",
+      "lime",
+      "fish-sauce",
+      "tamarind-paste",
+      "garlic",
+      "scallions"
+    ],
+    "description": "Sweet, sour, and savory noodles with peanuts and lime. A Thai street food classic that's both complex and comforting."
+  },
+  {
+    "id": 7,
+    "name": "Steak",
+    "emoji": "🥩",
+    "time": 35,
+    "cost": "$$$",
+    "estimatedPrice": 40,
+    "cuisine": "American",
+    "tags": [
+      "premium",
+      "indulgent"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "ribeye-steak",
+      "butter",
+      "garlic",
+      "rosemary",
+      "black-pepper",
+      "salt",
+      "olive-oil",
+      "thyme"
+    ],
+    "description": "A perfectly cooked steak is a true luxury. Pair with roasted vegetables or a loaded baked potato for a steakhouse experience at home."
+  },
+  {
+    "id": 8,
+    "name": "Curry",
+    "emoji": "🍛",
+    "time": 40,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Indian",
+    "tags": [
+      "spicy",
+      "aromatic"
+    ],
+    "allergens": [],
+    "dietScore": 2,
+    "ingredients": [
+      "chicken",
+      "coconut-milk",
+      "curry-powder",
+      "onion",
+      "garlic",
+      "ginger",
+      "tomatoes",
+      "rice",
+      "cilantro",
+      "cumin"
+    ],
+    "description": "Rich and aromatic with complex spices. Whether mild or fiery, curry over rice is deeply satisfying and full of flavor."
+  },
+  {
+    "id": 9,
+    "name": "Ramen",
+    "emoji": "🍜",
+    "time": 35,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Japanese",
+    "tags": [
+      "comfort",
+      "hearty"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "ramen-noodles",
+      "pork-belly",
+      "eggs",
+      "chicken-broth",
+      "soy-sauce",
+      "miso-paste",
+      "green-onions",
+      "nori",
+      "sesame-oil",
+      "garlic"
+    ],
+    "description": "A steaming bowl of noodles in rich broth. Top with soft-boiled eggs, pork belly, and green onions for the ultimate comfort meal."
+  },
+  {
+    "id": 10,
+    "name": "Salad",
+    "emoji": "🥗",
+    "time": 15,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Healthy",
+    "tags": [
+      "light",
+      "fresh",
+      "quick"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "mixed-greens",
+      "cherry-tomatoes",
+      "cucumber",
+      "carrots",
+      "chicken-breast",
+      "olive-oil",
+      "balsamic-vinegar",
+      "feta-cheese",
+      "red-onion"
+    ],
+    "description": "Fresh greens and crisp vegetables. Add protein and a great dressing to make it a complete, nutritious meal."
+  },
+  {
+    "id": 11,
+    "name": "Fried Rice",
+    "emoji": "🍚",
+    "time": 20,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Chinese",
+    "tags": [
+      "quick",
+      "versatile"
+    ],
+    "allergens": [
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "rice",
+      "eggs",
+      "peas",
+      "carrots",
+      "soy-sauce",
+      "sesame-oil",
+      "garlic",
+      "green-onions",
+      "ginger"
+    ],
+    "description": "Quick and versatile, fried rice is perfect for using up leftovers. Add any protein and vegetables you have on hand."
+  },
+  {
+    "id": 12,
+    "name": "BBQ Ribs",
+    "emoji": "🍖",
+    "time": 60,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "American",
+    "tags": [
+      "indulgent",
+      "weekend"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "pork-ribs",
+      "bbq-sauce",
+      "brown-sugar",
+      "paprika",
+      "garlic-powder",
+      "onion-powder",
+      "black-pepper",
+      "salt",
+      "apple-cider-vinegar"
+    ],
+    "description": "Fall-off-the-bone tender ribs slathered in tangy BBQ sauce. Worth the time investment for a truly memorable meal."
+  },
+  {
+    "id": 13,
+    "name": "Fish & Chips",
+    "emoji": "🐟",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "British",
+    "tags": [
+      "crispy",
+      "satisfying"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "cod",
+      "flour",
+      "beer",
+      "potatoes",
+      "baking-powder",
+      "malt-vinegar",
+      "lemon",
+      "tartar-sauce",
+      "peas"
+    ],
+    "description": "Crispy battered fish with golden fries. A British pub classic that's both comforting and satisfying."
+  },
+  {
+    "id": 14,
+    "name": "Burrito Bowl",
+    "emoji": "🌯",
+    "time": 20,
+    "cost": "$$",
+    "estimatedPrice": 15,
+    "cuisine": "Mexican",
+    "tags": [
+      "customizable",
+      "healthy"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "rice",
+      "black-beans",
+      "chicken",
+      "corn",
+      "salsa",
+      "sour-cream",
+      "cheese",
+      "lettuce",
+      "guacamole",
+      "lime"
+    ],
+    "description": "Build your own bowl with rice, beans, protein, and all your favorite toppings. Fresh, customizable, and delicious."
+  },
+  {
+    "id": 15,
+    "name": "Soup & Bread",
+    "emoji": "🍲",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Comfort",
+    "tags": [
+      "cozy",
+      "warming"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "vegetable-broth",
+      "carrots",
+      "celery",
+      "onion",
+      "potatoes",
+      "crusty-bread",
+      "butter",
+      "garlic",
+      "herbs"
+    ],
+    "description": "Warm and comforting, perfect for a cozy night in. Pair hearty soup with crusty bread for the ultimate comfort meal."
+  },
+  {
+    "id": 16,
+    "name": "Grilled Chicken",
+    "emoji": "🍗",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 15,
+    "cuisine": "Healthy",
+    "tags": [
+      "protein-rich",
+      "versatile"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "olive-oil",
+      "lemon-juice",
+      "garlic",
+      "paprika",
+      "black-pepper",
+      "salt",
+      "thyme"
+    ],
+    "description": "Simple, healthy, and delicious. Season to your taste and pair with vegetables or salad for a balanced meal."
+  },
+  {
+    "id": 17,
+    "name": "Dumplings",
+    "emoji": "🥟",
+    "time": 35,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Chinese",
+    "tags": [
+      "fun",
+      "shareable"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "dumpling-wrappers",
+      "ground-pork",
+      "cabbage",
+      "ginger",
+      "garlic",
+      "soy-sauce",
+      "sesame-oil",
+      "scallions",
+      "rice-vinegar"
+    ],
+    "description": "Pan-fried or steamed, dumplings are fun to make and even more fun to eat. Dip in soy-vinegar sauce for perfection."
+  },
+  {
+    "id": 18,
+    "name": "Kebabs",
+    "emoji": "🍢",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Mediterranean",
+    "tags": [
+      "grilled",
+      "flavorful"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "beef",
+      "bell-pepper",
+      "onion",
+      "cherry-tomatoes",
+      "olive-oil",
+      "lemon-juice",
+      "cumin",
+      "paprika",
+      "garlic",
+      "yogurt"
+    ],
+    "description": "Marinated meat and vegetables on skewers, grilled to perfection. Serve with rice or flatbread for a Mediterranean feast."
+  },
+  {
+    "id": 19,
+    "name": "Mac & Cheese",
+    "emoji": "🧀",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Comfort",
+    "tags": [
+      "comfort",
+      "cheesy"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "elbow-macaroni",
+      "cheddar-cheese",
+      "milk",
+      "butter",
+      "flour",
+      "parmesan-cheese",
+      "breadcrumbs",
+      "salt"
+    ],
+    "description": "Creamy, cheesy, and utterly comforting. The ultimate comfort food that never fails to satisfy."
+  },
+  {
+    "id": 20,
+    "name": "Poke Bowl",
+    "emoji": "🥢",
+    "time": 15,
+    "cost": "$$",
+    "estimatedPrice": 25,
+    "cuisine": "Hawaiian",
+    "tags": [
+      "fresh",
+      "light"
+    ],
+    "allergens": [
+      "soy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "ahi-tuna",
+      "sushi-rice",
+      "edamame",
+      "cucumber",
+      "avocado",
+      "soy-sauce",
+      "sesame-oil",
+      "seaweed",
+      "green-onions",
+      "sesame-seeds"
+    ],
+    "description": "Fresh raw fish over rice with crisp vegetables and savory sauce. Light yet satisfying, and beautifully vibrant."
+  },
+  {
+    "id": 21,
+    "name": "Sandwich Night",
+    "emoji": "🥪",
+    "time": 10,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Quick",
+    "tags": [
+      "quick",
+      "easy"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "bread",
+      "deli-meat",
+      "cheese",
+      "lettuce",
+      "tomato",
+      "mayonnaise",
+      "mustard",
+      "pickles"
+    ],
+    "description": "Sometimes simple is best. Build your perfect sandwich and call it a night. Quick, easy, and always satisfying."
+  },
+  {
+    "id": 22,
+    "name": "Breakfast for Dinner",
+    "emoji": "🍳",
+    "time": 20,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Comfort",
+    "tags": [
+      "fun",
+      "nostalgic"
+    ],
+    "allergens": [
+      "eggs",
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "eggs",
+      "bacon",
+      "pancake-mix",
+      "butter",
+      "maple-syrup",
+      "milk",
+      "hash-browns",
+      "orange-juice"
+    ],
+    "description": "Who says breakfast is only for mornings? Pancakes, eggs, bacon - a fun and nostalgic dinner that always hits different."
+  },
+  {
+    "id": 23,
+    "name": "Shrimp Scampi",
+    "emoji": "🦐",
+    "time": 25,
+    "cost": "$$$",
+    "estimatedPrice": 35,
+    "cuisine": "Italian",
+    "tags": [
+      "elegant",
+      "quick"
+    ],
+    "allergens": [
+      "shellfish",
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "shrimp",
+      "linguine-pasta",
+      "butter",
+      "garlic",
+      "white-wine",
+      "lemon-juice",
+      "parsley",
+      "red-pepper-flakes",
+      "parmesan-cheese"
+    ],
+    "description": "Succulent shrimp in garlic butter sauce over pasta. Restaurant-quality elegance that comes together surprisingly fast."
+  },
+  {
+    "id": 24,
+    "name": "Veggie Stir Fry",
+    "emoji": "🥦",
+    "time": 20,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Healthy",
+    "tags": [
+      "healthy",
+      "colorful",
+      "quick"
+    ],
+    "allergens": [
+      "soy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "broccoli",
+      "bell-pepper",
+      "snap-peas",
+      "carrots",
+      "mushrooms",
+      "soy-sauce",
+      "garlic",
+      "ginger",
+      "sesame-oil",
+      "rice"
+    ],
+    "description": "Colorful vegetables tossed in a hot wok with savory sauce. Quick, healthy, and bursting with fresh flavors."
+  },
+  {
+    "id": 25,
+    "name": "Lasagna",
+    "emoji": "🍝",
+    "time": 90,
+    "cost": "$$",
+    "estimatedPrice": 25,
+    "cuisine": "Italian",
+    "tags": [
+      "comfort",
+      "classic",
+      "feeds-crowd"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "lasagna-noodles",
+      "ground-beef",
+      "ricotta-cheese",
+      "mozzarella-cheese",
+      "parmesan-cheese",
+      "marinara-sauce",
+      "eggs",
+      "garlic",
+      "basil",
+      "onion"
+    ],
+    "description": "Layers of pasta, rich meat sauce, creamy ricotta, and melted mozzarella. Worth the effort for this Italian comfort food masterpiece."
+  },
+  {
+    "id": 26,
+    "name": "Chicken Parmesan",
+    "emoji": "🍗",
+    "time": 45,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Italian",
+    "tags": [
+      "classic",
+      "crispy"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "breadcrumbs",
+      "eggs",
+      "flour",
+      "mozzarella",
+      "parmesan",
+      "marinara-sauce",
+      "olive-oil",
+      "basil"
+    ],
+    "description": "Breaded chicken cutlets smothered in marinara and melted mozzarella. Crispy, cheesy, and utterly satisfying."
+  },
+  {
+    "id": 27,
+    "name": "Pulled Pork",
+    "emoji": "🥩",
+    "time": 480,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "American",
+    "tags": [
+      "slow-cooked",
+      "comfort",
+      "feeds-crowd"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "pork-shoulder",
+      "bbq-sauce",
+      "brown-sugar",
+      "paprika",
+      "garlic-powder",
+      "onion-powder",
+      "apple-cider-vinegar",
+      "coleslaw",
+      "buns"
+    ],
+    "description": "Low and slow braised pork shoulder that falls apart at the touch. Pile it high on buns with coleslaw for peak comfort."
+  },
+  {
+    "id": 28,
+    "name": "Baked Salmon",
+    "emoji": "🐟",
+    "time": 25,
+    "cost": "$$$",
+    "estimatedPrice": 35,
+    "cuisine": "Seafood",
+    "tags": [
+      "healthy",
+      "quick",
+      "elegant"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "salmon-fillets",
+      "lemon",
+      "olive-oil",
+      "garlic",
+      "dill",
+      "parsley",
+      "salt",
+      "pepper"
+    ],
+    "description": "Flaky, tender salmon with a crispy herb crust. Simple preparation, restaurant-quality results."
+  },
+  {
+    "id": 29,
+    "name": "Meatloaf",
+    "emoji": "🍖",
+    "time": 75,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "classic",
+      "comfort",
+      "budget-friendly"
+    ],
+    "allergens": [
+      "gluten",
+      "eggs",
+      "dairy"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "ground-beef",
+      "breadcrumbs",
+      "eggs",
+      "ketchup",
+      "onion",
+      "garlic",
+      "worcestershire-sauce",
+      "milk",
+      "salt",
+      "pepper"
+    ],
+    "description": "Classic ground beef loaf glazed with tangy ketchup. Nostalgic comfort food that makes great leftovers."
+  },
+  {
+    "id": 30,
+    "name": "Chicken Pot Pie",
+    "emoji": "🥧",
+    "time": 60,
+    "cost": "$$",
+    "estimatedPrice": 25,
+    "cuisine": "American",
+    "tags": [
+      "comfort",
+      "cozy",
+      "hearty"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "chicken",
+      "pie-crust",
+      "carrots",
+      "peas",
+      "potatoes",
+      "onion",
+      "chicken-broth",
+      "flour",
+      "butter",
+      "cream"
+    ],
+    "description": "Creamy chicken and vegetables wrapped in a golden, flaky crust. Pure comfort in every bite."
+  },
+  {
+    "id": 31,
+    "name": "Fajitas",
+    "emoji": "🌮",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Mexican",
+    "tags": [
+      "interactive",
+      "sizzling",
+      "customizable"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken",
+      "bell-pepper",
+      "onion",
+      "tortillas",
+      "lime",
+      "cumin",
+      "chili-powder",
+      "sour-cream",
+      "cheese",
+      "salsa"
+    ],
+    "description": "Sizzling strips of marinated meat with peppers and onions. Build your own with warm tortillas and all the fixings."
+  },
+  {
+    "id": 32,
+    "name": "Fried Chicken",
+    "emoji": "🍗",
+    "time": 45,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Southern",
+    "tags": [
+      "crispy",
+      "indulgent",
+      "crowd-pleaser"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "chicken-pieces",
+      "flour",
+      "buttermilk",
+      "eggs",
+      "paprika",
+      "garlic-powder",
+      "cayenne-pepper",
+      "salt",
+      "pepper",
+      "vegetable-oil"
+    ],
+    "description": "Golden, crispy perfection with juicy meat inside. Southern comfort food that's worth every calorie."
+  },
+  {
+    "id": 33,
+    "name": "Quesadillas",
+    "emoji": "🧀",
+    "time": 15,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Mexican",
+    "tags": [
+      "quick",
+      "easy",
+      "customizable"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "flour-tortillas",
+      "cheddar-cheese",
+      "monterey-jack-cheese",
+      "chicken",
+      "bell-pepper",
+      "onion",
+      "sour-cream",
+      "salsa"
+    ],
+    "description": "Crispy tortillas filled with melted cheese and your choice of fillings. Simple, fast, and endlessly adaptable."
+  },
+  {
+    "id": 34,
+    "name": "Teriyaki Chicken",
+    "emoji": "🍗",
+    "time": 30,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Japanese",
+    "tags": [
+      "sweet-savory",
+      "quick",
+      "weeknight"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-thighs",
+      "soy-sauce",
+      "mirin",
+      "brown-sugar",
+      "garlic",
+      "ginger",
+      "sesame-seeds",
+      "green-onions",
+      "rice"
+    ],
+    "description": "Tender chicken glazed in sweet and savory teriyaki sauce. Serve over rice with steamed vegetables for a complete meal."
+  },
+  {
+    "id": 35,
+    "name": "Beef Stew",
+    "emoji": "🍲",
+    "time": 180,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "American",
+    "tags": [
+      "slow-cooked",
+      "hearty",
+      "comfort"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "beef-chuck",
+      "potatoes",
+      "carrots",
+      "celery",
+      "onion",
+      "beef-broth",
+      "tomato-paste",
+      "flour",
+      "thyme",
+      "bay-leaves"
+    ],
+    "description": "Tender chunks of beef simmered with potatoes, carrots, and rich gravy. Perfect for cold nights."
+  },
+  {
+    "id": 36,
+    "name": "Cheese Enchiladas",
+    "emoji": "🌯",
+    "time": 45,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Mexican",
+    "tags": [
+      "vegetarian",
+      "cheesy",
+      "comfort"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "corn-tortillas",
+      "cheddar-cheese",
+      "enchilada-sauce",
+      "onion",
+      "sour-cream",
+      "black-olives",
+      "cilantro",
+      "cumin"
+    ],
+    "description": "Corn tortillas rolled with cheese, smothered in red sauce and baked until bubbly. Vegetarian comfort at its finest."
+  },
+  {
+    "id": 37,
+    "name": "Chicken Noodle Soup",
+    "emoji": "🍜",
+    "time": 60,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "comfort",
+      "cozy",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "chicken",
+      "egg-noodles",
+      "carrots",
+      "celery",
+      "onion",
+      "chicken-broth",
+      "bay-leaves",
+      "thyme",
+      "parsley",
+      "salt"
+    ],
+    "description": "Warm, healing broth with tender chicken and egg noodles. The ultimate comfort soup that never gets old."
+  },
+  {
+    "id": 38,
+    "name": "Pork Chops",
+    "emoji": "🥩",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "American",
+    "tags": [
+      "quick",
+      "classic"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "pork-chops",
+      "olive-oil",
+      "garlic",
+      "rosemary",
+      "thyme",
+      "butter",
+      "salt",
+      "pepper"
+    ],
+    "description": "Juicy pan-seared pork chops with a golden crust. Simple seasoning lets the quality meat shine."
+  },
+  {
+    "id": 39,
+    "name": "Shepherd's Pie",
+    "emoji": "🥧",
+    "time": 75,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "British",
+    "tags": [
+      "comfort",
+      "hearty",
+      "classic"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-lamb",
+      "potatoes",
+      "carrots",
+      "peas",
+      "onion",
+      "butter",
+      "milk",
+      "worcestershire-sauce",
+      "tomato-paste",
+      "beef-broth"
+    ],
+    "description": "Savory ground meat and vegetables topped with creamy mashed potatoes and baked until golden. British comfort food perfection."
+  },
+  {
+    "id": 40,
+    "name": "Stuffed Peppers",
+    "emoji": "🫑",
+    "time": 60,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "healthy",
+      "colorful"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "bell-pepper",
+      "ground-beef",
+      "rice",
+      "black-beans",
+      "corn",
+      "tomato-sauce",
+      "cheese",
+      "onion",
+      "garlic",
+      "cumin"
+    ],
+    "description": "Bell peppers filled with seasoned rice, beans, and melted cheese. Wholesome and satisfying."
+  },
+  {
+    "id": 41,
+    "name": "Chili",
+    "emoji": "🌶️",
+    "time": 90,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "hearty",
+      "spicy",
+      "feeds-crowd"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-beef",
+      "kidney-beans",
+      "tomatoes",
+      "onion",
+      "chili-powder",
+      "cumin",
+      "garlic",
+      "bell-pepper",
+      "tomato-paste",
+      "beef-broth"
+    ],
+    "description": "Rich, spicy stew of beans, meat, and tomatoes. Top with cheese and sour cream for the ultimate bowl."
+  },
+  {
+    "id": 42,
+    "name": "Orange Chicken",
+    "emoji": "🍊",
+    "time": 40,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Chinese",
+    "tags": [
+      "sweet",
+      "crispy",
+      "crowd-pleaser"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "orange-juice",
+      "orange-zest",
+      "soy-sauce",
+      "brown-sugar",
+      "cornstarch",
+      "garlic",
+      "ginger",
+      "rice-vinegar",
+      "eggs"
+    ],
+    "description": "Crispy chicken coated in tangy-sweet orange sauce. Better than takeout when made fresh at home."
+  },
+  {
+    "id": 43,
+    "name": "Veggie Burgers",
+    "emoji": "🍔",
+    "time": 30,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "customizable"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "black-beans",
+      "quinoa",
+      "breadcrumbs",
+      "onion",
+      "garlic",
+      "cumin",
+      "burger-buns",
+      "lettuce",
+      "tomato",
+      "avocado"
+    ],
+    "description": "Hearty plant-based patties loaded with flavor. Serve with all the classic burger toppings."
+  },
+  {
+    "id": 44,
+    "name": "Shakshuka",
+    "emoji": "🍳",
+    "time": 35,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Middle Eastern",
+    "tags": [
+      "vegetarian",
+      "spicy",
+      "breakfast-dinner"
+    ],
+    "allergens": [
+      "eggs"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "eggs",
+      "tomatoes",
+      "bell-pepper",
+      "onion",
+      "garlic",
+      "cumin",
+      "paprika",
+      "cayenne-pepper",
+      "feta-cheese",
+      "parsley"
+    ],
+    "description": "Eggs poached in spicy tomato sauce with peppers and onions. Scoop up with crusty bread for breakfast at any hour."
+  },
+  {
+    "id": 45,
+    "name": "Falafel Wraps",
+    "emoji": "🥙",
+    "time": 45,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Middle Eastern",
+    "tags": [
+      "vegetarian",
+      "crispy",
+      "healthy"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "chickpeas",
+      "pita-bread",
+      "tahini",
+      "cucumber",
+      "tomatoes",
+      "lettuce",
+      "garlic",
+      "cumin",
+      "coriander",
+      "parsley"
+    ],
+    "description": "Crispy chickpea fritters wrapped with fresh vegetables and tahini sauce. Protein-packed vegetarian delight."
+  },
+  {
+    "id": 46,
+    "name": "Mushroom Risotto",
+    "emoji": "🍄",
+    "time": 45,
+    "cost": "$$",
+    "estimatedPrice": 25,
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "elegant",
+      "creamy"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "arborio-rice",
+      "mushrooms",
+      "parmesan-cheese",
+      "white-wine",
+      "vegetable-broth",
+      "butter",
+      "onion",
+      "garlic",
+      "thyme",
+      "olive-oil"
+    ],
+    "description": "Creamy arborio rice with earthy mushrooms and parmesan. Requires patience but delivers restaurant-quality results."
+  },
+  {
+    "id": 47,
+    "name": "Vegetable Lo Mein",
+    "emoji": "🍜",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Chinese",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "noodles"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "lo-mein-noodles",
+      "cabbage",
+      "carrots",
+      "bell-pepper",
+      "snow-peas",
+      "soy-sauce",
+      "sesame-oil",
+      "garlic",
+      "ginger"
+    ],
+    "description": "Soft noodles tossed with crisp vegetables in savory sauce. Quick stir-fry that beats takeout every time."
+  },
+  {
+    "id": 48,
+    "name": "Carnitas",
+    "emoji": "🌮",
+    "time": 240,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Mexican",
+    "tags": [
+      "slow-cooked",
+      "crispy",
+      "feeds-crowd"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "pork-shoulder",
+      "orange-juice",
+      "lime-juice",
+      "garlic",
+      "cumin",
+      "oregano",
+      "bay-leaves",
+      "onion",
+      "tortillas",
+      "salsa"
+    ],
+    "description": "Slow-braised pork shoulder with crispy edges. Pile into tacos with fresh salsa and lime for taco night perfection."
+  },
+  {
+    "id": 49,
+    "name": "Eggplant Parmesan",
+    "emoji": "🍆",
+    "time": 75,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "comfort",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "eggplant",
+      "breadcrumbs",
+      "eggs",
+      "flour",
+      "mozzarella",
+      "parmesan",
+      "marinara-sauce",
+      "basil",
+      "olive-oil"
+    ],
+    "description": "Breaded eggplant slices layered with marinara and mozzarella. All the comfort of chicken parm, vegetarian style."
+  },
+  {
+    "id": 50,
+    "name": "Pot Roast",
+    "emoji": "🍖",
+    "time": 240,
+    "cost": "$$$",
+    "estimatedPrice": 30,
+    "cuisine": "American",
+    "tags": [
+      "slow-cooked",
+      "comfort",
+      "classic"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "chuck-roast",
+      "carrots",
+      "potatoes",
+      "onion",
+      "beef-broth",
+      "red-wine",
+      "tomato-paste",
+      "garlic",
+      "thyme",
+      "bay-leaves"
+    ],
+    "description": "Melt-in-your-mouth beef roast with carrots and potatoes. The ultimate Sunday dinner that fills the house with amazing aromas."
+  },
+  {
+    "id": 51,
+    "name": "Sesame Chicken",
+    "emoji": "🍗",
+    "time": 35,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Chinese",
+    "tags": [
+      "crispy",
+      "sweet",
+      "nutty"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "soy-sauce",
+      "honey",
+      "sesame-oil",
+      "rice-vinegar",
+      "cornstarch",
+      "sesame-seeds",
+      "garlic",
+      "ginger",
+      "eggs"
+    ],
+    "description": "Crispy chicken bites coated in sweet sesame sauce and toasted seeds. Classic Chinese-American takeout favorite."
+  },
+  {
+    "id": 52,
+    "name": "Minestrone",
+    "emoji": "🥣",
+    "time": 60,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "hearty",
+      "soup"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "ditalini-pasta",
+      "cannellini-beans",
+      "tomatoes",
+      "zucchini",
+      "carrots",
+      "celery",
+      "onion",
+      "garlic",
+      "vegetable-broth",
+      "basil"
+    ],
+    "description": "Hearty Italian vegetable soup with pasta and beans. Rustic, warming, and packed with vegetables."
+  },
+  {
+    "id": 53,
+    "name": "Beef and Broccoli",
+    "emoji": "🥦",
+    "time": 25,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Chinese",
+    "tags": [
+      "quick",
+      "stir-fry"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "flank-steak",
+      "broccoli",
+      "soy-sauce",
+      "oyster-sauce",
+      "garlic",
+      "ginger",
+      "cornstarch",
+      "rice-wine",
+      "sesame-oil"
+    ],
+    "description": "Tender beef strips with crisp broccoli in savory brown sauce. Classic stir-fry that comes together in minutes."
+  },
+  {
+    "id": 54,
+    "name": "Ratatouille",
+    "emoji": "🍆",
+    "time": 90,
+    "cost": "$$",
+    "estimatedPrice": 15,
+    "cuisine": "French",
+    "tags": [
+      "vegetarian",
+      "elegant",
+      "colorful"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "eggplant",
+      "zucchini",
+      "tomatoes",
+      "bell-pepper",
+      "onion",
+      "garlic",
+      "olive-oil",
+      "thyme",
+      "basil",
+      "herbes-de-provence"
+    ],
+    "description": "Layers of eggplant, zucchini, and tomato baked in herb-infused sauce. Beautiful Provençal vegetable dish."
+  },
+  {
+    "id": 55,
+    "name": "Chicken Wings",
+    "emoji": "🍗",
+    "time": 50,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "American",
+    "tags": [
+      "crispy",
+      "party",
+      "customizable"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "chicken-wings",
+      "baking-powder",
+      "buffalo-sauce",
+      "butter",
+      "garlic-powder",
+      "cayenne-pepper",
+      "ranch-dressing",
+      "celery"
+    ],
+    "description": "Crispy baked or fried wings tossed in your favorite sauce. Game day essential that disappears fast."
+  },
+  {
+    "id": 56,
+    "name": "Pasta Primavera",
+    "emoji": "🥬",
+    "time": 30,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "light",
+      "colorful"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "pasta",
+      "broccoli",
+      "cherry-tomatoes",
+      "asparagus",
+      "bell-pepper",
+      "garlic",
+      "olive-oil",
+      "parmesan-cheese",
+      "lemon",
+      "basil"
+    ],
+    "description": "Fresh spring vegetables tossed with pasta in light garlic sauce. Bright, healthy, and celebrates seasonal produce."
+  },
+  {
+    "id": 57,
+    "name": "Tofu Stir-Fry",
+    "emoji": "🥢",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Asian",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "healthy"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "firm-tofu",
+      "broccoli",
+      "bell-pepper",
+      "snap-peas",
+      "carrots",
+      "soy-sauce",
+      "garlic",
+      "ginger",
+      "sesame-oil",
+      "cornstarch"
+    ],
+    "description": "Crispy tofu cubes with colorful vegetables in savory sauce. Plant-based protein that satisfies."
+  },
+  {
+    "id": 58,
+    "name": "Baked Ziti",
+    "emoji": "🍝",
+    "time": 60,
+    "cost": "$",
+    "estimatedPrice": 15,
+    "cuisine": "Italian",
+    "tags": [
+      "comfort",
+      "cheesy",
+      "feeds-crowd"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "ziti-pasta",
+      "ricotta-cheese",
+      "mozzarella",
+      "parmesan",
+      "marinara-sauce",
+      "ground-beef",
+      "garlic",
+      "basil",
+      "oregano"
+    ],
+    "description": "Pasta baked with ricotta, mozzarella, and marinara until bubbly. Easier than lasagna, just as satisfying."
+  },
+  {
+    "id": 59,
+    "name": "Chicken Marsala",
+    "emoji": "🍷",
+    "time": 35,
+    "cost": "$$",
+    "estimatedPrice": 25,
+    "cuisine": "Italian",
+    "tags": [
+      "elegant",
+      "savory"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "mushrooms",
+      "marsala-wine",
+      "chicken-broth",
+      "flour",
+      "butter",
+      "garlic",
+      "parsley",
+      "heavy-cream"
+    ],
+    "description": "Tender chicken in rich mushroom and Marsala wine sauce. Restaurant-quality dish that impresses every time."
+  },
+  {
+    "id": 60,
+    "name": "Lentil Soup",
+    "emoji": "🥣",
+    "time": 50,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Mediterranean",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "budget-friendly"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "lentils",
+      "carrots",
+      "celery",
+      "onion",
+      "garlic",
+      "vegetable-broth",
+      "tomatoes",
+      "cumin",
+      "bay-leaves",
+      "spinach"
+    ],
+    "description": "Hearty soup packed with protein-rich lentils and vegetables. Wholesome, filling, and budget-friendly."
+  },
+  {
+    "id": 61,
+    "name": "Sloppy Joes",
+    "emoji": "🍔",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "American",
+    "tags": [
+      "quick",
+      "kid-friendly",
+      "messy"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "ground-beef",
+      "hamburger-buns",
+      "tomato-sauce",
+      "ketchup",
+      "brown-sugar",
+      "worcestershire-sauce",
+      "onion",
+      "garlic",
+      "bell-pepper"
+    ],
+    "description": "Messy, tangy ground beef sandwiches that live up to their name. Classic kid-pleaser that adults love too."
+  },
+  {
+    "id": 62,
+    "name": "Buddha Bowl",
+    "emoji": "🥗",
+    "time": 30,
+    "cost": "$",
+    "cuisine": "Fusion",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "customizable"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "quinoa",
+      "chickpeas",
+      "sweet-potato",
+      "kale",
+      "avocado",
+      "tahini",
+      "lemon-juice",
+      "cherry-tomatoes",
+      "cucumber",
+      "sesame-seeds"
+    ],
+    "description": "Colorful bowl packed with grains, roasted vegetables, greens, and flavorful dressing. Nourishing and endlessly adaptable."
+  },
+  {
+    "id": 63,
+    "name": "Beef Stroganoff",
+    "emoji": "🍄",
+    "time": 40,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Russian",
+    "tags": [
+      "creamy",
+      "comfort",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "beef-sirloin",
+      "mushrooms",
+      "sour-cream",
+      "egg-noodles",
+      "onion",
+      "beef-broth",
+      "flour",
+      "butter",
+      "dijon-mustard",
+      "paprika"
+    ],
+    "description": "Tender beef strips in creamy mushroom sauce over egg noodles. Rich, comforting Russian classic."
+  },
+  {
+    "id": 64,
+    "name": "Grilled Cheese & Tomato Soup",
+    "emoji": "🧀",
+    "time": 30,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "comfort",
+      "classic",
+      "cozy"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "bread",
+      "cheddar-cheese",
+      "butter",
+      "tomatoes",
+      "cream",
+      "garlic",
+      "onion",
+      "basil",
+      "vegetable-broth"
+    ],
+    "description": "Crispy, melty grilled cheese paired with creamy tomato soup. Childhood comfort elevated to dinner-worthy status."
+  },
+  {
+    "id": 65,
+    "name": "Chicken Alfredo",
+    "emoji": "🍝",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Italian",
+    "tags": [
+      "creamy",
+      "indulgent",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "fettuccine",
+      "chicken-breast",
+      "heavy-cream",
+      "parmesan-cheese",
+      "butter",
+      "garlic",
+      "black-pepper",
+      "parsley"
+    ],
+    "description": "Fettuccine in rich, creamy parmesan sauce with tender chicken. Decadent Italian-American comfort food."
+  },
+  {
+    "id": 66,
+    "name": "Pasta Carbonara",
+    "emoji": "🥓",
+    "time": 25,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Italian",
+    "tags": [
+      "creamy",
+      "quick",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "spaghetti",
+      "pancetta",
+      "eggs",
+      "parmesan-cheese",
+      "pecorino-cheese",
+      "black-pepper",
+      "garlic",
+      "salt"
+    ],
+    "description": "Silky egg and cheese sauce with crispy pancetta. Roman classic that's simple yet sophisticated."
+  },
+  {
+    "id": 67,
+    "name": "Penne alla Vodka",
+    "emoji": "🍝",
+    "time": 30,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Italian",
+    "tags": [
+      "creamy",
+      "tomato",
+      "indulgent"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "penne-pasta",
+      "vodka",
+      "heavy-cream",
+      "tomato-sauce",
+      "garlic",
+      "red-pepper-flakes",
+      "parmesan-cheese",
+      "butter",
+      "basil"
+    ],
+    "description": "Penne in creamy tomato vodka sauce. The vodka enhances the tomato flavor in this crowd-pleasing pasta."
+  },
+  {
+    "id": 68,
+    "name": "General Tso's Chicken",
+    "emoji": "🌶️",
+    "time": 40,
+    "cost": "$$",
+    "estimatedPrice": 20,
+    "cuisine": "Chinese",
+    "tags": [
+      "crispy",
+      "spicy",
+      "sweet"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "soy-sauce",
+      "rice-vinegar",
+      "hoisin-sauce",
+      "brown-sugar",
+      "cornstarch",
+      "dried-chilies",
+      "garlic",
+      "ginger",
+      "eggs"
+    ],
+    "description": "Crispy chicken in sweet and spicy sauce with dried chilies. Bold flavors that define Chinese-American cuisine."
+  },
+  {
+    "id": 69,
+    "name": "Butternut Squash Soup",
+    "emoji": "🎃",
+    "time": 60,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "American",
+    "tags": [
+      "vegetarian",
+      "creamy",
+      "autumn"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "butternut-squash",
+      "vegetable-broth",
+      "onion",
+      "garlic",
+      "heavy-cream",
+      "nutmeg",
+      "cinnamon",
+      "olive-oil",
+      "salt",
+      "pepper"
+    ],
+    "description": "Silky smooth soup with roasted butternut squash and warm spices. Fall comfort in a bowl."
+  },
+  {
+    "id": 70,
+    "name": "French Onion Soup",
+    "emoji": "🧅",
+    "time": 90,
+    "cost": "$$",
+    "estimatedPrice": 25,
+    "cuisine": "French",
+    "tags": [
+      "savory",
+      "elegant",
+      "cheesy"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "onion",
+      "beef-broth",
+      "gruyre-cheese",
+      "french-bread",
+      "butter",
+      "white-wine",
+      "thyme",
+      "bay-leaves",
+      "garlic"
+    ],
+    "description": "Caramelized onions in rich broth, topped with crusty bread and melted Gruyère. Bistro classic worth the patience."
+  },
+  {
+    "id": 71,
+    "name": "Loaded Baked Potatoes",
+    "emoji": "🥔",
+    "time": 75,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "American",
+    "tags": [
+      "comfort",
+      "customizable",
+      "vegetarian"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "russet-potatoes",
+      "cheddar-cheese",
+      "sour-cream",
+      "chives",
+      "butter",
+      "salt",
+      "pepper"
+    ],
+    "description": "Fluffy baked potatoes piled high with cheese, sour cream, and chives. Simple ingredients, maximum satisfaction."
+  },
+  {
+    "id": 72,
+    "name": "Honey Garlic Chicken",
+    "emoji": "🍯",
+    "time": 30,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Asian Fusion",
+    "tags": [
+      "sweet",
+      "savory",
+      "quick"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-thighs",
+      "honey",
+      "garlic",
+      "soy-sauce",
+      "rice-vinegar",
+      "ginger",
+      "cornstarch",
+      "sesame-seeds",
+      "green-onions"
+    ],
+    "description": "Chicken glazed in sticky honey garlic sauce. Perfect balance of sweet and savory that everyone loves."
+  },
+  {
+    "id": 73,
+    "name": "Black Bean Tacos",
+    "emoji": "🌮",
+    "time": 20,
+    "cost": "$",
+    "estimatedPrice": 5,
+    "cuisine": "Mexican",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "budget-friendly"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "black-beans",
+      "tortillas",
+      "avocado",
+      "lime",
+      "cilantro",
+      "onion",
+      "tomatoes",
+      "cumin",
+      "chili-powder",
+      "lettuce"
+    ],
+    "description": "Seasoned black beans in warm tortillas with fresh toppings. Quick, protein-packed vegetarian tacos."
+  },
+  {
+    "id": 74,
+    "name": "Chicken Stir-Fry",
+    "emoji": "🥘",
+    "time": 25,
+    "cost": "$",
+    "estimatedPrice": 10,
+    "cuisine": "Asian",
+    "tags": [
+      "quick",
+      "healthy",
+      "weeknight"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "bell-pepper",
+      "broccoli",
+      "carrots",
+      "soy-sauce",
+      "garlic",
+      "ginger",
+      "cornstarch",
+      "sesame-oil",
+      "rice"
+    ],
+    "description": "Quick-cooked chicken and vegetables in savory sauce over rice. Fast weeknight dinner that beats takeout."
+  },
+  {
+    "id": 75,
+    "name": "Bibimbap",
+    "emoji": "🍚",
+    "time": 40,
+    "cost": "$$",
+    "cuisine": "Korean",
+    "tags": [
+      "healthy",
+      "customizable",
+      "colorful"
+    ],
+    "allergens": [
+      "eggs",
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "rice",
+      "eggs",
+      "spinach",
+      "carrots",
+      "zucchini",
+      "bean-sprouts",
+      "ground-beef",
+      "sesame-oil",
+      "soy-sauce",
+      "gochujang",
+      "sesame-seeds"
+    ],
+    "description": "A vibrant Korean rice bowl topped with sautéed vegetables, a fried egg, and spicy gochujang sauce. Mix it all together for a harmony of flavors and textures."
+  },
+  {
+    "id": 76,
+    "name": "Greek Chicken Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$",
+    "cuisine": "Mediterranean",
+    "tags": [
+      "healthy",
+      "quick",
+      "fresh"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "chicken-breast",
+      "mixed-greens",
+      "cucumber",
+      "tomato",
+      "red-onion",
+      "feta-cheese",
+      "black-olives",
+      "olive-oil",
+      "lemon-juice",
+      "oregano"
+    ],
+    "description": "Grilled chicken over crisp greens with cucumber, tomatoes, olives, and tangy feta. Dressed with lemon-herb vinaigrette for a light but satisfying meal."
+  },
+  {
+    "id": 77,
+    "name": "Pesto Pasta",
+    "emoji": "🍝",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "Italian",
+    "tags": [
+      "quick",
+      "vegetarian",
+      "simple"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "nuts"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "pasta",
+      "basil",
+      "parmesan-cheese",
+      "olive-oil",
+      "garlic",
+      "pine-nuts",
+      "cherry-tomatoes",
+      "salt",
+      "pepper"
+    ],
+    "description": "Fresh basil pesto tossed with al dente pasta and cherry tomatoes. Simple ingredients, incredible flavor. Ready in minutes."
+  },
+  {
+    "id": 78,
+    "name": "Fish Tacos",
+    "emoji": "🌮",
+    "time": 30,
+    "cost": "$$",
+    "cuisine": "Mexican",
+    "tags": [
+      "seafood",
+      "fresh",
+      "customizable"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "cod",
+      "corn-tortillas",
+      "cabbage",
+      "lime-juice",
+      "sour-cream",
+      "cilantro",
+      "avocado",
+      "chili-powder",
+      "cumin",
+      "garlic-powder"
+    ],
+    "description": "Crispy or grilled fish in warm tortillas topped with tangy slaw, creamy sauce, and fresh lime. A taste of Baja in every bite."
+  },
+  {
+    "id": 79,
+    "name": "Tom Yum Soup",
+    "emoji": "🍲",
+    "time": 35,
+    "cost": "$$",
+    "cuisine": "Thai",
+    "tags": [
+      "spicy",
+      "soup",
+      "aromatic"
+    ],
+    "allergens": [
+      "shellfish"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "shrimp",
+      "mushrooms",
+      "lemon-juice",
+      "fish-sauce",
+      "ginger",
+      "garlic",
+      "cilantro",
+      "red-pepper-flakes",
+      "chicken-broth",
+      "lime"
+    ],
+    "description": "Hot and sour Thai soup with tender shrimp, mushrooms, and aromatic herbs. Bold, spicy, and utterly addictive."
+  },
+  {
+    "id": 80,
+    "name": "Beef Bulgogi",
+    "emoji": "🥩",
+    "time": 45,
+    "cost": "$$",
+    "cuisine": "Korean",
+    "tags": [
+      "grilled",
+      "marinated",
+      "savory"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "beef-sirloin",
+      "soy-sauce",
+      "sesame-oil",
+      "garlic",
+      "ginger",
+      "brown-sugar",
+      "green-onions",
+      "rice",
+      "sesame-seeds",
+      "pear"
+    ],
+    "description": "Thinly sliced beef marinated in sweet soy sauce and grilled to caramelized perfection. Served over rice with pickled vegetables."
+  },
+  {
+    "id": 81,
+    "name": "Caprese Salad",
+    "emoji": "🍅",
+    "time": 10,
+    "cost": "$",
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "quick",
+      "fresh",
+      "no-cook"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "tomato",
+      "mozzarella",
+      "basil",
+      "olive-oil",
+      "balsamic-vinegar",
+      "salt",
+      "pepper"
+    ],
+    "description": "Ripe tomatoes, fresh mozzarella, and fragrant basil drizzled with olive oil and balsamic. Simple Italian elegance at its finest."
+  },
+  {
+    "id": 82,
+    "name": "Jambalaya",
+    "emoji": "🍛",
+    "time": 50,
+    "cost": "$$",
+    "cuisine": "Cajun",
+    "tags": [
+      "spicy",
+      "one-pot",
+      "hearty"
+    ],
+    "allergens": [
+      "shellfish"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "rice",
+      "shrimp",
+      "chicken-thighs",
+      "bell-pepper",
+      "onion",
+      "celery",
+      "tomato-sauce",
+      "cajun-seasoning",
+      "garlic",
+      "chicken-broth"
+    ],
+    "description": "A bold Louisiana one-pot classic with chicken, shrimp, and andouille sausage. Smoky, spicy, and packed with Cajun soul."
+  },
+  {
+    "id": 83,
+    "name": "Vegetable Korma",
+    "emoji": "🍛",
+    "time": 40,
+    "cost": "$",
+    "cuisine": "Indian",
+    "tags": [
+      "vegetarian",
+      "creamy",
+      "mild"
+    ],
+    "allergens": [
+      "dairy",
+      "nuts"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "potatoes",
+      "carrots",
+      "peas",
+      "coconut-milk",
+      "yogurt",
+      "ginger",
+      "garlic",
+      "cumin",
+      "coriander",
+      "rice"
+    ],
+    "description": "Tender vegetables in a creamy, mildly spiced coconut-yogurt sauce. Comforting Indian cuisine perfect for spice-sensitive palates."
+  },
+  {
+    "id": 84,
+    "name": "Cobb Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$",
+    "cuisine": "American",
+    "tags": [
+      "healthy",
+      "protein-packed",
+      "classic"
+    ],
+    "allergens": [
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "bacon",
+      "eggs",
+      "avocado",
+      "tomato",
+      "mixed-greens",
+      "cheddar-cheese",
+      "ranch-dressing",
+      "red-onion"
+    ],
+    "description": "The iconic American salad with rows of chicken, bacon, eggs, avocado, and blue cheese over crisp greens. A full meal in a bowl."
+  },
+  {
+    "id": 85,
+    "name": "Pho",
+    "emoji": "🍜",
+    "time": 60,
+    "cost": "$$",
+    "cuisine": "Vietnamese",
+    "tags": [
+      "soup",
+      "aromatic",
+      "comforting"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "beef-sirloin",
+      "rice-noodles",
+      "beef-broth",
+      "ginger",
+      "onion",
+      "cinnamon",
+      "star-anise",
+      "bean-sprouts",
+      "basil",
+      "lime",
+      "hoisin-sauce"
+    ],
+    "description": "Aromatic Vietnamese noodle soup with tender beef slices, rice noodles, and fragrant broth. Customize with fresh herbs, lime, and chili."
+  },
+  {
+    "id": 86,
+    "name": "Gyros",
+    "emoji": "🥙",
+    "time": 35,
+    "cost": "$$",
+    "cuisine": "Greek",
+    "tags": [
+      "handheld",
+      "savory",
+      "Mediterranean"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-lamb",
+      "pita-bread",
+      "yogurt",
+      "cucumber",
+      "tomato",
+      "red-onion",
+      "garlic",
+      "oregano",
+      "cumin",
+      "olive-oil"
+    ],
+    "description": "Seasoned lamb in warm pita with cool tzatziki, fresh vegetables, and a drizzle of olive oil. Street food perfection from Athens."
+  },
+  {
+    "id": 87,
+    "name": "Gnocchi",
+    "emoji": "🥔",
+    "time": 45,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "comfort-food",
+      "homemade",
+      "hearty"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "potatoes",
+      "flour",
+      "eggs",
+      "butter",
+      "parmesan-cheese",
+      "garlic",
+      "basil",
+      "olive-oil",
+      "salt"
+    ],
+    "description": "Pillowy potato dumplings in brown butter sage sauce or marinara. Labor of love that melts in your mouth."
+  },
+  {
+    "id": 88,
+    "name": "Banh Mi",
+    "emoji": "🥖",
+    "time": 30,
+    "cost": "$",
+    "cuisine": "Vietnamese",
+    "tags": [
+      "sandwich",
+      "fusion",
+      "fresh"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "pork-belly",
+      "bread",
+      "carrots",
+      "cucumber",
+      "cilantro",
+      "jalapeno",
+      "mayonnaise",
+      "soy-sauce",
+      "rice-vinegar",
+      "garlic"
+    ],
+    "description": "Crispy baguette loaded with savory pork, pickled vegetables, fresh herbs, and spicy mayo. French-Vietnamese fusion at its finest."
+  },
+  {
+    "id": 89,
+    "name": "Tikka Masala",
+    "emoji": "🍛",
+    "time": 45,
+    "cost": "$$",
+    "cuisine": "Indian",
+    "tags": [
+      "creamy",
+      "spiced",
+      "popular"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "yogurt",
+      "heavy-cream",
+      "tomato-sauce",
+      "ginger",
+      "garlic",
+      "cumin",
+      "coriander",
+      "paprika",
+      "rice"
+    ],
+    "description": "Tender chicken in rich, creamy tomato sauce with warm spices. The beloved British-Indian classic that's comfort in a bowl."
+  },
+  {
+    "id": 90,
+    "name": "Cauliflower Steak",
+    "emoji": "🥬",
+    "time": 35,
+    "cost": "$",
+    "cuisine": "Modern",
+    "tags": [
+      "vegetarian",
+      "healthy",
+      "elegant"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "cauliflower",
+      "olive-oil",
+      "garlic",
+      "lemon-juice",
+      "parsley",
+      "cumin",
+      "paprika",
+      "salt",
+      "pepper",
+      "tahini"
+    ],
+    "description": "Thick-cut cauliflower roasted until golden and caramelized. Drizzled with tahini and herbs for a stunning vegetarian centerpiece."
+  },
+  {
+    "id": 91,
+    "name": "Miso Soup",
+    "emoji": "🍵",
+    "time": 15,
+    "cost": "$",
+    "cuisine": "Japanese",
+    "tags": [
+      "quick",
+      "light",
+      "traditional"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "miso-paste",
+      "firm-tofu",
+      "seaweed",
+      "green-onions",
+      "vegetable-broth",
+      "ginger",
+      "sesame-oil"
+    ],
+    "description": "Warming Japanese soup with silky tofu, wakame seaweed, and savory miso. Simple, soothing, and ready in minutes."
+  },
+  {
+    "id": 92,
+    "name": "Coconut Curry Shrimp",
+    "emoji": "🍤",
+    "time": 30,
+    "cost": "$$$",
+    "cuisine": "Thai",
+    "tags": [
+      "seafood",
+      "creamy",
+      "aromatic"
+    ],
+    "allergens": [
+      "shellfish"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "shrimp",
+      "coconut-milk",
+      "curry-powder",
+      "bell-pepper",
+      "garlic",
+      "ginger",
+      "lime-juice",
+      "cilantro",
+      "rice",
+      "fish-sauce"
+    ],
+    "description": "Plump shrimp swimming in fragrant coconut curry sauce. Sweet, savory, and with just the right amount of heat."
+  },
+  {
+    "id": 93,
+    "name": "Lamb Chops",
+    "emoji": "🍖",
+    "time": 30,
+    "cost": "$$$",
+    "cuisine": "Mediterranean",
+    "tags": [
+      "elegant",
+      "grilled",
+      "special-occasion"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "lamb-chops",
+      "rosemary",
+      "garlic",
+      "olive-oil",
+      "lemon-juice",
+      "thyme",
+      "salt",
+      "pepper",
+      "dijon-mustard"
+    ],
+    "description": "Herb-crusted lamb chops seared to pink perfection. Restaurant-quality elegance for a special dinner at home."
+  },
+  {
+    "id": 94,
+    "name": "Caprese Chicken",
+    "emoji": "🍗",
+    "time": 35,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "healthy",
+      "fresh",
+      "colorful"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "mozzarella",
+      "tomato",
+      "basil",
+      "balsamic-vinegar",
+      "olive-oil",
+      "garlic",
+      "salt",
+      "pepper"
+    ],
+    "description": "Juicy chicken topped with melted mozzarella, fresh tomatoes, and basil. All the flavors of caprese in a satisfying main course."
+  },
+  {
+    "id": 95,
+    "name": "Sweet and Sour Pork",
+    "emoji": "🐷",
+    "time": 40,
+    "cost": "$$",
+    "cuisine": "Chinese",
+    "tags": [
+      "crispy",
+      "tangy",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "pork-shoulder",
+      "bell-pepper",
+      "pineapple",
+      "onion",
+      "rice-vinegar",
+      "brown-sugar",
+      "soy-sauce",
+      "cornstarch",
+      "ketchup",
+      "rice"
+    ],
+    "description": "Crispy battered pork in vibrant sweet and tangy sauce with pineapple and peppers. Takeout favorite made fresh at home."
+  },
+  {
+    "id": 96,
+    "name": "Bolognese",
+    "emoji": "🍝",
+    "time": 90,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "slow-cooked",
+      "hearty",
+      "classic"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-beef",
+      "ground-pork",
+      "spaghetti",
+      "tomato-sauce",
+      "carrots",
+      "celery",
+      "onion",
+      "red-wine",
+      "parmesan-cheese",
+      "olive-oil"
+    ],
+    "description": "Rich, slow-simmered meat sauce with a soffritto base. Worth every minute of cooking time. The ultimate Italian comfort."
+  },
+  {
+    "id": 97,
+    "name": "Black Bean Soup",
+    "emoji": "🥣",
+    "time": 45,
+    "cost": "$",
+    "cuisine": "Mexican",
+    "tags": [
+      "vegetarian",
+      "hearty",
+      "healthy"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "black-beans",
+      "onion",
+      "garlic",
+      "cumin",
+      "chili-powder",
+      "vegetable-broth",
+      "lime-juice",
+      "cilantro",
+      "sour-cream",
+      "corn"
+    ],
+    "description": "Thick, smoky black bean soup topped with lime, cilantro, and a dollop of sour cream. Protein-packed and deeply satisfying."
+  },
+  {
+    "id": 98,
+    "name": "Stuffed Mushrooms",
+    "emoji": "🍄",
+    "time": 35,
+    "cost": "$",
+    "cuisine": "American",
+    "tags": [
+      "vegetarian",
+      "appetizer",
+      "elegant"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "mushrooms",
+      "breadcrumbs",
+      "parmesan-cheese",
+      "garlic",
+      "spinach",
+      "cream-cheese",
+      "olive-oil",
+      "parsley",
+      "salt",
+      "pepper"
+    ],
+    "description": "Large mushroom caps filled with savory spinach and cheese stuffing. Can be a starter or a light vegetarian main course."
+  },
+  {
+    "id": 99,
+    "name": "Salmon Teriyaki",
+    "emoji": "🐟",
+    "time": 25,
+    "cost": "$$$",
+    "cuisine": "Japanese",
+    "tags": [
+      "healthy",
+      "quick",
+      "glazed"
+    ],
+    "allergens": [
+      "soy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "salmon-fillets",
+      "soy-sauce",
+      "mirin",
+      "brown-sugar",
+      "ginger",
+      "garlic",
+      "sesame-seeds",
+      "green-onions",
+      "rice",
+      "broccoli"
+    ],
+    "description": "Glazed salmon with sweet-savory teriyaki sauce, caramelized to perfection. Elegant enough for guests, easy enough for weeknights."
+  },
+  {
+    "id": 100,
+    "name": "Greek Moussaka",
+    "emoji": "🍆",
+    "time": 75,
+    "cost": "$$",
+    "cuisine": "Greek",
+    "tags": [
+      "baked",
+      "comfort-food",
+      "layered"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "eggplant",
+      "ground-beef",
+      "tomato-sauce",
+      "onion",
+      "garlic",
+      "cinnamon",
+      "butter",
+      "flour",
+      "milk",
+      "parmesan-cheese"
+    ],
+    "description": "Layers of tender eggplant, spiced meat sauce, and creamy béchamel, baked until golden. A hearty Greek classic that's worth the effort."
+  },
+  {
+    "id": 101,
+    "name": "Korean Fried Chicken",
+    "emoji": "🍗",
+    "time": 50,
+    "cost": "$$",
+    "cuisine": "Korean",
+    "tags": [
+      "crispy",
+      "spicy",
+      "crowd-pleaser"
+    ],
+    "allergens": [
+      "gluten",
+      "soy"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "chicken-thighs",
+      "flour",
+      "cornstarch",
+      "gochujang",
+      "soy-sauce",
+      "garlic",
+      "ginger",
+      "honey",
+      "sesame-oil",
+      "scallions"
+    ],
+    "description": "Double-fried for extra crunch, glazed in sweet and spicy gochujang sauce. Impossibly crispy on the outside, juicy within."
+  },
+  {
+    "id": 102,
+    "name": "Spinach Stuffed Shells",
+    "emoji": "🐚",
+    "time": 55,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "baked",
+      "cheesy"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "jumbo-pasta-shells",
+      "ricotta-cheese",
+      "spinach",
+      "mozzarella-cheese",
+      "parmesan-cheese",
+      "garlic",
+      "basil",
+      "tomato-sauce",
+      "olive-oil"
+    ],
+    "description": "Giant pasta shells filled with creamy ricotta and spinach, baked in marinara until bubbly. Comfort food at its finest."
+  },
+  {
+    "id": 103,
+    "name": "Shrimp Fried Rice",
+    "emoji": "🍤",
+    "time": 25,
+    "cost": "$",
+    "cuisine": "Chinese",
+    "tags": [
+      "quick",
+      "one-pan",
+      "leftover-friendly"
+    ],
+    "allergens": [
+      "shellfish",
+      "soy",
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "shrimp",
+      "rice",
+      "eggs",
+      "peas",
+      "carrots",
+      "soy-sauce",
+      "sesame-oil",
+      "garlic",
+      "scallions"
+    ],
+    "description": "Day-old rice transformed into a sizzling, savory dish with plump shrimp and scrambled eggs. Better than takeout."
+  },
+  {
+    "id": 104,
+    "name": "Chicken Shawarma",
+    "emoji": "🥙",
+    "time": 40,
+    "cost": "$",
+    "cuisine": "Middle Eastern",
+    "tags": [
+      "spiced",
+      "grilled",
+      "wraps"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-thighs",
+      "yogurt",
+      "cumin",
+      "paprika",
+      "garlic",
+      "lemon-juice",
+      "pita-bread",
+      "tahini",
+      "lettuce",
+      "tomato"
+    ],
+    "description": "Juicy spiced chicken with garlicky tahini sauce, wrapped in warm pita. Street food perfection you can make at home."
+  },
+  {
+    "id": 105,
+    "name": "Tofu Tikka Masala",
+    "emoji": "🧈",
+    "time": 40,
+    "cost": "$",
+    "cuisine": "Indian",
+    "tags": [
+      "vegetarian",
+      "creamy",
+      "spiced"
+    ],
+    "allergens": [
+      "dairy",
+      "soy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "tofu",
+      "heavy-cream",
+      "tomato-sauce",
+      "yogurt",
+      "ginger",
+      "garlic",
+      "cumin",
+      "coriander",
+      "paprika",
+      "rice"
+    ],
+    "description": "Crispy pan-fried tofu in rich, aromatic tomato-cream sauce. All the comfort of tikka masala, plant-based style."
+  },
+  {
+    "id": 106,
+    "name": "Tacos al Pastor",
+    "emoji": "🍍",
+    "time": 45,
+    "cost": "$",
+    "cuisine": "Mexican",
+    "tags": [
+      "grilled",
+      "tangy",
+      "street-food"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "pork-belly",
+      "pineapple",
+      "dried-chilies",
+      "cumin",
+      "oregano",
+      "garlic",
+      "lime-juice",
+      "tortillas",
+      "onion",
+      "cilantro"
+    ],
+    "description": "Marinated pork with sweet pineapple and spices, grilled to perfection. A taqueria favorite with smoky, tangy flavor."
+  },
+  {
+    "id": 107,
+    "name": "Vegetable Lasagna",
+    "emoji": "🥬",
+    "time": 80,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "vegetarian",
+      "baked",
+      "make-ahead"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "lasagna-noodles",
+      "ricotta-cheese",
+      "mozzarella-cheese",
+      "spinach",
+      "zucchini",
+      "mushrooms",
+      "tomato-sauce",
+      "parmesan-cheese",
+      "garlic",
+      "basil"
+    ],
+    "description": "Layers of tender vegetables, three cheeses, and hearty marinara. A meatless lasagna that satisfies everyone at the table."
+  },
+  {
+    "id": 108,
+    "name": "Blackened Salmon",
+    "emoji": "🐟",
+    "time": 25,
+    "cost": "$$$",
+    "cuisine": "Cajun",
+    "tags": [
+      "quick",
+      "healthy",
+      "spicy"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "salmon-fillets",
+      "paprika",
+      "cumin",
+      "garlic-powder",
+      "onion-powder",
+      "butter",
+      "lemon-juice",
+      "rice",
+      "broccoli"
+    ],
+    "description": "Salmon coated in bold Cajun spices, seared until perfectly charred. Restaurant-quality dinner in under 30 minutes."
+  },
+  {
+    "id": 109,
+    "name": "Chickpea Curry",
+    "emoji": "🫘",
+    "time": 35,
+    "cost": "$",
+    "cuisine": "Indian",
+    "tags": [
+      "vegetarian",
+      "vegan-option",
+      "protein-rich"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "chickpeas",
+      "coconut-milk",
+      "tomato-sauce",
+      "onion",
+      "garlic",
+      "ginger",
+      "curry-powder",
+      "cumin",
+      "rice",
+      "cilantro"
+    ],
+    "description": "Creamy coconut curry loaded with tender chickpeas. A warming, protein-packed vegan dinner that's ready in no time."
+  },
+  {
+    "id": 110,
+    "name": "Beef Wellington",
+    "emoji": "🥩",
+    "time": 120,
+    "cost": "$$$",
+    "cuisine": "British",
+    "tags": [
+      "fancy",
+      "special-occasion",
+      "impressive"
+    ],
+    "allergens": [
+      "gluten",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "beef",
+      "mushrooms",
+      "puff-pastry",
+      "prosciutto",
+      "mustard",
+      "eggs",
+      "butter",
+      "thyme",
+      "garlic"
+    ],
+    "description": "Tender beef wrapped in mushroom duxelles and flaky puff pastry. The ultimate dinner party showstopper."
+  },
+  {
+    "id": 111,
+    "name": "Dan Dan Noodles",
+    "emoji": "🍜",
+    "time": 30,
+    "cost": "$",
+    "cuisine": "Chinese",
+    "tags": [
+      "spicy",
+      "savory",
+      "noodles"
+    ],
+    "allergens": [
+      "gluten",
+      "soy",
+      "nuts"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-pork",
+      "ramen-noodles",
+      "peanut-butter",
+      "soy-sauce",
+      "sesame-oil",
+      "chili-oil",
+      "garlic",
+      "ginger",
+      "scallions"
+    ],
+    "description": "Silky noodles in nutty, spicy sauce with crumbled pork. A Sichuan classic that packs serious flavor and heat."
+  },
+  {
+    "id": 112,
+    "name": "Caprese Pasta",
+    "emoji": "🍅",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "Italian",
+    "tags": [
+      "quick",
+      "fresh",
+      "vegetarian"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "pasta",
+      "tomatoes",
+      "mozzarella",
+      "basil",
+      "olive-oil",
+      "garlic",
+      "balsamic-vinegar"
+    ],
+    "description": "Fresh tomatoes, creamy mozzarella, and fragrant basil tossed with warm pasta. Summer in a bowl, ready in minutes."
+  },
+  {
+    "id": 113,
+    "name": "Jamaican Jerk Chicken",
+    "emoji": "🔥",
+    "time": 50,
+    "cost": "$$",
+    "cuisine": "Caribbean",
+    "tags": [
+      "spicy",
+      "grilled",
+      "bold-flavor"
+    ],
+    "allergens": [],
+    "dietScore": 5,
+    "ingredients": [
+      "chicken-thighs",
+      "scallions",
+      "thyme",
+      "garlic",
+      "ginger",
+      "cinnamon",
+      "lime-juice",
+      "soy-sauce",
+      "rice",
+      "black-beans"
+    ],
+    "description": "Chicken marinated in fiery jerk spices, grilled until charred and juicy. Caribbean heat with aromatic depth."
+  },
+  {
+    "id": 114,
+    "name": "Stuffed Zucchini Boats",
+    "emoji": "🥒",
+    "time": 45,
+    "cost": "$",
+    "cuisine": "Mediterranean",
+    "tags": [
+      "low-carb",
+      "healthy",
+      "baked"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "zucchini",
+      "ground-beef",
+      "tomato-sauce",
+      "onion",
+      "garlic",
+      "mozzarella-cheese",
+      "parmesan-cheese",
+      "basil",
+      "oregano"
+    ],
+    "description": "Tender zucchini stuffed with seasoned meat and melted cheese. A lighter take on comfort food that doesn't skimp on flavor."
+  },
+  {
+    "id": 115,
+    "name": "Thai Basil Chicken",
+    "emoji": "🌿",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "Thai",
+    "tags": [
+      "quick",
+      "spicy",
+      "aromatic"
+    ],
+    "allergens": [
+      "soy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "basil",
+      "garlic",
+      "dried-chilies",
+      "soy-sauce",
+      "fish-sauce",
+      "oyster-sauce",
+      "rice",
+      "eggs"
+    ],
+    "description": "Ground chicken stir-fried with holy basil and chilies. A Thai street food staple that's explosively flavorful."
+  },
+  {
+    "id": 116,
+    "name": "Portobello Steaks",
+    "emoji": "🍄",
+    "time": 25,
+    "cost": "$",
+    "cuisine": "American",
+    "tags": [
+      "vegetarian",
+      "grilled",
+      "meaty-texture"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "mushrooms",
+      "olive-oil",
+      "garlic",
+      "balsamic-vinegar",
+      "thyme",
+      "potatoes",
+      "mixed-greens"
+    ],
+    "description": "Thick portobello caps marinated and grilled until meaty and tender. A satisfying plant-based centerpiece."
+  },
+  {
+    "id": 117,
+    "name": "Swedish Meatballs",
+    "emoji": "🧆",
+    "time": 45,
+    "cost": "$$",
+    "cuisine": "Swedish",
+    "tags": [
+      "comfort-food",
+      "creamy",
+      "family-friendly"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ground-beef",
+      "ground-pork",
+      "breadcrumbs",
+      "cream",
+      "butter",
+      "onion",
+      "beef-broth",
+      "nutmeg",
+      "egg-noodles"
+    ],
+    "description": "Tender meatballs in silky cream sauce, served over egg noodles. The IKEA classic, but homemade and better."
+  },
+  {
+    "id": 118,
+    "name": "Thai Green Curry",
+    "emoji": "🥥",
+    "time": 35,
+    "cost": "$$",
+    "cuisine": "Thai",
+    "tags": [
+      "creamy",
+      "spicy",
+      "aromatic"
+    ],
+    "allergens": [
+      "shellfish"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "shrimp",
+      "coconut-milk",
+      "green-curry-paste",
+      "bell-pepper",
+      "basil",
+      "fish-sauce",
+      "bamboo-shoots",
+      "rice",
+      "lime"
+    ],
+    "description": "Creamy coconut curry with shrimp and vegetables in fragrant green curry. Rich, spicy, and utterly addictive."
+  },
+  {
+    "id": 119,
+    "name": "Moroccan Tagine",
+    "emoji": "🫕",
+    "time": 60,
+    "cost": "$$",
+    "cuisine": "Moroccan",
+    "tags": [
+      "slow-cooked",
+      "aromatic",
+      "exotic"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-thighs",
+      "chickpeas",
+      "tomatoes",
+      "onion",
+      "garlic",
+      "cumin",
+      "cinnamon",
+      "apricots",
+      "couscous",
+      "cilantro"
+    ],
+    "description": "Tender chicken with chickpeas, apricots, and warm spices. A fragrant North African stew that transports you."
+  },
+  {
+    "id": 120,
+    "name": "Honey Walnut Shrimp",
+    "emoji": "🦐",
+    "time": 30,
+    "cost": "$$",
+    "cuisine": "Chinese-American",
+    "tags": [
+      "crispy",
+      "sweet",
+      "restaurant-style"
+    ],
+    "allergens": [
+      "shellfish",
+      "nuts",
+      "dairy",
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "shrimp",
+      "walnuts",
+      "honey",
+      "mayonnaise",
+      "cornstarch",
+      "eggs",
+      "rice",
+      "broccoli"
+    ],
+    "description": "Crispy fried shrimp with candied walnuts and creamy honey sauce. The Panda Express favorite, elevated at home."
+  },
+  {
+    "id": 121,
+    "name": "Cacio e Pepe",
+    "emoji": "🧀",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "Italian",
+    "tags": [
+      "quick",
+      "simple",
+      "classic"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "spaghetti-pasta",
+      "pecorino-cheese",
+      "parmesan-cheese",
+      "black-pepper",
+      "butter",
+      "pasta-water"
+    ],
+    "description": "Just pasta, cheese, and pepper—but technique is everything. Silky, peppery Roman perfection in three ingredients."
+  },
+  {
+    "id": 122,
+    "name": "Kung Pao Tofu",
+    "emoji": "🌶️",
+    "time": 25,
+    "cost": "$",
+    "cuisine": "Chinese",
+    "tags": [
+      "vegetarian",
+      "spicy",
+      "stir-fry"
+    ],
+    "allergens": [
+      "soy",
+      "nuts"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "tofu",
+      "peanuts",
+      "dried-chilies",
+      "soy-sauce",
+      "rice-vinegar",
+      "garlic",
+      "ginger",
+      "scallions",
+      "bell-pepper",
+      "rice"
+    ],
+    "description": "Crispy tofu with roasted peanuts and numbing chilies. All the bold Sichuan flavor, no meat required."
+  },
+  {
+    "id": 123,
+    "name": "Chicken Piccata",
+    "emoji": "🍋",
+    "time": 30,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "quick",
+      "tangy",
+      "elegant"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "chicken-breast",
+      "lemon-juice",
+      "capers",
+      "white-wine",
+      "butter",
+      "flour",
+      "garlic",
+      "parsley",
+      "linguine-pasta"
+    ],
+    "description": "Tender chicken cutlets in bright lemon-caper butter sauce. Simple Italian elegance that never goes out of style."
+  },
+  {
+    "id": 124,
+    "name": "Black Bean Burgers",
+    "emoji": "🍔",
+    "time": 30,
+    "cost": "$",
+    "cuisine": "American",
+    "tags": [
+      "vegetarian",
+      "grillable",
+      "hearty"
+    ],
+    "allergens": [
+      "gluten"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "black-beans",
+      "breadcrumbs",
+      "onion",
+      "garlic",
+      "cumin",
+      "chili-powder",
+      "eggs",
+      "buns",
+      "lettuce",
+      "tomato",
+      "avocado"
+    ],
+    "description": "Smoky, satisfying veggie burgers with real texture and flavor. The plant-based patty that meat-lovers respect."
+  },
+  {
+    "id": 125,
+    "name": "Caesar Salad",
+    "emoji": "🥗",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "Italian",
+    "tags": [
+      "classic",
+      "fresh",
+      "quick"
+    ],
+    "allergens": [
+      "dairy",
+      "eggs",
+      "gluten"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "lettuce",
+      "parmesan-cheese",
+      "garlic",
+      "lemon-juice",
+      "olive-oil",
+      "eggs",
+      "bread",
+      "black-pepper"
+    ],
+    "description": "The timeless classic with crisp romaine, shaved parmesan, homemade croutons, and a creamy garlic dressing. Simple elegance on a plate."
+  },
+  {
+    "id": 126,
+    "name": "Asian Sesame Chicken Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$",
+    "cuisine": "Asian",
+    "tags": [
+      "healthy",
+      "protein-packed",
+      "crunchy"
+    ],
+    "allergens": [
+      "soy",
+      "nuts"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "mixed-greens",
+      "cabbage",
+      "edamame",
+      "chicken-breast",
+      "sesame-seeds",
+      "sesame-oil",
+      "ginger",
+      "carrots",
+      "soy-sauce"
+    ],
+    "description": "Crispy cabbage and greens topped with sliced chicken, crunchy sesame seeds, and edamame. Tossed in a tangy Asian ginger dressing."
+  },
+  {
+    "id": 127,
+    "name": "Taco Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$",
+    "cuisine": "Mexican",
+    "tags": [
+      "hearty",
+      "family-friendly",
+      "spicy"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "lettuce",
+      "ground-beef",
+      "black-beans",
+      "tomato",
+      "cheddar-cheese",
+      "sour-cream",
+      "taco-seasoning",
+      "corn-tortillas",
+      "salsa"
+    ],
+    "description": "All the flavors of a taco in salad form. Seasoned beef, beans, cheese, and fresh veggies over crispy tortilla strips."
+  },
+  {
+    "id": 128,
+    "name": "Nicoise Salad",
+    "emoji": "🥗",
+    "time": 30,
+    "cost": "$$",
+    "cuisine": "French",
+    "tags": [
+      "elegant",
+      "protein-packed",
+      "classic"
+    ],
+    "allergens": [
+      "eggs"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "mixed-greens",
+      "tuna",
+      "eggs",
+      "black-olives",
+      "tomato",
+      "snap-peas",
+      "potatoes",
+      "olive-oil",
+      "dijon-mustard"
+    ],
+    "description": "A French Riviera classic with seared tuna, hard-boiled eggs, olives, and tender potatoes over fresh greens with Dijon vinaigrette."
+  },
+  {
+    "id": 129,
+    "name": "Kale Caesar Salad",
+    "emoji": "🥗",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "American",
+    "tags": [
+      "healthy",
+      "hearty",
+      "superfood"
+    ],
+    "allergens": [
+      "dairy",
+      "eggs",
+      "gluten"
+    ],
+    "dietScore": 2,
+    "ingredients": [
+      "kale",
+      "parmesan-cheese",
+      "garlic",
+      "lemon-juice",
+      "olive-oil",
+      "eggs",
+      "bread",
+      "black-pepper"
+    ],
+    "description": "A hearty twist on the classic Caesar using nutrient-dense kale. Massaged with creamy dressing and topped with crunchy croutons."
+  },
+  {
+    "id": 130,
+    "name": "Southwest Chicken Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$",
+    "cuisine": "Mexican",
+    "tags": [
+      "hearty",
+      "spicy",
+      "colorful"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "lettuce",
+      "chicken-breast",
+      "black-beans",
+      "corn",
+      "avocado",
+      "salsa",
+      "sour-cream",
+      "lime",
+      "cilantro"
+    ],
+    "description": "Grilled chicken over greens with black beans, roasted corn, creamy avocado, and a zesty lime-cilantro dressing. Bold southwestern flavors."
+  },
+  {
+    "id": 131,
+    "name": "Mediterranean Quinoa Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$",
+    "cuisine": "Mediterranean",
+    "tags": [
+      "vegan-option",
+      "healthy",
+      "protein-packed"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 1,
+    "ingredients": [
+      "quinoa",
+      "cucumber",
+      "cherry-tomatoes",
+      "red-onion",
+      "feta-cheese",
+      "black-olives",
+      "olive-oil",
+      "lemon-juice",
+      "parsley"
+    ],
+    "description": "Fluffy quinoa tossed with fresh cucumbers, tomatoes, olives, and tangy feta. A light yet satisfying plant-powered meal."
+  },
+  {
+    "id": 132,
+    "name": "Thai Peanut Chicken Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$",
+    "cuisine": "Thai",
+    "tags": [
+      "spicy",
+      "crunchy",
+      "flavorful"
+    ],
+    "allergens": [
+      "nuts",
+      "soy"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "cabbage",
+      "carrots",
+      "chicken-breast",
+      "peanuts",
+      "cilantro",
+      "lime",
+      "sesame-oil",
+      "soy-sauce",
+      "ginger"
+    ],
+    "description": "Crunchy cabbage slaw with tender chicken, crushed peanuts, and fresh herbs. Drizzled with creamy Thai peanut dressing."
+  },
+  {
+    "id": 133,
+    "name": "Steak Salad",
+    "emoji": "🥗",
+    "time": 30,
+    "cost": "$$$",
+    "cuisine": "American",
+    "tags": [
+      "hearty",
+      "protein-packed",
+      "steakhouse"
+    ],
+    "allergens": [
+      "dairy"
+    ],
+    "dietScore": 5,
+    "ingredients": [
+      "mixed-greens",
+      "flank-steak",
+      "cherry-tomatoes",
+      "red-onion",
+      "feta-cheese",
+      "balsamic-vinegar",
+      "olive-oil",
+      "garlic"
+    ],
+    "description": "Juicy sliced steak over fresh greens with cherry tomatoes, red onion, and crumbled cheese. Finished with balsamic glaze."
+  },
+  {
+    "id": 134,
+    "name": "Grilled Salmon Salad",
+    "emoji": "🥗",
+    "time": 25,
+    "cost": "$$$",
+    "cuisine": "American",
+    "tags": [
+      "healthy",
+      "omega-rich",
+      "light"
+    ],
+    "allergens": [],
+    "dietScore": 4,
+    "ingredients": [
+      "mixed-greens",
+      "salmon-fillets",
+      "avocado",
+      "cucumber",
+      "cherry-tomatoes",
+      "lemon-juice",
+      "olive-oil",
+      "dill"
+    ],
+    "description": "Perfectly grilled salmon over a bed of greens with creamy avocado and crisp vegetables. Light lemon-dill dressing."
+  },
+  {
+    "id": 135,
+    "name": "Tuna Poke Salad",
+    "emoji": "🥗",
+    "time": 20,
+    "cost": "$$$",
+    "cuisine": "Hawaiian",
+    "tags": [
+      "fresh",
+      "raw",
+      "trendy"
+    ],
+    "allergens": [
+      "soy"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "ahi-tuna",
+      "rice",
+      "edamame",
+      "avocado",
+      "cucumber",
+      "sesame-seeds",
+      "soy-sauce",
+      "sesame-oil",
+      "green-onions"
+    ],
+    "description": "Fresh cubed ahi tuna marinated in soy and sesame, served over warm rice with avocado, edamame, and crunchy toppings."
+  },
+  {
+    "id": 136,
+    "name": "Antipasto Salad",
+    "emoji": "🥗",
+    "time": 15,
+    "cost": "$$",
+    "cuisine": "Italian",
+    "tags": [
+      "hearty",
+      "no-cook",
+      "party"
+    ],
+    "allergens": [
+      "dairy",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "lettuce",
+      "deli-meat",
+      "mozzarella-cheese",
+      "cherry-tomatoes",
+      "black-olives",
+      "pepperoni",
+      "olive-oil",
+      "red-onion",
+      "oregano"
+    ],
+    "description": "An Italian deli favorite with layers of cured meats, fresh mozzarella, olives, and pepperoni over crisp greens."
+  },
+  {
+    "id": 137,
+    "name": "BLT Salad",
+    "emoji": "🥗",
+    "time": 20,
+    "cost": "$$",
+    "cuisine": "American",
+    "tags": [
+      "classic",
+      "comfort",
+      "quick"
+    ],
+    "allergens": [
+      "eggs",
+      "gluten"
+    ],
+    "dietScore": 4,
+    "ingredients": [
+      "lettuce",
+      "bacon",
+      "tomato",
+      "avocado",
+      "mayonnaise",
+      "bread",
+      "black-pepper",
+      "green-onions"
+    ],
+    "description": "All the flavors of a classic BLT transformed into a satisfying salad. Crispy bacon, fresh tomatoes, and creamy avocado."
+  },
+  {
+    "id": 138,
+    "name": "Kale Power Salad",
+    "emoji": "🥗",
+    "time": 20,
+    "cost": "$",
+    "cuisine": "American",
+    "tags": [
+      "superfood",
+      "vegan",
+      "healthy"
+    ],
+    "allergens": [],
+    "dietScore": 1,
+    "ingredients": [
+      "kale",
+      "quinoa",
+      "chickpeas",
+      "avocado",
+      "lemon-juice",
+      "olive-oil",
+      "carrots",
+      "cucumber",
+      "tahini"
+    ],
+    "description": "A nutrient-packed powerhouse with massaged kale, protein-rich quinoa and chickpeas, and creamy tahini dressing. Fuel for the day."
+  },
+  {
+    "id": 139,
+    "name": "Shrimp Avocado Salad",
+    "emoji": "🥗",
+    "time": 20,
+    "cost": "$$",
+    "cuisine": "Coastal",
+    "tags": [
+      "light",
+      "fresh",
+      "elegant"
+    ],
+    "allergens": [
+      "shellfish"
+    ],
+    "dietScore": 3,
+    "ingredients": [
+      "mixed-greens",
+      "shrimp",
+      "avocado",
+      "cucumber",
+      "cherry-tomatoes",
+      "lime-juice",
+      "cilantro",
+      "olive-oil",
+      "red-onion"
+    ],
+    "description": "Succulent grilled shrimp with creamy avocado, crisp vegetables, and a bright lime-cilantro vinaigrette. Light and refreshing."
+  }
+]
