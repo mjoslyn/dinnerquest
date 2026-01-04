@@ -319,19 +319,39 @@ import GameLayout from '../layouts/GameLayout.astro';
       const cumulativeCost = harmoniesCost + currentPicksCost;
       const cumulativeUsd = harmoniesUsdTotal + currentPicksUsd;
 
-      // Calculate unique meals (deduplicate harmonies and selections)
+      // Calculate meals to show: current picks this round / meals still needed
+      const currentPicksCount = selectedMeals.size;
+      const mealsStillNeeded = Math.max(0, mealCount - state.harmoniesSoFar.length);
       const allMealIds = new Set([...state.harmoniesSoFar, ...Array.from(selectedMeals)]);
       const totalMealsSecured = allMealIds.size;
-      pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
+
+      // Show "Complete!" when all meals secured, otherwise show picks / needed
+      if (totalMealsSecured >= mealCount) {
+        pickCountEl.textContent = 'Complete!';
+      } else {
+        pickCountEl.textContent = `${currentPicksCount} / ${mealsStillNeeded}`;
+      }
       budgetDisplayEl.innerHTML = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'} <span class="usd-total">($${cumulativeUsd})</span>`;
 
-      // Color coding
+      // Color coding - check if we have enough total meals secured
       pickCountEl.style.color = totalMealsSecured >= mealCount ? 'var(--primary)' : '#d35d5d';
       budgetDisplayEl.style.color = (budgetLimit && cumulativeCost > budgetLimit) ? 'var(--danger)' : 'var(--primary)';
 
       // Live validation
       state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
       const validation = validateDraft(state, currentPlayer, allMeals);
+
+      // Debug logging
+      console.log('Validation:', {
+        valid: validation.valid,
+        errors: validation.errors,
+        theme: currentTheme,
+        totalMealsSecured,
+        mealCount,
+        selectedMeals: Array.from(selectedMeals),
+        harmoniesSoFar: state.harmoniesSoFar,
+        draftActionsExists: !!draftActions
+      });
 
       // Check if quest will be completed
       let questComplete = false;
@@ -360,13 +380,17 @@ import GameLayout from '../layouts/GameLayout.astro';
         openLinkBtn.disabled = false;
         copyLinkBtn.disabled = false;
         if (draftActions) {
+          console.log('Adding visible class to draft-actions');
           draftActions.classList.add('visible');
+        } else {
+          console.error('draftActions is null when trying to add visible class');
         }
       } else {
         lockBtn.disabled = true;
         openLinkBtn.disabled = true;
         copyLinkBtn.disabled = true;
         if (draftActions) {
+          console.log('Removing visible class from draft-actions');
           draftActions.classList.remove('visible');
         }
       }
@@ -456,6 +480,9 @@ import GameLayout from '../layouts/GameLayout.astro';
             state.harmoniesSoFar = [...state.harmoniesSoFar, mealId];
           }
 
+          // Add to selectedMeals so it counts in validation
+          selectedMeals.add(mealId);
+
           // Create or update harmonies section
           let harmoniesSection = document.querySelector('.harmonies-section');
           if (!harmoniesSection) {
@@ -502,6 +529,9 @@ import GameLayout from '../layouts/GameLayout.astro';
             undoBtn.addEventListener('click', () => {
               // Remove from harmonies
               state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== mealId);
+
+              // Remove from selectedMeals
+              selectedMeals.delete(mealId);
 
               // Remove harmony card
               const harmonyCardToRemove = document.querySelector(`.lock-harmony-card[data-meal-id="${mealId}"]`);
@@ -1250,6 +1280,9 @@ import GameLayout from '../layouts/GameLayout.astro';
             state.harmoniesSoFar = [...state.harmoniesSoFar, takeoutId];
           }
 
+          // Add to selectedMeals so it counts in validation
+          selectedMeals.add(takeoutId);
+
           // Persist takeout meal to state (so it survives across rounds)
           state = {
             ...state,
@@ -1292,6 +1325,9 @@ import GameLayout from '../layouts/GameLayout.astro';
             undoBtn.addEventListener('click', () => {
               // Remove from harmonies
               state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== takeoutId);
+
+              // Remove from selectedMeals
+              selectedMeals.delete(takeoutId);
 
               // Remove from takeout meals map
               takeoutMeals.delete(takeoutId);

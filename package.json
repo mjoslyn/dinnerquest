@@ -8,7 +8,10 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
   },
   "repository": {
     "type": "git",
@@ -30,6 +33,7 @@
     "lz-string": "^1.5.0"
   },
   "devDependencies": {
-    "@astrojs/netlify": "^6.6.3"
+    "@astrojs/netlify": "^6.6.3",
+    "@playwright/test": "^1.57.0"
   }
 }
