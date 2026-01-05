@@ -60,9 +60,20 @@ import GameLayout from '../layouts/GameLayout.astro';
     import { validateDraft, resolveDraft } from '../lib/gameLogic.js';
     import { getCostPoints, getBudgetPoints, getRandomUpgrades, getRandomMeals, getAllMeals, getAllUpgrades } from '../lib/gameDataClient.js';
 
+    // New architecture imports
+    import { GameController } from '../lib/GameController.js';
+    import { updateDisplays as updateDisplaysUtil } from '../lib/displayUtils.js';
+    import { setupTakeoutUpgradeUI, setupLockUpgradeUI, renderUpgradeCards } from '../lib/upgradeHandlers.js';
+
     const params = new URLSearchParams(window.location.search);
-    let state = decodeGameState(params);
     const currentPlayer = params.get('player') || 'A';
+
+    // Initialize GameController first (Phase 1 migration)
+    const controller = new GameController(params, currentPlayer);
+
+    // Backward compatibility: reference controller's state
+    // TODO: Remove after full migration
+    let state = controller.state;
 
     // Apply theme from state (fallback to default if not set)
     if (state && state.theme) {
@@ -124,14 +135,9 @@ import GameLayout from '../layouts/GameLayout.astro';
       }
     };
 
-    // Track takeout meals (id -> meal object) for cost calculations
-    // Restore from state if available (persists across rounds)
-    const takeoutMeals = new Map();
-    if (state.takeoutMeals && state.takeoutMeals.length > 0) {
-      state.takeoutMeals.forEach(meal => {
-        takeoutMeals.set(meal.id, meal);
-      });
-    }
+    // Backward compatibility: reference controller's takeoutMeals Map
+    // TODO: Remove after full migration
+    const takeoutMeals = controller.takeoutMeals;
 
     // Hydrate upgrades with full data (they're stored as just IDs in URL)
     const allUpgrades = await getAllUpgrades();
@@ -165,10 +171,10 @@ import GameLayout from '../layouts/GameLayout.astro';
       };
     }
 
-    const mealCount = state.settings.mealCount;
+    // Backward compatibility references (will be removed after migration)
+    const mealCount = controller.mealCount;
     const budgetLimit = getBudgetPoints(state.settings.budgetCap, mealCount);
-
-    let selectedMeals = new Set();
+    const selectedMeals = controller.selectedMeals; // Reference controller's Set
 
     // UI elements
     const pickCountEl = document.getElementById('pick-count');
