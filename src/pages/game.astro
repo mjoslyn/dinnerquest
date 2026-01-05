@@ -329,47 +329,37 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     // Meal card selection
+    // Phase 5: Streamlined meal selection using controller methods
     document.querySelectorAll('.meal-card').forEach(card => {
       card.addEventListener('click', async (e) => {
         const mealId = parseInt(card.dataset.mealId);
 
-        // Handle partial harmony - immediately lock into harmonies but keep in draft list
+        // Handle lock selection mode first
+        if (lockMealHandler) {
+          await lockMealHandler(mealId);
+          lockMealHandler = null;
+          state = controller.state;
+          return;
+        }
+
+        // Prevent deselecting locked meals
+        if (card.classList.contains('locked')) {
+          return;
+        }
+
+        // Handle partial harmony - immediately lock into harmonies
         if (otherPlayerPicksSet.has(mealId)) {
-          // Find the meal data
           const partialMeal = (await getAllMeals()).find(m => m.id === mealId);
           if (!partialMeal) return;
 
-          // Toggle selection
-          if (selectedMeals.has(mealId)) {
-            // Uncheck - remove from harmonies and selections
-            selectedMeals.delete(mealId);
-            card.classList.remove('selected');
-            state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== mealId);
+          const isSelected = controller.toggleMealSelection(mealId);
+          card.classList.toggle('selected', isSelected);
 
-            // Remove from harmony grid
-            const harmonyCard = document.querySelector(`.harmony-card[data-meal-id="${mealId}"]`);
-            if (harmonyCard) {
-              harmonyCard.remove();
-            }
+          if (isSelected) {
+            // Add to harmonies
+            controller.addToHarmonies(mealId);
 
-            // Hide harmonies section if empty
-            const harmoniesSection = document.querySelector('.harmonies-section');
-            if (harmoniesSection) {
-              const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
-              if (harmonyGrid && harmonyGrid.children.length === 0) {
-                harmoniesSection.style.display = 'none';
-              }
-            }
-          } else {
-            // Check - add to harmonies and selections
-            selectedMeals.add(mealId);
-            card.classList.add('selected');
-
-            if (!state.harmoniesSoFar.includes(mealId)) {
-              state.harmoniesSoFar = [...state.harmoniesSoFar, mealId];
-            }
-
-            // Create or update harmonies section
+            // Create or show harmonies section
             let harmoniesSection = document.querySelector('.harmonies-section');
             if (!harmoniesSection) {
               harmoniesSection = document.createElement('div');
@@ -390,38 +380,33 @@ import GameLayout from '../layouts/GameLayout.astro';
               <div class="meal-name">${partialMeal.name}</div>
             `;
             harmonyGrid.appendChild(harmonyCard);
+          } else {
+            // Remove from harmonies
+            controller.removeFromHarmonies(mealId);
+
+            // Remove harmony card
+            const harmonyCard = document.querySelector(`.harmony-card[data-meal-id="${mealId}"]`);
+            if (harmonyCard) harmonyCard.remove();
+
+            // Hide harmonies section if empty
+            const harmoniesSection = document.querySelector('.harmonies-section');
+            if (harmoniesSection) {
+              const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+              if (harmonyGrid && harmonyGrid.children.length === 0) {
+                harmoniesSection.style.display = 'none';
+              }
+            }
           }
 
-          // Update displays
+          state = controller.state;
           updateDisplays();
           return;
         }
 
-        // Handle lock selection mode (Phase 4: Using upgradeHandlers)
-        if (lockMealHandler) {
-          await lockMealHandler(mealId);
-          lockMealHandler = null;
-          // Sync state after lock
-          state = controller.state;
-          return;
-        }
-
-        // Normal selection
-        // Prevent deselecting locked meals
-        if (card.classList.contains('locked')) {
-          return;
-        }
-
-        if (selectedMeals.has(mealId)) {
-          // Deselect
-          selectedMeals.delete(mealId);
-          card.classList.remove('selected');
-        } else {
-          // Select
-          selectedMeals.add(mealId);
-          card.classList.add('selected');
-        }
-
+        // Normal selection - use controller method
+        const isSelected = controller.toggleMealSelection(mealId);
+        card.classList.toggle('selected', isSelected);
+        state = controller.state;
         updateDisplays();
       });
     });
