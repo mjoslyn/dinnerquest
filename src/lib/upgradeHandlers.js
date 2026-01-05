@@ -157,10 +157,16 @@ export function setupLockUpgradeUI(controller, upgrade, upgradeCard, onMealSelec
     harmonyCard.className = 'harmony-card locked lock-harmony-card';
     harmonyCard.dataset.mealId = mealId;
     harmonyCard.innerHTML = `
-      <span class="meal-emoji">${lockedMeal.emoji}</span>
+      <span class="meal-emoji">${upgrade.emoji}${lockedMeal.emoji}</span>
       <div class="meal-name">${lockedMeal.name}</div>
     `;
     harmonyGrid.appendChild(harmonyCard);
+
+    // Mark meal card as locked in the pool (don't remove it)
+    const mealCardInPool = document.querySelector(`.meal-card[data-meal-id="${mealId}"]`);
+    if (mealCardInPool) {
+      mealCardInPool.classList.add('locked', 'selected');
+    }
 
     // Update button
     useBtn.textContent = 'Used';
@@ -173,10 +179,10 @@ export function setupLockUpgradeUI(controller, upgrade, upgradeCard, onMealSelec
     undoBtn.addEventListener('click', () => {
       controller.cancelLockUpgrade(mealId);
 
-      // Remove from selected meals
+      // Remove locked state from meal card
       const mealCard = document.querySelector(`.meal-card[data-meal-id="${mealId}"]`);
       if (mealCard) {
-        mealCard.classList.remove('selected');
+        mealCard.classList.remove('selected', 'locked');
       }
 
       // Remove harmony card
