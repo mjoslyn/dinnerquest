@@ -248,11 +248,11 @@ import GameLayout from '../layouts/GameLayout.astro';
     // Set narrative
     document.getElementById('meal-count-text').textContent = `at least ${mealCount} meals`;
 
-    // Render harmonies (include both regular meals and takeout meals)
+    // Render harmonies (include both regular meals, takeout meals, and custom meals)
     const harmonyMeals = (state.harmoniesSoFar || [])
       .map(id => {
-        // Check if it's a numeric ID (regular meal) or string ID (takeout)
-        if (typeof id === 'string' && id.startsWith('takeout-')) {
+        // Check takeout/custom meals first (string IDs like 'takeout-123' or 'custom-123')
+        if (typeof id === 'string' && (id.startsWith('takeout-') || id.startsWith('custom-'))) {
           return takeoutMeals.get(id);
         }
         return allMeals.find(m => m.id === id);
