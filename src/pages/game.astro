@@ -25,6 +25,9 @@ import GameLayout from '../layouts/GameLayout.astro';
       </div>
     </div>
 
+    <!-- Validation errors -->
+    <div class="validation-errors" id="validation-errors" style="display: none;"></div>
+
     <!-- Upgrades section - populated by client -->
     <div class="upgrades-section" id="upgrades-section" style="display: none;">
       <h3>Your Themes</h3>
@@ -182,6 +185,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     const openLinkBtn = document.getElementById('open-link-btn');
     const copyLinkBtn = document.getElementById('copy-link-btn');
     const shareMessage = document.getElementById('share-message');
+    const validationErrorsEl = document.getElementById('validation-errors');
 
     // Set initial button text based on theme
     const initialButtonTexts = themeButtonText[currentTheme] || themeButtonText['theme-fantasy'];
@@ -305,7 +309,8 @@ import GameLayout from '../layouts/GameLayout.astro';
       lockBtn,
       openLinkBtn,
       copyLinkBtn,
-      draftActions
+      draftActions,
+      validationErrorsEl
     };
 
     // Update displays and run live validation (Phase 2: Using displayUtils)
@@ -1407,6 +1412,39 @@ import GameLayout from '../layouts/GameLayout.astro';
       font-weight: normal;
     }
 
+    .validation-errors {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100%);
+      width: 90%;
+      max-width: 600px;
+      background: var(--danger, #ff4444);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 0 0 8px 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .validation-errors.slide-down {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .validation-errors .error-item {
+      margin: 4px 0;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .validation-errors .error-item:first-child {
+      margin-top: 0;
+    }
+
+    .validation-errors .error-item:last-child {
+      margin-bottom: 0;
+    }
 
     .meal-pool {
       display: grid;

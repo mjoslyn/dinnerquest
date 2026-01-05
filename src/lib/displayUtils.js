@@ -13,7 +13,7 @@ import { getCostPoints, getBudgetPoints } from './gameDataClient.js';
  * @param {string} currentTheme - Current theme ID
  */
 export function updateDisplays(controller, elements, allMeals, themeButtonText, currentTheme) {
-  const { pickCountEl, budgetDisplayEl, lockBtn, openLinkBtn, copyLinkBtn, draftActions } = elements;
+  const { pickCountEl, budgetDisplayEl, lockBtn, openLinkBtn, copyLinkBtn, draftActions, validationErrorsEl } = elements;
 
   // Calculate costs
   const { currentPicksCost, currentPicksUsd, harmoniesCost, harmoniesUsdTotal } =
@@ -42,6 +42,18 @@ export function updateDisplays(controller, elements, allMeals, themeButtonText, 
 
   // Validate
   const validation = controller.validate(allMeals);
+
+  // Show/hide validation errors
+  if (validationErrorsEl) {
+    if (validation.errors.length > 0) {
+      validationErrorsEl.innerHTML = validation.errors.map(err => `<div class="error-item">${err}</div>`).join('');
+      validationErrorsEl.style.display = 'block';
+      validationErrorsEl.classList.add('slide-down');
+    } else {
+      validationErrorsEl.style.display = 'none';
+      validationErrorsEl.classList.remove('slide-down');
+    }
+  }
 
   // Check if quest will be completed
   const questComplete = checkQuestComplete(controller);
