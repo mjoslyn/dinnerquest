@@ -43,9 +43,11 @@ export function updateDisplays(controller, elements, allMeals, themeButtonText, 
   // Validate
   const validation = controller.validate(allMeals);
 
-  // Show/hide validation errors
+  // Show/hide validation errors (only after 3+ meals picked to avoid annoying early warnings)
   if (validationErrorsEl) {
-    if (validation.errors.length > 0) {
+    const shouldShowErrors = totalMealsSecured > 3 || totalMealsSecured > mealCount;
+
+    if (validation.errors.length > 0 && shouldShowErrors) {
       validationErrorsEl.innerHTML = validation.errors.map(err => `<div class="error-item">${err}</div>`).join('');
       validationErrorsEl.style.display = 'block';
       validationErrorsEl.classList.add('slide-down');
