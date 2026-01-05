@@ -23,7 +23,7 @@ const upgradesCollection = defineCollection({
     id: z.string(),
     name: z.string(),
     emoji: z.string(),
-    type: z.enum(['theme', 'lock', 'takeout', 'redraw']),
+    type: z.enum(['theme', 'lock', 'takeout', 'redraw', 'custom']),
     effect: z.string(),
     themeStyle: z.string().optional(),
     rejectionText: z.string().optional(),
