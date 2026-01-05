@@ -115,26 +115,24 @@ export async function getRandomUpgrades(count = 2, theme = null) {
     });
   }
 
-  const shuffled = availableUpgrades.sort(() => Math.random() - 0.5);
-
   const selected = [];
-  let hasTakeout = false;
-  let hasLock = false;
-  let hasRedraw = false;
 
-  for (const upgrade of shuffled) {
-    // Skip if we already have max of this type
-    if (upgrade.type === 'takeout' && hasTakeout) continue;
-    if (upgrade.type === 'lock' && hasLock) continue;
-    if (upgrade.type === 'redraw' && hasRedraw) continue;
+  // Separate utility upgrades (lock, redraw, takeout) and theme upgrades
+  const utilityUpgrades = availableUpgrades.filter(u =>
+    u.type === 'lock' || u.type === 'redraw' || u.type === 'takeout'
+  );
+  const themeUpgrades = availableUpgrades.filter(u => u.type === 'theme');
 
-    selected.push(upgrade);
+  // Always pick 1 random utility upgrade
+  if (utilityUpgrades.length > 0) {
+    const randomUtility = utilityUpgrades[Math.floor(Math.random() * utilityUpgrades.length)];
+    selected.push(randomUtility);
+  }
 
-    if (upgrade.type === 'takeout') hasTakeout = true;
-    if (upgrade.type === 'lock') hasLock = true;
-    if (upgrade.type === 'redraw') hasRedraw = true;
-
-    if (selected.length >= count) break;
+  // Always pick 1 random theme upgrade
+  if (themeUpgrades.length > 0) {
+    const randomTheme = themeUpgrades[Math.floor(Math.random() * themeUpgrades.length)];
+    selected.push(randomTheme);
   }
 
   return selected;
