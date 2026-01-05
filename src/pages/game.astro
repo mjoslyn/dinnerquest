@@ -618,6 +618,8 @@ import GameLayout from '../layouts/GameLayout.astro';
                 usedIndices.push(index);
               } else if (upgrade.type === 'takeout' && player.usedTakeoutId === upgrade.id) {
                 usedIndices.push(index);
+              } else if (upgrade.type === 'custom' && player.usedCustomId === upgrade.id) {
+                usedIndices.push(index);
               }
             });
 
@@ -1038,6 +1040,89 @@ import GameLayout from '../layouts/GameLayout.astro';
               updateDisplays();
             }
           );
+          return;
+        }
+
+        // Handle custom meal upgrades
+        if (upgrade.type === 'custom') {
+          // Prompt user for meal name
+          const mealName = prompt(upgrade.effect + '\n\nEnter your custom meal name:');
+
+          if (!mealName || mealName.trim() === '') {
+            return; // User cancelled or entered empty name
+          }
+
+          // Create custom meal object
+          const customId = `custom-${Date.now()}`;
+          const customMeal = {
+            id: customId,
+            name: mealName.trim(),
+            emoji: upgrade.emoji,
+            cost: upgrade.mealCost || '$$',
+            estimatedPrice: 20, // $$ = 20
+            time: 30,
+            cuisine: 'Custom'
+          };
+
+          // Store custom meal
+          controller.takeoutMeals.set(customId, customMeal);
+
+          // Add to harmonies and selected meals
+          controller.addToHarmonies(customId);
+          controller.selectedMeals.add(customId);
+
+          // Persist to state
+          controller.state = {
+            ...controller.state,
+            takeoutMeals: [...(controller.state.takeoutMeals || []), customMeal]
+          };
+
+          // Mark upgrade as used
+          controller.state = {
+            ...controller.state,
+            players: {
+              ...controller.state.players,
+              [currentPlayer]: {
+                ...controller.player,
+                usedCustomId: upgrade.id
+              }
+            }
+          };
+
+          // Create or update harmonies section
+          let harmoniesSection = document.querySelector('.harmonies-section');
+          if (!harmoniesSection) {
+            harmoniesSection = document.createElement('div');
+            harmoniesSection.className = 'harmonies-section';
+            harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
+            const draftInfo = document.querySelector('.draft-info');
+            draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
+          }
+          harmoniesSection.style.display = 'block';
+
+          // Add harmony card
+          const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+          const harmonyCard = document.createElement('div');
+          harmonyCard.className = 'harmony-card locked custom-harmony-card';
+          harmonyCard.dataset.mealId = customId;
+          harmonyCard.innerHTML = `
+            <span class="meal-emoji">${customMeal.emoji}</span>
+            <div class="meal-name">${customMeal.name}</div>
+          `;
+          harmonyGrid.appendChild(harmonyCard);
+
+          // Update button
+          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
+          if (upgradeCard) {
+            const useBtn = upgradeCard.querySelector('.btn-use-upgrade');
+            useBtn.disabled = true;
+            useBtn.textContent = 'Used';
+            useBtn.classList.add('btn-used');
+          }
+
+          // Sync state and update displays
+          state = controller.state;
+          updateDisplays();
           return;
         }
 

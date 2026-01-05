@@ -18,6 +18,7 @@ export function renderUpgradeCards(upgrades) {
       ${upgrade.type === 'takeout' ? '<div class="takeout-badge">TAKEOUT</div>' : ''}
       ${upgrade.type === 'lock' ? '<div class="lock-badge">LOCK AN ITEM</div>' : ''}
       ${upgrade.type === 'redraw' ? '<div class="redraw-badge">REDRAW</div>' : ''}
+      ${upgrade.type === 'custom' ? '<div class="custom-badge">CUSTOM MEAL</div>' : ''}
       <div class="upgrade-emoji">${upgrade.emoji}</div>
       <div class="upgrade-name">${upgrade.name}</div>
       <div class="upgrade-effect">${upgrade.effect}</div>

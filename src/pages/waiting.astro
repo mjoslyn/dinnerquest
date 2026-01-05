@@ -120,6 +120,7 @@ import GameLayout from '../layouts/GameLayout.astro';
           ${upgrade.type === 'takeout' ? '<div class="takeout-badge">TAKEOUT</div>' : ''}
           ${upgrade.type === 'lock' ? '<div class="lock-badge">LOCK AN ITEM</div>' : ''}
           ${upgrade.type === 'redraw' ? '<div class="redraw-badge">REDRAW</div>' : ''}
+          ${upgrade.type === 'custom' ? '<div class="custom-badge">CUSTOM MEAL</div>' : ''}
           <div class="upgrade-emoji">${upgrade.emoji}</div>
           <div class="upgrade-name">${upgrade.name}</div>
           <div class="upgrade-effect">${upgrade.effect}</div>
@@ -423,6 +424,23 @@ import GameLayout from '../layouts/GameLayout.astro';
       z-index: 10;
     }
 
+    .custom-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 11px;
+      padding: 3px 6px;
+      background: var(--purple);
+      color: white;
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      z-index: 10;
+    }
+
     @media (max-width: 768px) {
       .theme-badge {
         font-size: 10px;
@@ -446,6 +464,13 @@ import GameLayout from '../layouts/GameLayout.astro';
       }
 
       .redraw-badge {
+        font-size: 10px;
+        padding: 2px 5px;
+        top: 6px;
+        right: 6px;
+      }
+
+      .custom-badge {
         font-size: 10px;
         padding: 2px 5px;
         top: 6px;

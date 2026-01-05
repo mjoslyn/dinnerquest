@@ -117,9 +117,9 @@ export async function getRandomUpgrades(count = 2, theme = null) {
 
   const selected = [];
 
-  // Separate utility upgrades (lock, redraw, takeout) and theme upgrades
+  // Separate utility upgrades (lock, redraw, takeout, custom) and theme upgrades
   const utilityUpgrades = availableUpgrades.filter(u =>
-    u.type === 'lock' || u.type === 'redraw' || u.type === 'takeout'
+    u.type === 'lock' || u.type === 'redraw' || u.type === 'takeout' || u.type === 'custom'
   );
   const themeUpgrades = availableUpgrades.filter(u => u.type === 'theme');
 
