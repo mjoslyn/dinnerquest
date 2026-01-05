@@ -1178,8 +1178,10 @@ import GameLayout from '../layouts/GameLayout.astro';
               }
 
               // Handle lock selection mode
-              if (isSelectingToLock && activeLockUpgrade) {
-                // Same lock logic as before
+              if (lockMealHandler) {
+                await lockMealHandler(mealId);
+                lockMealHandler = null;
+                state = controller.state;
                 return;
               }
 
@@ -1222,10 +1224,17 @@ import GameLayout from '../layouts/GameLayout.astro';
 
               // Re-attach click handlers to restored cards
               document.querySelectorAll('.meal-card').forEach(card => {
-                card.addEventListener('click', () => {
+                card.addEventListener('click', async () => {
                   const mealId = parseInt(card.dataset.mealId);
 
-                  if (isSelectingToLock && activeLockUpgrade) return;
+                  // Handle lock upgrade first
+                  if (lockMealHandler) {
+                    await lockMealHandler(mealId);
+                    lockMealHandler = null;
+                    state = controller.state;
+                    return;
+                  }
+
                   if (card.classList.contains('locked')) return;
 
                   if (selectedMeals.has(mealId)) {
