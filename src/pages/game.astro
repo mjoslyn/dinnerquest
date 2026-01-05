@@ -1215,12 +1215,30 @@ import GameLayout from '../layouts/GameLayout.astro';
               // Restore original pool
               state = { ...state, pool: originalPool };
 
-              // Restore original selections
+              // Preserve current selections that exist in the restored pool
+              const currentSelections = new Set(selectedMeals);
               selectedMeals.clear();
+
+              // Add back original selections
               originalSelections.forEach(id => selectedMeals.add(id));
+
+              // Add current selections if they exist in the restored pool
+              currentSelections.forEach(id => {
+                if (originalPool.includes(id)) {
+                  selectedMeals.add(id);
+                }
+              });
 
               // Restore original pool UI
               mealPoolEl.innerHTML = originalPoolCards;
+
+              // Re-apply selected state to preserved selections
+              document.querySelectorAll('.meal-card').forEach(card => {
+                const mealId = parseInt(card.dataset.mealId);
+                if (selectedMeals.has(mealId)) {
+                  card.classList.add('selected');
+                }
+              });
 
               // Re-attach click handlers to restored cards
               document.querySelectorAll('.meal-card').forEach(card => {
