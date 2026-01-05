@@ -1,0 +1,62 @@
+[
+  {
+    "id": "produce",
+    "name": "Produce",
+    "sortOrder": 1,
+    "emoji": "🥬"
+  },
+  {
+    "id": "meat-seafood",
+    "name": "Meat & Seafood",
+    "sortOrder": 2,
+    "emoji": "🥩"
+  },
+  {
+    "id": "dairy",
+    "name": "Dairy",
+    "sortOrder": 3,
+    "emoji": "🥛"
+  },
+  {
+    "id": "grains-pasta",
+    "name": "Grains & Pasta",
+    "sortOrder": 4,
+    "emoji": "🌾"
+  },
+  {
+    "id": "canned-jarred",
+    "name": "Canned & Jarred",
+    "sortOrder": 5,
+    "emoji": "🥫"
+  },
+  {
+    "id": "spices-seasonings",
+    "name": "Spices & Seasonings",
+    "sortOrder": 6,
+    "emoji": "🧂"
+  },
+  {
+    "id": "oils-condiments",
+    "name": "Oils & Condiments",
+    "sortOrder": 7,
+    "emoji": "🫗"
+  },
+  {
+    "id": "frozen",
+    "name": "Frozen",
+    "sortOrder": 8,
+    "emoji": "🧊"
+  },
+  {
+    "id": "bakery",
+    "name": "Bakery",
+    "sortOrder": 9,
+    "emoji": "🥖"
+  },
+  {
+    "id": "beverages",
+    "name": "Beverages",
+    "sortOrder": 10,
+    "emoji": "☕"
+  }
+]
