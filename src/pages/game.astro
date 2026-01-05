@@ -1043,11 +1043,6 @@ import GameLayout from '../layouts/GameLayout.astro';
 
         // Handle redraw upgrades
         if (upgrade.type === 'redraw') {
-          // Save original pool for undo
-          const originalPool = [...state.pool];
-          const originalPoolCards = document.querySelector('.meal-pool').innerHTML;
-          const originalSelections = new Set(selectedMeals); // Save current selections
-
           // Get partial harmony IDs (other player's picks that aren't harmonized yet)
           // Player B sees Player A's picks in Round 1
           let otherPlayerAllPicks = [];
@@ -1214,83 +1209,8 @@ import GameLayout from '../layouts/GameLayout.astro';
             mealPoolEl.appendChild(mealCard);
           }
 
-          // Disable the upgrade button
-          btn.disabled = true;
-          btn.textContent = 'Used';
-          btn.classList.add('btn-used');
-
-          // Create undo button
-          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
-          if (upgradeCard) {
-            const undoBtn = document.createElement('button');
-            undoBtn.className = 'btn-undo-lock';
-            undoBtn.textContent = upgrade.undoText || 'Undo';
-            undoBtn.addEventListener('click', () => {
-              // Restore original pool
-              state = { ...state, pool: originalPool };
-
-              // Preserve current selections that exist in the restored pool
-              const currentSelections = new Set(selectedMeals);
-              selectedMeals.clear();
-
-              // Add back original selections
-              originalSelections.forEach(id => selectedMeals.add(id));
-
-              // Add current selections if they exist in the restored pool
-              currentSelections.forEach(id => {
-                if (originalPool.includes(id)) {
-                  selectedMeals.add(id);
-                }
-              });
-
-              // Restore original pool UI
-              mealPoolEl.innerHTML = originalPoolCards;
-
-              // Re-apply selected state to preserved selections
-              document.querySelectorAll('.meal-card').forEach(card => {
-                const mealId = parseInt(card.dataset.mealId);
-                if (selectedMeals.has(mealId)) {
-                  card.classList.add('selected');
-                }
-              });
-
-              // Re-attach click handlers to restored cards
-              document.querySelectorAll('.meal-card').forEach(card => {
-                card.addEventListener('click', async () => {
-                  const mealId = parseInt(card.dataset.mealId);
-
-                  // Handle lock upgrade first
-                  if (lockMealHandler) {
-                    await lockMealHandler(mealId);
-                    lockMealHandler = null;
-                    state = controller.state;
-                    return;
-                  }
-
-                  if (card.classList.contains('locked')) return;
-
-                  if (selectedMeals.has(mealId)) {
-                    selectedMeals.delete(mealId);
-                    card.classList.remove('selected');
-                  } else {
-                    selectedMeals.add(mealId);
-                    card.classList.add('selected');
-                  }
-                  updateDisplays();
-                });
-              });
-
-              undoBtn.remove();
-
-              // Re-enable the upgrade button
-              btn.disabled = false;
-              btn.textContent = 'Use';
-              btn.classList.remove('btn-used');
-
-              updateDisplays();
-            });
-            upgradeCard.appendChild(undoBtn);
-          }
+          // Update button text to show it can be used again
+          btn.textContent = 'Redraw Again';
 
           updateDisplays();
           return;
