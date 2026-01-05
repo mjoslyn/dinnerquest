@@ -319,17 +319,16 @@ import GameLayout from '../layouts/GameLayout.astro';
       const cumulativeCost = harmoniesCost + currentPicksCost;
       const cumulativeUsd = harmoniesUsdTotal + currentPicksUsd;
 
-      // Calculate meals to show: current picks this round / meals still needed
+      // Calculate meals to show: total secured (locked + picks) / total meal count
       const currentPicksCount = selectedMeals.size;
-      const mealsStillNeeded = Math.max(0, mealCount - state.harmoniesSoFar.length);
       const allMealIds = new Set([...state.harmoniesSoFar, ...Array.from(selectedMeals)]);
       const totalMealsSecured = allMealIds.size;
 
-      // Show "Complete!" when all meals secured, otherwise show picks / needed
+      // Show "Complete!" when all meals secured, otherwise show total secured / meal count
       if (totalMealsSecured >= mealCount) {
         pickCountEl.textContent = 'Complete!';
       } else {
-        pickCountEl.textContent = `${currentPicksCount} / ${mealsStillNeeded}`;
+        pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
       }
       budgetDisplayEl.innerHTML = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'} <span class="usd-total">($${cumulativeUsd})</span>`;
 
