@@ -51,6 +51,31 @@ import GameLayout from '../layouts/GameLayout.astro';
       </button>
     </div>
     <div id="share-message" class="share-message" style="display: none;"></div>
+
+    <!-- Custom Meal Modal -->
+    <div id="custom-meal-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="custom-meal-modal-title">Create Your Custom Meal</h3>
+          <button class="modal-close" id="custom-meal-modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <p id="custom-meal-modal-description">Enter the name of your custom meal:</p>
+          <input
+            type="text"
+            id="custom-meal-input"
+            class="custom-meal-input"
+            placeholder="e.g., Grandma's Secret Recipe"
+            maxlength="50"
+            autocomplete="off"
+          />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="custom-meal-cancel">Cancel</button>
+          <button class="btn btn-primary" id="custom-meal-submit">Create Meal</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="narrative">
@@ -1045,84 +1070,144 @@ import GameLayout from '../layouts/GameLayout.astro';
 
         // Handle custom meal upgrades
         if (upgrade.type === 'custom') {
-          // Prompt user for meal name
-          const mealName = prompt(upgrade.effect + '\n\nEnter your custom meal name:');
+          // Show modal
+          const modal = document.getElementById('custom-meal-modal');
+          const modalDescription = document.getElementById('custom-meal-modal-description');
+          const modalInput = document.getElementById('custom-meal-input');
+          const modalClose = document.getElementById('custom-meal-modal-close');
+          const modalCancel = document.getElementById('custom-meal-cancel');
+          const modalSubmit = document.getElementById('custom-meal-submit');
 
-          if (!mealName || mealName.trim() === '') {
-            return; // User cancelled or entered empty name
-          }
+          // Set description from upgrade effect
+          modalDescription.textContent = upgrade.effect;
 
-          // Create custom meal object
-          const customId = `custom-${Date.now()}`;
-          const customMeal = {
-            id: customId,
-            name: mealName.trim(),
-            emoji: upgrade.emoji,
-            cost: upgrade.mealCost || '$$',
-            estimatedPrice: 20, // $$ = 20
-            time: 30,
-            cuisine: 'Custom'
+          // Clear input and show modal
+          modalInput.value = '';
+          modal.style.display = 'flex';
+
+          // Focus input after a brief delay to ensure modal is visible
+          setTimeout(() => modalInput.focus(), 100);
+
+          // Close handlers
+          const closeModal = () => {
+            modal.style.display = 'none';
+            // Remove event listeners
+            modalClose.removeEventListener('click', closeModal);
+            modalCancel.removeEventListener('click', closeModal);
+            modalSubmit.removeEventListener('click', submitHandler);
+            document.removeEventListener('keydown', escapeHandler);
+            modal.removeEventListener('click', overlayClickHandler);
           };
 
-          // Store custom meal
-          controller.takeoutMeals.set(customId, customMeal);
-
-          // Add to harmonies and selected meals
-          controller.addToHarmonies(customId);
-          controller.selectedMeals.add(customId);
-
-          // Persist to state
-          controller.state = {
-            ...controller.state,
-            takeoutMeals: [...(controller.state.takeoutMeals || []), customMeal]
+          const escapeHandler = (e) => {
+            if (e.key === 'Escape') closeModal();
           };
 
-          // Mark upgrade as used
-          controller.state = {
-            ...controller.state,
-            players: {
-              ...controller.state.players,
-              [currentPlayer]: {
-                ...controller.player,
-                usedCustomId: upgrade.id
-              }
+          const overlayClickHandler = (e) => {
+            if (e.target === modal) closeModal();
+          };
+
+          // Submit handler
+          const submitHandler = () => {
+            const mealName = modalInput.value.trim();
+
+            if (!mealName) {
+              // Shake animation for empty input
+              modalInput.style.animation = 'shake 0.3s';
+              setTimeout(() => { modalInput.style.animation = ''; }, 300);
+              return;
             }
+
+            // Close modal
+            closeModal();
+
+            // Create custom meal object
+            const customId = `custom-${Date.now()}`;
+            const customMeal = {
+              id: customId,
+              name: mealName,
+              emoji: upgrade.emoji,
+              cost: upgrade.mealCost || '$',
+              estimatedPrice: 20, // $ = 20
+              time: 30,
+              cuisine: 'Custom'
+            };
+
+            // Store custom meal
+            controller.takeoutMeals.set(customId, customMeal);
+
+            // Add to harmonies and selected meals
+            controller.addToHarmonies(customId);
+            controller.selectedMeals.add(customId);
+
+            // Persist to state
+            controller.state = {
+              ...controller.state,
+              takeoutMeals: [...(controller.state.takeoutMeals || []), customMeal]
+            };
+
+            // Mark upgrade as used
+            controller.state = {
+              ...controller.state,
+              players: {
+                ...controller.state.players,
+                [currentPlayer]: {
+                  ...controller.player,
+                  usedCustomId: upgrade.id
+                }
+              }
+            };
+
+            // Create or update harmonies section
+            let harmoniesSection = document.querySelector('.harmonies-section');
+            if (!harmoniesSection) {
+              harmoniesSection = document.createElement('div');
+              harmoniesSection.className = 'harmonies-section';
+              harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
+              const draftInfo = document.querySelector('.draft-info');
+              draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
+            }
+            harmoniesSection.style.display = 'block';
+
+            // Add harmony card
+            const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
+            const harmonyCard = document.createElement('div');
+            harmonyCard.className = 'harmony-card locked custom-harmony-card';
+            harmonyCard.dataset.mealId = customId;
+            harmonyCard.innerHTML = `
+              <span class="meal-emoji">${customMeal.emoji}</span>
+              <div class="meal-name">${customMeal.name}</div>
+            `;
+            harmonyGrid.appendChild(harmonyCard);
+
+            // Update button
+            const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
+            if (upgradeCard) {
+              const useBtn = upgradeCard.querySelector('.btn-use-upgrade');
+              useBtn.disabled = true;
+              useBtn.textContent = 'Used';
+              useBtn.classList.add('btn-used');
+            }
+
+            // Sync state and update displays
+            state = controller.state;
+            updateDisplays();
           };
 
-          // Create or update harmonies section
-          let harmoniesSection = document.querySelector('.harmonies-section');
-          if (!harmoniesSection) {
-            harmoniesSection = document.createElement('div');
-            harmoniesSection.className = 'harmonies-section';
-            harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
-            const draftInfo = document.querySelector('.draft-info');
-            draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
-          }
-          harmoniesSection.style.display = 'block';
+          // Attach event listeners
+          modalClose.addEventListener('click', closeModal);
+          modalCancel.addEventListener('click', closeModal);
+          modalSubmit.addEventListener('click', submitHandler);
+          document.addEventListener('keydown', escapeHandler);
+          modal.addEventListener('click', overlayClickHandler);
 
-          // Add harmony card
-          const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
-          const harmonyCard = document.createElement('div');
-          harmonyCard.className = 'harmony-card locked custom-harmony-card';
-          harmonyCard.dataset.mealId = customId;
-          harmonyCard.innerHTML = `
-            <span class="meal-emoji">${customMeal.emoji}</span>
-            <div class="meal-name">${customMeal.name}</div>
-          `;
-          harmonyGrid.appendChild(harmonyCard);
+          // Allow Enter key to submit
+          modalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              submitHandler();
+            }
+          });
 
-          // Update button
-          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
-          if (upgradeCard) {
-            const useBtn = upgradeCard.querySelector('.btn-use-upgrade');
-            useBtn.disabled = true;
-            useBtn.textContent = 'Used';
-            useBtn.classList.add('btn-used');
-          }
-
-          // Sync state and update displays
-          state = controller.state;
-          updateDisplays();
           return;
         }
 
@@ -2278,6 +2363,131 @@ import GameLayout from '../layouts/GameLayout.astro';
       color: var(--primary);
       font-size: 14px;
       text-align: center;
+    }
+
+    /* Custom Meal Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-content {
+      background: var(--bg-dark);
+      border: 3px solid var(--accent);
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+      20%, 40%, 60%, 80% { transform: translateX(8px); }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--accent);
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 32px;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--danger);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-body p {
+      margin: 0 0 16px 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .custom-meal-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      color: var(--text);
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .custom-meal-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .custom-meal-input::placeholder {
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 2px solid var(--border);
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-footer .btn {
+      flex: 0 1 auto;
+      min-width: 120px;
     }
 
     .btn {
