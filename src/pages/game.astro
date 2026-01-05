@@ -266,9 +266,15 @@ import GameLayout from '../layouts/GameLayout.astro';
     }
 
     // Calculate meal pool
-    const otherPlayerAllPicks = state.currentRound > 1
-      ? (currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
-      : [];
+    // Show partial harmonies: Player B sees Player A's picks in Round 1, then accumulated picks in later rounds
+    let otherPlayerAllPicks = [];
+    if (state.currentRound === 1 && currentPlayer === 'B') {
+      // Round 1: Player B sees Player A's current picks
+      otherPlayerAllPicks = state.players.A.picks || [];
+    } else if (state.currentRound > 1) {
+      // Later rounds: show accumulated picks from previous rounds
+      otherPlayerAllPicks = currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []);
+    }
     const partialHarmonyIds = otherPlayerAllPicks.filter(id => !(state.harmoniesSoFar || []).includes(id));
     const otherPlayerPicksSet = new Set(partialHarmonyIds);
 
@@ -1043,10 +1049,13 @@ import GameLayout from '../layouts/GameLayout.astro';
           const originalSelections = new Set(selectedMeals); // Save current selections
 
           // Get partial harmony IDs (other player's picks that aren't harmonized yet)
-          // Don't show partial harmonies in Round 1
-          const otherPlayerAllPicks = state.currentRound > 1
-            ? (currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []))
-            : [];
+          // Player B sees Player A's picks in Round 1
+          let otherPlayerAllPicks = [];
+          if (state.currentRound === 1 && currentPlayer === 'B') {
+            otherPlayerAllPicks = state.players.A.picks || [];
+          } else if (state.currentRound > 1) {
+            otherPlayerAllPicks = currentPlayer === 'A' ? (state.playerBAllPicks || []) : (state.playerAAllPicks || []);
+          }
           const partialHarmonyIds = otherPlayerAllPicks.filter(id => !state.harmoniesSoFar.includes(id));
 
           // Keep partial harmonies AND selected meals in the pool
