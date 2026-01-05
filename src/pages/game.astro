@@ -1158,7 +1158,6 @@ import GameLayout from '../layouts/GameLayout.astro';
     let isSelectingToLock = false;
     let activeLockUpgrade = null;
     let lockedMealId = null;
-    let activeTakeoutUpgrade = null;
 
     // Upgrade usage
     document.querySelectorAll('.btn-use-upgrade').forEach(btn => {
@@ -1185,122 +1184,18 @@ import GameLayout from '../layouts/GameLayout.astro';
           return;
         }
 
-        // Handle takeout upgrades
+        // Handle takeout upgrades (Phase 3: Using upgradeHandlers)
         if (upgrade.type === 'takeout') {
-          // Track the active takeout upgrade
-          activeTakeoutUpgrade = upgrade;
-
-          // Create a fake meal ID for the takeout
-          const takeoutId = `takeout-${Date.now()}`;
-
-          // Create meal object from upgrade data
-          const takeoutMeal = {
-            id: takeoutId,
-            name: upgrade.mealName || 'Takeout',
-            emoji: upgrade.emoji,
-            cost: upgrade.mealCost || '$$$',
-            estimatedPrice: upgrade.mealCost === '$' ? 10 : upgrade.mealCost === '$$' ? 20 : 30,
-            time: 0,
-            cuisine: 'Takeout'
-          };
-
-          // Store takeout meal for cost calculations
-          takeoutMeals.set(takeoutId, takeoutMeal);
-
-          // Add to harmonies immediately
-          if (!state.harmoniesSoFar.includes(takeoutId)) {
-            state.harmoniesSoFar = [...state.harmoniesSoFar, takeoutId];
-          }
-
-          // Add to selectedMeals so it counts in validation
-          selectedMeals.add(takeoutId);
-
-          // Persist takeout meal to state (so it survives across rounds)
-          state = {
-            ...state,
-            takeoutMeals: [...(state.takeoutMeals || []), takeoutMeal]
-          };
-
-          // Create or update harmonies section
-          let harmoniesSection = document.querySelector('.harmonies-section');
-          if (!harmoniesSection) {
-            harmoniesSection = document.createElement('div');
-            harmoniesSection.className = 'harmonies-section';
-            harmoniesSection.innerHTML = '<h3>Harmonies (Locked In)</h3><div class="harmony-grid"></div>';
-            const draftInfo = document.querySelector('.draft-info');
-            draftInfo.parentNode.insertBefore(harmoniesSection, draftInfo);
-          }
-          harmoniesSection.style.display = 'block';
-
-          // Add harmony card
-          const harmonyGrid = harmoniesSection.querySelector('.harmony-grid');
-          const harmonyCard = document.createElement('div');
-          harmonyCard.className = 'harmony-card locked takeout-harmony-card';
-          harmonyCard.dataset.mealId = takeoutId;
-          harmonyCard.innerHTML = `
-            <span class="meal-emoji">${takeoutMeal.emoji}</span>
-            <div class="meal-name">${takeoutMeal.name}</div>
-          `;
-          harmonyGrid.appendChild(harmonyCard);
-
-          // Disable the upgrade button
-          btn.disabled = true;
-          btn.textContent = 'Used';
-          btn.classList.add('btn-used');
-
-          // Create undo button
-          const upgradeCard = document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`);
-          if (upgradeCard) {
-            const undoBtn = document.createElement('button');
-            undoBtn.className = 'btn-undo-lock';
-            undoBtn.textContent = upgrade.undoText || 'Undo';
-            undoBtn.addEventListener('click', () => {
-              // Remove from harmonies
-              state.harmoniesSoFar = state.harmoniesSoFar.filter(id => id !== takeoutId);
-
-              // Remove from selectedMeals
-              selectedMeals.delete(takeoutId);
-
-              // Remove from takeout meals map
-              takeoutMeals.delete(takeoutId);
-
-              // Remove from state (persisted takeout meals)
-              state = {
-                ...state,
-                takeoutMeals: (state.takeoutMeals || []).filter(meal => meal.id !== takeoutId)
-              };
-
-              // Clear active takeout tracking
-              activeTakeoutUpgrade = null;
-
-              // Remove harmony card
-              const harmonyCardToRemove = document.querySelector(`.takeout-harmony-card[data-meal-id="${takeoutId}"]`);
-              if (harmonyCardToRemove) {
-                harmonyCardToRemove.remove();
-              }
-
-              // Hide harmonies section if empty
-              const harmonyGrid = document.querySelector('.harmony-grid');
-              if (harmonyGrid && harmonyGrid.children.length === 0) {
-                const harmoniesSection = document.querySelector('.harmonies-section');
-                if (harmoniesSection) harmoniesSection.remove();
-              }
-
-              undoBtn.remove();
-
-              // Re-enable the upgrade button
-              btn.disabled = false;
-              btn.textContent = 'Use';
-              btn.classList.remove('btn-used');
-
-              // Update displays after removing takeout
+          setupTakeoutUpgradeUI(
+            controller,
+            upgrade,
+            document.querySelector(`.upgrade-card[data-upgrade-id="${upgrade.id}"]`),
+            () => {
+              // Sync state after upgrade usage
+              state = controller.state;
               updateDisplays();
-            });
-            upgradeCard.appendChild(undoBtn);
-          }
-
-          // Update displays after adding takeout
-          updateDisplays();
+            }
+          );
           return;
         }
 
