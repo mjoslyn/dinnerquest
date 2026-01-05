@@ -300,105 +300,32 @@ import GameLayout from '../layouts/GameLayout.astro';
       </div>
     `).join('');
 
-    // Update displays and run live validation
+    // Define UI elements object for display updates
+    const displayElements = {
+      pickCountEl,
+      budgetDisplayEl,
+      lockBtn,
+      openLinkBtn,
+      copyLinkBtn,
+      draftActions
+    };
+
+    // Update displays and run live validation (Phase 2: Using displayUtils)
     function updateDisplays() {
-      const currentPicksCost = Array.from(selectedMeals).reduce((sum, id) => {
-        const card = document.querySelector(`[data-meal-id="${id}"]`);
-        if (!card || !card.dataset.cost) {
-          // Fallback: look up meal in allMeals array
-          const meal = allMeals.find(m => m.id === id);
-          return sum + (meal ? getCostPoints(meal.cost) : 0);
-        }
-        return sum + parseInt(card.dataset.cost);
-      }, 0);
+      // Sync controller state with any external state changes
+      controller.state = state;
 
-      const currentPicksUsd = Array.from(selectedMeals).reduce((sum, id) => {
-        const card = document.querySelector(`[data-meal-id="${id}"]`);
-        if (!card || card.dataset.usd === undefined) {
-          // Fallback: look up meal in allMeals array
-          const meal = allMeals.find(m => m.id === id);
-          return sum + (meal ? (meal.estimatedPrice || 0) : 0);
-        }
-        return sum + parseInt(card.dataset.usd || 0);
-      }, 0);
+      // Use centralized display update utility
+      const { validation, questComplete } = updateDisplaysUtil(
+        controller,
+        displayElements,
+        allMeals,
+        themeButtonText,
+        currentTheme
+      );
 
-      const cumulativeCost = harmoniesCost + currentPicksCost;
-      const cumulativeUsd = harmoniesUsdTotal + currentPicksUsd;
-
-      // Calculate meals to show: total secured (locked + picks) / total meal count
-      const currentPicksCount = selectedMeals.size;
-      const allMealIds = new Set([...state.harmoniesSoFar, ...Array.from(selectedMeals)]);
-      const totalMealsSecured = allMealIds.size;
-
-      // Show "Complete!" when all meals secured, otherwise show total secured / meal count
-      if (totalMealsSecured >= mealCount) {
-        pickCountEl.textContent = 'Complete!';
-      } else {
-        pickCountEl.textContent = `${totalMealsSecured} / ${mealCount}`;
-      }
-      budgetDisplayEl.innerHTML = `${cumulativeCost} / ${budgetLimit ? budgetLimit : 'No limit'} <span class="usd-total">($${cumulativeUsd})</span>`;
-
-      // Color coding - check if we have enough total meals secured
-      pickCountEl.style.color = totalMealsSecured >= mealCount ? 'var(--primary)' : '#d35d5d';
-      budgetDisplayEl.style.color = (budgetLimit && cumulativeCost > budgetLimit) ? 'var(--danger)' : 'var(--primary)';
-
-      // Live validation
-      state = updatePlayerPicks(state, currentPlayer, Array.from(selectedMeals));
-      const validation = validateDraft(state, currentPlayer, allMeals);
-
-      // Debug logging
-      console.log('Validation:', {
-        valid: validation.valid,
-        errors: validation.errors,
-        theme: currentTheme,
-        totalMealsSecured,
-        mealCount,
-        selectedMeals: Array.from(selectedMeals),
-        harmoniesSoFar: state.harmoniesSoFar,
-        draftActionsExists: !!draftActions
-      });
-
-      // Check if quest will be completed
-      let questComplete = false;
-      if (currentPlayer === 'A') {
-        const playerBAllPicks = state.playerBAllPicks || [];
-        const newHarmonies = Array.from(selectedMeals).filter(mealId => playerBAllPicks.includes(mealId));
-        const allHarmonies = [...new Set([...state.harmoniesSoFar, ...newHarmonies])];
-        questComplete = allHarmonies.length >= mealCount;
-      } else if (currentPlayer === 'B') {
-        const playerAPicks = state.players.A.picks;
-        const harmonies = Array.from(selectedMeals).filter(mealId => playerAPicks.includes(mealId));
-        const allHarmonies = [...new Set([...state.harmoniesSoFar, ...harmonies])];
-        questComplete = allHarmonies.length >= mealCount;
-      }
-
-      // Update button text based on quest completion and theme
-      const buttonTexts = themeButtonText[currentTheme] || themeButtonText['theme-fantasy'];
-      if (questComplete) {
-        lockBtn.textContent = buttonTexts?.complete || 'Return Triumphant';
-      } else {
-        lockBtn.textContent = buttonTexts?.inProgress || 'Seal & Dispatch';
-      }
-
-      if (validation.valid) {
-        lockBtn.disabled = false;
-        openLinkBtn.disabled = false;
-        copyLinkBtn.disabled = false;
-        if (draftActions) {
-          console.log('Adding visible class to draft-actions');
-          draftActions.classList.add('visible');
-        } else {
-          console.error('draftActions is null when trying to add visible class');
-        }
-      } else {
-        lockBtn.disabled = true;
-        openLinkBtn.disabled = true;
-        copyLinkBtn.disabled = true;
-        if (draftActions) {
-          console.log('Removing visible class from draft-actions');
-          draftActions.classList.remove('visible');
-        }
-      }
+      // Sync state back from controller
+      state = controller.state;
     }
 
     // Meal card selection
