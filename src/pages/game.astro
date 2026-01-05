@@ -71,8 +71,7 @@ import GameLayout from '../layouts/GameLayout.astro';
     // Initialize GameController first (Phase 1 migration)
     const controller = new GameController(params, currentPlayer);
 
-    // Backward compatibility: reference controller's state
-    // TODO: Remove after full migration
+    // Local state reference for convenience (synced with controller.state as needed)
     let state = controller.state;
 
     // Apply theme from state (fallback to default if not set)
@@ -135,8 +134,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       }
     };
 
-    // Backward compatibility: reference controller's takeoutMeals Map
-    // TODO: Remove after full migration
+    // Reference to controller's takeoutMeals Map for convenience
     const takeoutMeals = controller.takeoutMeals;
 
     // Hydrate upgrades with full data (they're stored as just IDs in URL)
@@ -171,10 +169,10 @@ import GameLayout from '../layouts/GameLayout.astro';
       };
     }
 
-    // Backward compatibility references (will be removed after migration)
+    // Controller references for convenience
     const mealCount = controller.mealCount;
     const budgetLimit = getBudgetPoints(state.settings.budgetCap, mealCount);
-    const selectedMeals = controller.selectedMeals; // Reference controller's Set
+    const selectedMeals = controller.selectedMeals; // Reference to controller's Set
 
     // UI elements
     const pickCountEl = document.getElementById('pick-count');
@@ -413,28 +411,8 @@ import GameLayout from '../layouts/GameLayout.astro';
 
     // Helper to persist used lock/takeout upgrades to player state
     function persistUsedUpgrades() {
-      const player = state.players[currentPlayer];
-      let updates = {};
-
-      if (lockedMealId && activeLockUpgrade) {
-        updates.usedLockId = activeLockUpgrade.id;
-      }
-      if (activeTakeoutUpgrade) {
-        updates.usedTakeoutId = activeTakeoutUpgrade.id;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        state = {
-          ...state,
-          players: {
-            ...state.players,
-            [currentPlayer]: {
-              ...player,
-              ...updates
-            }
-          }
-        };
-      }
+      // Sync controller state (upgrades already persisted by controller methods)
+      state = controller.state;
     }
 
     // Lock button
