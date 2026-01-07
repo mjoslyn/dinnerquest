@@ -222,8 +222,8 @@ export function decodeGameState(params) {
       }
 
       results = {
-        finalMenu: finalMenuStr.split(',').map(Number),
-        harmonies: harmoniesStr ? harmoniesStr.split(',').map(Number) : [],
+        finalMenu: finalMenuStr.split(',').map(id => isNaN(Number(id)) ? id : Number(id)),
+        harmonies: harmoniesStr ? harmoniesStr.split(',').map(id => isNaN(Number(id)) ? id : Number(id)) : [],
         conflicts
       };
     }
@@ -234,9 +234,18 @@ export function decodeGameState(params) {
       const numId = parseInt(id);
       return isNaN(numId) ? id : numId;
     }) : [];
-    const usedMeals = params.get('used') ? params.get('used').split(',').map(Number) : [];
-    const playerAAllPicks = params.get('pAAP') ? params.get('pAAP').split(',').map(Number) : [];
-    const playerBAllPicks = params.get('pBAP') ? params.get('pBAP').split(',').map(Number) : [];
+    const usedMeals = params.get('used') ? params.get('used').split(',').map(id => {
+      const numId = parseInt(id);
+      return isNaN(numId) ? id : numId;
+    }) : [];
+    const playerAAllPicks = params.get('pAAP') ? params.get('pAAP').split(',').map(id => {
+      const numId = parseInt(id);
+      return isNaN(numId) ? id : numId;
+    }) : [];
+    const playerBAllPicks = params.get('pBAP') ? params.get('pBAP').split(',').map(id => {
+      const numId = parseInt(id);
+      return isNaN(numId) ? id : numId;
+    }) : [];
 
     // Decode takeout meals
     const takeoutStr = params.get('to');

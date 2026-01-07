@@ -97,10 +97,10 @@ import GameLayout from '../layouts/GameLayout.astro';
 
       const finalMenuIds = state.results?.finalMenu || [];
 
-      // Get meal objects (check both allMeals and takeout meals)
+      // Get meal objects (check both allMeals and takeout/custom meals)
       const finalMeals = finalMenuIds
         .map(id => {
-          if (typeof id === 'string' && id.startsWith('takeout-')) {
+          if (typeof id === 'string' && (id.startsWith('takeout-') || id.startsWith('custom-'))) {
             return takeoutMeals.get(id);
           }
           return allMeals.find(m => m.id === id);
@@ -126,7 +126,7 @@ import GameLayout from '../layouts/GameLayout.astro';
       // Calculate total cost (prices already for 2 people)
       const totalUSD = finalMenuIds.reduce((sum, id) => {
         let meal;
-        if (typeof id === 'string' && id.startsWith('takeout-')) {
+        if (typeof id === 'string' && (id.startsWith('takeout-') || id.startsWith('custom-'))) {
           meal = takeoutMeals.get(id);
         } else {
           meal = allMeals.find(m => m.id === id);

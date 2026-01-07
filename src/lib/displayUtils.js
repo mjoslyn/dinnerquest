@@ -95,7 +95,12 @@ export function updateDisplays(controller, elements, allMeals, themeButtonText, 
  * @returns {Object} Cost breakdown
  */
 function calculateCosts(controller, allMeals) {
-  const currentPicksCost = Array.from(controller.selectedMeals).reduce((sum, id) => {
+  // Filter out harmonies from current picks to avoid double-counting
+  const currentPicksOnly = Array.from(controller.selectedMeals).filter(
+    id => !controller.harmoniesSoFar.includes(id)
+  );
+
+  const currentPicksCost = currentPicksOnly.reduce((sum, id) => {
     const card = document.querySelector(`[data-meal-id="${id}"]`);
     if (!card || !card.dataset.cost) {
       const meal = allMeals.find(m => m.id === id) || controller.takeoutMeals.get(id);
@@ -104,7 +109,7 @@ function calculateCosts(controller, allMeals) {
     return sum + parseInt(card.dataset.cost);
   }, 0);
 
-  const currentPicksUsd = Array.from(controller.selectedMeals).reduce((sum, id) => {
+  const currentPicksUsd = currentPicksOnly.reduce((sum, id) => {
     const card = document.querySelector(`[data-meal-id="${id}"]`);
     if (!card || card.dataset.usd === undefined) {
       const meal = allMeals.find(m => m.id === id) || controller.takeoutMeals.get(id);
