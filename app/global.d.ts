@@ -6,6 +6,7 @@ type Head = {
   ogTitle?: string
   ogDescription?: string
   themeClass?: string
+  subtitle?: string
 }
 
 declare module 'hono' {

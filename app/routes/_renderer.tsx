@@ -1,7 +1,7 @@
 import { jsxRenderer } from 'hono/jsx-renderer'
 import { Link, Script } from 'honox/server'
 
-export default jsxRenderer(({ children, title, description, ogTitle, ogDescription, themeClass }) => {
+export default jsxRenderer(({ children, title, description, ogTitle, ogDescription, themeClass, subtitle }) => {
   const pageTitle = title ?? 'Dinner Quest'
   const pageDescription = description ?? 'A text-based RPG for couples to decide on dinner for the week'
   return (
@@ -23,7 +23,19 @@ export default jsxRenderer(({ children, title, description, ogTitle, ogDescripti
         <Link href="/app/style.css" rel="stylesheet" />
         <Script src="/app/client.ts" async />
       </head>
-      <body class={themeClass || undefined}>{children}</body>
+      <body class={themeClass || undefined}>
+        <div class="container">
+          <header class="header">
+            <h1 class="title">
+              <a href="/" class="title-link">
+                DINNER QUEST
+              </a>
+            </h1>
+            <p class="subtitle">{subtitle ?? 'A meal planning roguelike'}</p>
+          </header>
+          {children}
+        </div>
+      </body>
     </html>
   )
 })
