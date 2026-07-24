@@ -3,10 +3,12 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "strict": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "node"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   },

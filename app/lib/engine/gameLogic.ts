@@ -66,12 +66,12 @@ export function validateDraft(
   // Budget is cumulative: harmonies already locked plus current picks.
   // Synthetic takeout/custom meals are intentionally not costed (matches the
   // original: they never appeared in the meal lookup).
-  const currentPicksCost = player.picks.reduce((sum, mealId) => {
+  const currentPicksCost = player.picks.reduce((sum: number, mealId) => {
     const meal = state.pool.find((m) => m.id === mealId)
     return sum + (meal ? getCostPoints(meal.cost) : 0)
   }, 0)
   const mealsForLookup = allMeals || state.pool
-  const harmoniesCost = harmonies.reduce((sum, mealId) => {
+  const harmoniesCost = harmonies.reduce((sum: number, mealId) => {
     const meal = mealsForLookup.find((m) => m.id === mealId)
     return sum + (meal ? getCostPoints(meal.cost) : 0)
   }, 0)
