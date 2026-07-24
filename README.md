@@ -1,139 +1,62 @@
-# 🍽️ DINNER QUEST
+# DINNER QUEST
 
 > A text-based RPG roguelike for couples to decide on dinner for the week
 
 ![Dinner Quest](https://img.shields.io/badge/players-2-blue)
-![Status](https://img.shields.io/badge/status-live-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## The Premise
 
-The week stretches before you like an endless dungeon. **Seven dinners** await. Two appetites. One kitchen.
+The week stretches before you like an endless dungeon. A week of dinners awaits. Two appetites. One kitchen.
 
 Will you find **harmony**... or descend into takeout chaos?
 
 ## How It Works
 
-1. **Start a Quest** — Enter your name, get a shareable link for your partner
-2. **Pick & Bid** — Each player secretly chooses a meal from 5 options and bids enthusiasm tokens (0-3)
-3. **Reveal** — Same pick? Harmony! Different picks? Weighted coin flip based on bids
-4. **Repeat** — Battle through 7 days of dinner decisions
-5. **Victory** — Get your weekly meal plan + stats
+1. **Start a Quest** — Pick meal count, budget, allergies, and a theme; share the join link with your partner
+2. **Draft** — Each round, Player A drafts meals and locks in; Player B drafts seeing A's picks as partial harmonies
+3. **Harmony** — Meals you both pick lock into the menu; partial harmonies carry into the next round
+4. **Repeat** — The pool prunes and refills each round until the menu is complete
+5. **Victory** — Weekly meal plan, stats, and a shopping list grouped by grocery section
 
 ## Features
 
-- 🎮 **Text-based RPG aesthetic** — Dramatic narrative, retro terminal vibes
-- 🍕 **24 meal options** — From tacos to sushi, comfort food to healthy
-- ⚔️ **Conflict resolution** — Bid tokens to influence outcomes
-- 📊 **End-of-week stats** — Harmonies, conflicts, top cuisine, total cook time
-- 📱 **Mobile-friendly** — Works on any device
-- 🔗 **Async play** — Take turns whenever, state stored in URL
+- Text-based RPG aesthetic with 9 selectable themes (plain + 8 flavors), switchable mid-game
+- ~190 meals with ingredients, allergens, and diet scores
+- Upgrades: lock, takeout, custom meal, pool redraw
+- Point-based budget system with cumulative enforcement
+- Live two-player sync (Supabase Realtime) — no refresh, no link-passing mid-game
+- Anonymous play by default; link an email to keep your quest history
 
-## Quick Start
+## Stack
 
-### Running Locally
-
-#### Option 1: npm (Recommended)
-```bash
-npm install
-npm start
-```
-Opens automatically at http://localhost:4321
-
-#### Option 2: Python HTTP Server (old version)
-```bash
-python3 -m http.server 8000
-open old-index.html  # Original single-file version
-```
-
-### Deploy to GitHub Pages
-
-1. **Push to GitHub:**
-   ```bash
-   git add .
-   git commit -m "Deploy Astro version"
-   git push origin main
-   ```
-
-2. **Enable GitHub Pages:**
-   - Go to repository Settings > Pages
-   - Under "Build and deployment", select:
-     - Source: `GitHub Actions`
-   - The workflow will auto-deploy
-
-3. **Access your game:**
-   - Wait 1-2 minutes for deployment
-   - Visit `https://mjoslyn.github.io/dinnerquest/`
-
-**Automatic Deployment:** Every push to `main` auto-deploys via GitHub Actions
-
-## Tech Stack
-
-### New (Astro Version)
-- **Astro** — Static site generation
-- **HTMX** — Dynamic content swapping without heavy JS
-- **Alpine.js** — Lightweight reactivity for UI interactions
-- **LZ-String** — URL state compression
-- Pure JavaScript (no TypeScript)
-
-### Original (Single-File Version)
-- Pure HTML/CSS/JS — no frameworks, no build tools
-- LocalStorage for game state
-- Retro terminal aesthetic with Google Fonts (VT323, Press Start 2P)
-
-## Architecture
-
-Game state is compressed and encoded in the URL using LZ-String, eliminating the need for a backend. Each player's link contains the entire game state, enabling true async play with no server persistence required.
+- [HonoX](https://github.com/honojs/honox) (file-based routing, JSX SSR, islands) on Cloudflare Workers
+- [Supabase](https://supabase.com) — Postgres (game state + content), anonymous auth, Realtime broadcast
+- Game content authored as MDX/JSON in `content/`, seeded into Postgres
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+npx supabase start        # local Supabase stack (Docker)
+npm run db:seed           # seed meals/upgrades/content
+npm run dev               # vite dev server on :5173
 ```
 
-## Project Structure
+Copy the local keys from `npx supabase status` into `.env` and `.dev.vars` (see CLAUDE.md).
 
-```
-dinner-quest/
-├── src/
-│   ├── components/       # Reusable Astro components
-│   ├── layouts/          # Page layouts
-│   ├── pages/            # Routes (index, waiting, game, complete)
-│   │   └── api/          # API endpoints for HTMX
-│   ├── lib/              # Game logic, state management, URL codec
-│   └── styles/           # Retro CSS theme
-├── public/               # Static assets
-└── old-index.html        # Original single-file version (backup)
+```bash
+npm test                  # vitest engine tests
+npm run test:e2e          # playwright (needs supabase + seed)
+npm run build             # client + worker bundles into dist/
+npm run preview           # wrangler dev against the built worker
+npm run deploy            # wrangler deploy
 ```
 
-## Roadmap
+## Rules
 
-- [x] Convert to Astro + HTMX architecture
-- [x] URL-based state management
-- [ ] Push notifications
-- [ ] Dietary restriction filters
-- [ ] Unlockable meals from harmony streaks
-- [ ] Grocery list generator
-- [ ] Recipe links
-
-## Contributing
-
-Pull requests welcome! This is a fun side project — feel free to add meals, improve the narrative, or enhance the game mechanics.
+See [RULESET.md](RULESET.md).
 
 ## License
 
-MIT — do whatever you want with it.
-
----
-
-*Made with 🌮 and ⚔️*
+MIT

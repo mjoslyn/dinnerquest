@@ -28,3 +28,5 @@ pnpm-debug.log*
 .dev.vars
 .env
 .wrangler/
+test-results/
+playwright-report/

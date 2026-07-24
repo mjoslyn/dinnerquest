@@ -33,6 +33,8 @@ export default function GameBoard(props: Props) {
   const [customName, setCustomName] = useState('')
   const viewRef = useRef<View>(view)
   viewRef.current = view
+  const pendingPicks = useRef<MealId[] | null>(null)
+  const syncingPicks = useRef<boolean>(false)
 
   const { seat, state } = view
   const me = state.players[seat]
@@ -44,6 +46,14 @@ export default function GameBoard(props: Props) {
       const res = await fetch(`/api/games/${props.gameId}`)
       if (res.ok) {
         const next = (await res.json()) as View
+        // Don't clobber optimistic picks while a pick sync is still in flight.
+        if (syncingPicks.current || pendingPicks.current) {
+          const mine = viewRef.current!.state.players[next.seat]
+          const nextMe = next.state.players[next.seat]
+          if (mine && nextMe && !nextMe.locked) {
+            next.state.players[next.seat] = { ...nextMe, picks: mine.picks }
+          }
+        }
         setView(next)
         document.body.className = themeClass(next.state.theme)
       }
@@ -129,17 +139,51 @@ export default function GameBoard(props: Props) {
 
   // ---------- actions ----------
 
+  /** Latest-wins pick sync so rapid clicks never drop picks. */
+  async function syncPicks(picks: MealId[]) {
+    pendingPicks.current = picks
+    if (syncingPicks.current) return
+    syncingPicks.current = true
+    try {
+      while (pendingPicks.current) {
+        const batch = pendingPicks.current
+        pendingPicks.current = null
+        const res = await fetch(`/api/games/${props.gameId}/picks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ picks: batch })
+        })
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string }
+          setError(data.error || 'Could not save picks')
+        }
+      }
+    } catch {
+      setError('Network error - try again')
+    } finally {
+      syncingPicks.current = false
+      refetch()
+    }
+  }
+
   async function togglePick(mealId: MealId) {
-    if (me?.locked || busy) return
+    if (me?.locked) return
     if (harmonies.includes(mealId)) return
     if (lockSelect) {
       const ok = await post('upgrade', { upgradeId: lockSelect, mealId })
       if (ok) setLockSelect(null)
       return
     }
-    const next = picks.includes(mealId) ? picks.filter((id) => id !== mealId) : [...picks, mealId]
-    setView({ ...view, state: { ...state, players: { ...state.players, [seat]: { ...me!, picks: next } } } })
-    await post('picks', { picks: next })
+    const current = pendingPicks.current ?? viewRef.current!.state.players[seat]!.picks
+    const next = current.includes(mealId) ? current.filter((id) => id !== mealId) : [...current, mealId]
+    setView({
+      ...viewRef.current!,
+      state: {
+        ...viewRef.current!.state,
+        players: { ...viewRef.current!.state.players, [seat]: { ...me!, picks: next } }
+      }
+    })
+    syncPicks(next)
   }
 
   async function useUpgrade(upgrade: Upgrade) {
@@ -397,7 +441,7 @@ export default function GameBoard(props: Props) {
               })}
             </div>
 
-            <div class="draft-actions">
+            <div class={`draft-actions ${view.validation?.valid ? 'visible' : ''}`}>
               <button
                 class="btn btn-primary"
                 disabled={busy || !(view.validation?.valid ?? false)}

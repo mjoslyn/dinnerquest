@@ -796,7 +796,7 @@ body.theme-horror .panel::before {
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin: 20px 0;
-      padding-bottom: 20px;
+      padding-bottom: 140px;
     }
 
     @media (max-width: 768px) {

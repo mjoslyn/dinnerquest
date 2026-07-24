@@ -1,308 +1,189 @@
+// End-to-end tests for the HonoX + Supabase version. Each player is a separate
+// browser context (separate anonymous session cookies). UI drives game
+// creation; game actions mix UI and the JSON API for robustness.
+// Requires: `npx supabase start` + `npm run db:seed` (playwright launches vite).
 import { test, expect } from '@playwright/test';
 
-test.describe('Dinner Quest - Game Flow', () => {
-  test('should start new game and navigate to Player A draft', async ({ page }) => {
-    await page.goto('/');
-
-    // Fill in game settings
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-
-    // Fill in player info
-    await page.fill('input[name="playerAName"]', 'Ranger');
-    await page.fill('input[name="playerBName"]', 'Mage');
-
-    // Start game
-    await page.click('button[type="submit"]');
-
-    // Should navigate to game page for Player A
-    await expect(page).toHaveURL(/\/game\?/);
-    await expect(page.locator('text=Ranger')).toBeVisible();
-  });
-
-  test('should allow Player A to select meals and transition to Player B', async ({ page }) => {
-    await page.goto('/');
-
-    // Setup game
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/game\?/);
-
-    // Select 5 meals for Player A
-    const mealCards = await page.locator('[data-meal-id]').all();
-    for (let i = 0; i < 5; i++) {
-      await mealCards[i].click();
-    }
-
-    // Verify meal count shows 5 / 5
-    await expect(page.locator('#pick-count')).toHaveText('5 / 5');
-
-    // Lock draft
-    const lockButton = page.locator('text=/Seal|Lock|Return/i').first();
-    await expect(lockButton).toBeEnabled();
-    await lockButton.click();
-
-    // Should show Player B's view
-    await expect(page.locator('text=Player B')).toBeVisible();
-  });
-
-  test('lock upgrade should add meal to harmonies and count towards validation', async ({ page }) => {
-    await page.goto('/');
-
-    // Setup game
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/game\?/);
-
-    // Select 5 meals for Player A
-    const mealCards = await page.locator('[data-meal-id]').all();
-    for (let i = 0; i < 5; i++) {
-      await mealCards[i].click();
-    }
-
-    // Lock and proceed to Player B
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
-
-    // Player B's turn - check if they have a lock upgrade
-    const lockUpgrade = page.locator('.upgrade-card').filter({ hasText: /Lock|Seal/ }).first();
-    const hasLockUpgrade = await lockUpgrade.count() > 0;
-
-    if (hasLockUpgrade) {
-      // Use lock upgrade
-      await lockUpgrade.locator('button:has-text("Use")').click();
-
-      // Select a meal to lock
-      const firstMeal = await page.locator('[data-meal-id]').first();
-      await firstMeal.click();
-
-      // Verify harmony section shows the locked meal
-      await expect(page.locator('text=/Harmonies|Locked/i')).toBeVisible();
-
-      // Select 4 more meals (total 5 with locked one)
-      const remainingMeals = await page.locator('[data-meal-id]').all();
-      for (let i = 1; i < 5; i++) {
-        await remainingMeals[i].click();
-      }
-
-      // Meal count should show 5 / 5 or "Complete!"
-      const pickCount = await page.locator('#pick-count').textContent();
-      expect(pickCount === '5 / 5' || pickCount === 'Complete!').toBeTruthy();
-
-      // Lock button should be enabled (validation passes)
-      await expect(page.locator('text=/Seal|Lock|Return/i').first()).toBeEnabled();
+async function createGame(context, opts = {}) {
+  const res = await context.request.post('/api/games', {
+    data: {
+      playerName: 'Alice',
+      mealCount: 3,
+      budgetCap: opts.budgetCap ?? 'none',
+      allergies: [],
+      theme: opts.theme ?? 'plain',
+      dietPreference: 3
     }
   });
+  expect(res.status()).toBe(201);
+  const { id } = await res.json();
+  return id;
+}
 
-  test('meal count should display correctly in round 2', async ({ page }) => {
-    await page.goto('/');
-
-    // Setup game
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL(/\/game\?/);
-
-    // Player A selects 5 meals
-    const playerAMeals = await page.locator('[data-meal-id]').all();
-    for (let i = 0; i < 5; i++) {
-      await playerAMeals[i].click();
-    }
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
-
-    // Player B selects 5 meals (some different from A)
-    const playerBMeals = await page.locator('[data-meal-id]').all();
-    for (let i = 2; i < 7; i++) {
-      await playerBMeals[i].click();
-    }
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
-
-    // Should be in round 2 if harmonies < 5
-    const url = page.url();
-    if (url.includes('round=2')) {
-      // Check that harmonies are displayed
-      await expect(page.locator('text=/Harmonies|Locked/i')).toBeVisible();
-
-      // Get number of harmonies from the page
-      const harmoniesSection = page.locator('.harmonies-section, [class*="harmony"]').first();
-      const harmoniesCount = await harmoniesSection.locator('[data-meal-id]').count();
-
-      // Meal count should show "0 / X" where X = 5 - harmonies
-      const pickCount = await page.locator('#pick-count').textContent();
-      const expectedNeeded = 5 - harmoniesCount;
-      expect(pickCount).toContain(`0 / ${expectedNeeded}`);
-    }
+async function joinGame(context, id) {
+  const res = await context.request.post(`/api/games/${id}/join`, {
+    data: { name: 'Bob', dietPreference: 3 }
   });
+  expect(res.ok()).toBeTruthy();
+}
 
-  test('budget tracking should be cumulative across rounds', async ({ page }) => {
-    await page.goto('/');
+async function getView(context, id) {
+  const res = await context.request.get(`/api/games/${id}`);
+  expect(res.ok()).toBeTruthy();
+  return res.json();
+}
 
-    // Setup game with budget
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
+test('full game: create, join, draft to harmony, complete with shopping list', async ({ browser }) => {
+  const ctxA = await browser.newContext();
+  const ctxB = await browser.newContext();
+  const pageA = await ctxA.newPage();
 
-    await page.waitForURL(/\/game\?/);
+  const id = await createGame(ctxA);
 
-    // Player A selects meals
-    const playerAMeals = await page.locator('[data-meal-id]').all();
-    for (let i = 0; i < 5; i++) {
-      await playerAMeals[i].click();
-    }
+  // A sees the waiting screen with the join link.
+  await pageA.goto(`/game/${id}`);
+  await expect(pageA.getByText('WAITING FOR YOUR PARTNER')).toBeVisible();
+  await expect(pageA.getByText(`/join/${id}`)).toBeVisible();
 
-    // Get Player A's budget total
-    const budgetTextA = await page.locator('#budget-display').textContent();
-    const budgetA = parseInt(budgetTextA.match(/(\d+)\s*\//)[1]);
+  await joinGame(ctxB, id);
 
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
+  // A's page flips to drafting without a reload (realtime or poll fallback).
+  await expect(pageA.getByText(/ROUND 1/)).toBeVisible({ timeout: 20000 });
 
-    // Player B selects meals
-    const playerBMeals = await page.locator('[data-meal-id]').all();
-    for (let i = 2; i < 7; i++) {
-      await playerBMeals[i].click();
-    }
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
+  // A drafts 3 meals through the UI.
+  const cards = pageA.locator('.meal-card');
+  await expect(cards.first()).toBeVisible();
+  for (let i = 0; i < 3; i++) {
+    await cards.nth(i).click();
+    await expect(cards.nth(i)).toHaveClass(/selected/);
+  }
+  await expect
+    .poll(async () => (await getView(ctxA, id)).state.players.A.picks.length)
+    .toBe(3);
+  const aPicks = (await getView(ctxA, id)).state.players.A.picks;
 
-    // If in round 2, budget should include harmonies from round 1
-    const url = page.url();
-    if (url.includes('round=2')) {
-      const budgetTextRound2 = await page.locator('#budget-display').textContent();
-      const budgetRound2 = parseInt(budgetTextRound2.match(/(\d+)\s*\//)[1]);
+  // Lock via UI button (plain-theme label).
+  await pageA.getByRole('button', { name: /Lock In Picks/i }).click();
+  await expect(pageA.getByText(/Locked in\. Waiting/)).toBeVisible({ timeout: 10000 });
 
-      // Budget in round 2 should account for harmonies already locked
-      expect(budgetRound2).toBeGreaterThan(0);
-    }
-  });
+  // B sees A's locked picks as partial harmonies and completes by matching them.
+  const viewB = await getView(ctxB, id);
+  expect([...viewB.partialHarmonies].sort()).toEqual([...aPicks].sort());
+  await ctxB.request.post(`/api/games/${id}/picks`, { data: { picks: aPicks } });
+  const lockB = await ctxB.request.post(`/api/games/${id}/lock`);
+  expect(lockB.ok()).toBeTruthy();
+  expect((await lockB.json()).status).toBe('complete');
 
-  test('theme upgrade should change UI theme', async ({ page }) => {
-    await page.goto('/');
+  // A's page flips to the complete screen and renders the shopping list.
+  await expect(pageA.getByText('QUEST COMPLETE')).toBeVisible({ timeout: 20000 });
+  await expect(pageA.getByText('SHOPPING LIST')).toBeVisible({ timeout: 10000 });
+  await expect(pageA.locator('.shopping-item').first()).toBeVisible();
 
-    // Setup game
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
+  await ctxA.close();
+  await ctxB.close();
+});
 
-    await page.waitForURL(/\/game\?/);
+test('redaction: B cannot see A picks before A locks', async ({ browser }) => {
+  const ctxA = await browser.newContext();
+  const ctxB = await browser.newContext();
 
-    // Check for theme upgrade
-    const themeUpgrade = page.locator('.upgrade-card').filter({ hasText: /THEME/i }).first();
-    const hasThemeUpgrade = await themeUpgrade.count() > 0;
+  const id = await createGame(ctxA);
+  await joinGame(ctxB, id);
 
-    if (hasThemeUpgrade) {
-      // Get current body class
-      const bodyClassBefore = await page.locator('body').getAttribute('class');
+  const view = await getView(ctxA, id);
+  const poolIds = view.state.pool.map((m) => m.id);
+  await ctxA.request.post(`/api/games/${id}/picks`, { data: { picks: poolIds.slice(0, 3) } });
 
-      // Use theme upgrade
-      await themeUpgrade.locator('button:has-text("Use")').click();
+  const viewB = await getView(ctxB, id);
+  expect(viewB.state.players.A.picks).toEqual([]);
+  expect(viewB.partialHarmonies).toEqual([]);
 
-      // Body class should change
-      const bodyClassAfter = await page.locator('body').getAttribute('class');
-      expect(bodyClassAfter).not.toBe(bodyClassBefore);
-      expect(bodyClassAfter).toContain('theme-');
-    }
-  });
+  await ctxA.close();
+  await ctxB.close();
+});
 
-  test('complete page should show all selected meals and correct budget', async ({ page }) => {
-    await page.goto('/');
+test('turn order: B cannot lock before A', async ({ browser }) => {
+  const ctxA = await browser.newContext();
+  const ctxB = await browser.newContext();
 
-    // Setup game
-    await page.selectOption('select[name="mealCount"]', '3'); // Smaller game for faster test
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
+  const id = await createGame(ctxA);
+  await joinGame(ctxB, id);
 
-    await page.waitForURL(/\/game\?/);
+  const viewB = await getView(ctxB, id);
+  const poolIds = viewB.state.pool.map((m) => m.id);
+  await ctxB.request.post(`/api/games/${id}/picks`, { data: { picks: poolIds.slice(0, 3) } });
+  const lock = await ctxB.request.post(`/api/games/${id}/lock`);
+  expect(lock.status()).toBe(400);
+  expect((await lock.json()).error).toMatch(/partner/i);
 
-    // Player A selects 3 meals
-    const playerAMeals = await page.locator('[data-meal-id]').all();
-    await playerAMeals[0].click();
-    await playerAMeals[1].click();
-    await playerAMeals[2].click();
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
+  await ctxA.close();
+  await ctxB.close();
+});
 
-    // Player B selects same 3 meals (all harmonies)
-    const playerBMeals = await page.locator('[data-meal-id]').all();
-    await playerBMeals[0].click();
-    await playerBMeals[1].click();
-    await playerBMeals[2].click();
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
+test('budget: over-budget lock is rejected server-side', async ({ browser }) => {
+  const ctxA = await browser.newContext();
+  const ctxB = await browser.newContext();
 
-    // Should navigate to complete page
-    await expect(page).toHaveURL(/\/complete\?/);
+  // tight budget: 3 meals x 1.3 = 3 points
+  const id = await createGame(ctxA, { budgetCap: 'tight' });
+  await joinGame(ctxB, id);
 
-    // Should show "QUEST COMPLETE!" or similar
-    await expect(page.locator('text=/COMPLETE|QUEST|TRIUMPHANT/i')).toBeVisible();
+  const view = await getView(ctxA, id);
+  const costMap = { $: 1, $$: 2, $$$: 3 };
+  // Greedily pick the 3 most expensive meals; skip if the pool rolled all-$.
+  const sorted = [...view.state.pool].sort((a, b) => costMap[b.cost] - costMap[a.cost]);
+  const picks = sorted.slice(0, 3);
+  const total = picks.reduce((s, m) => s + costMap[m.cost], 0);
+  test.skip(total <= 3, 'pool rolled all cheap meals; nothing to exceed budget with');
 
-    // Should show final menu with 3 meals
-    const finalMealCards = await page.locator('[data-meal-id], .meal-card, .final-meal').count();
-    expect(finalMealCards).toBeGreaterThanOrEqual(3);
+  await ctxA.request.post(`/api/games/${id}/picks`, { data: { picks: picks.map((m) => m.id) } });
+  const lock = await ctxA.request.post(`/api/games/${id}/lock`);
+  expect(lock.status()).toBe(400);
+  expect((await lock.json()).error).toMatch(/exceeds budget/i);
 
-    // Should show budget total
-    await expect(page.locator('text=/\\$\\d+/i')).toBeVisible();
+  await ctxA.close();
+  await ctxB.close();
+});
 
-    // Should show shopping list
-    await expect(page.locator('text=/Shopping|Ingredients/i')).toBeVisible();
-  });
+test('upgrades: using a dealt upgrade marks it used and updates state', async ({ browser }) => {
+  const ctxA = await browser.newContext();
+  const ctxB = await browser.newContext();
 
-  test('harmonies should persist between rounds', async ({ page }) => {
-    await page.goto('/');
+  const id = await createGame(ctxA);
+  await joinGame(ctxB, id);
 
-    // Setup game
-    await page.selectOption('select[name="mealCount"]', '5');
-    await page.selectOption('select[name="budgetCap"]', 'moderate');
-    await page.fill('input[name="playerAName"]', 'Player A');
-    await page.fill('input[name="playerBName"]', 'Player B');
-    await page.click('button[type="submit"]');
+  const view = await getView(ctxA, id);
+  const upgrade = view.state.players.A.upgrades[0];
+  expect(upgrade).toBeTruthy();
 
-    await page.waitForURL(/\/game\?/);
+  const body = { upgradeId: upgrade.id };
+  if (upgrade.type === 'lock') body.mealId = view.state.pool[0].id;
+  if (upgrade.type === 'custom') body.mealName = 'Test Meal';
+  const res = await ctxA.request.post(`/api/games/${id}/upgrade`, { data: body });
+  expect(res.ok()).toBeTruthy();
 
-    // Player A selects meals
-    const playerAMeals = await page.locator('[data-meal-id]').all();
-    const meal1 = await playerAMeals[0].getAttribute('data-meal-id');
-    const meal2 = await playerAMeals[1].getAttribute('data-meal-id');
+  const after = await getView(ctxA, id);
+  const me = after.state.players.A;
+  const usedFlag = {
+    lock: me.usedLockId,
+    takeout: me.usedTakeoutId,
+    custom: me.usedCustomId,
+    redraw: me.usedRedrawId
+  }[upgrade.type];
+  expect(usedFlag).toBe(upgrade.id);
 
-    await playerAMeals[0].click();
-    await playerAMeals[1].click();
-    await playerAMeals[2].click();
-    await playerAMeals[3].click();
-    await playerAMeals[4].click();
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
+  if (upgrade.type === 'lock') {
+    expect(after.state.harmoniesSoFar).toContain(view.state.pool[0].id);
+  }
+  if (upgrade.type === 'takeout' || upgrade.type === 'custom') {
+    expect(after.state.takeoutMeals.length).toBe(1);
+    expect(after.state.harmoniesSoFar).toContain(after.state.takeoutMeals[0].id);
+  }
 
-    // Player B selects some same meals
-    const playerBMeals = await page.locator('[data-meal-id]').all();
-    await playerBMeals[0].click(); // Same as Player A's first
-    await playerBMeals[1].click(); // Same as Player A's second
-    await playerBMeals[5].click();
-    await playerBMeals[6].click();
-    await playerBMeals[7].click();
-    await page.locator('text=/Seal|Lock|Return/i').first().click();
+  // Second use of a single-use upgrade must be rejected.
+  const again = await ctxA.request.post(`/api/games/${id}/upgrade`, { data: body });
+  expect(again.status()).toBe(400);
 
-    // If round 2, check harmonies section
-    const url = page.url();
-    if (url.includes('round=2')) {
-      // Should see harmonies section
-      await expect(page.locator('text=/Harmonies|Locked/i')).toBeVisible();
-
-      // The two meals both players picked should be in harmonies
-      const harmoniesSection = page.locator('.harmonies-section, [class*="harmony"]').first();
-      const harmonyMealIds = await harmoniesSection.locator('[data-meal-id]').all();
-
-      expect(harmonyMealIds.length).toBeGreaterThan(0);
-    }
-  });
+  await ctxA.close();
+  await ctxB.close();
 });

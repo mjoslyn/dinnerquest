@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:4321',
+    baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
   },
 
@@ -19,9 +19,10 @@ export default defineConfig({
     },
   ],
 
+  // Requires the local Supabase stack: `npx supabase start` + `npm run db:seed`
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:4321',
+    url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
   },
 });

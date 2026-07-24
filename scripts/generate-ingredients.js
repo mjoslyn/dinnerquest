@@ -113,7 +113,7 @@ for (const raw of ingredientsRaw) {
 }
 
 // Create ingredients directory
-const ingredientsDir = '/Users/michaeljoslyn/work/dinner-quest/src/content/ingredients';
+const ingredientsDir = '/Users/michaeljoslyn/work/dinner-quest/content/ingredients';
 if (!fs.existsSync(ingredientsDir)) {
   fs.mkdirSync(ingredientsDir, { recursive: true });
 }

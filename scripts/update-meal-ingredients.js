@@ -3,7 +3,7 @@ import path from 'path';
 import { glob } from 'glob';
 
 // Read all ingredient files to build a lookup map
-const ingredientsDir = '/Users/michaeljoslyn/work/dinner-quest/src/content/ingredients';
+const ingredientsDir = '/Users/michaeljoslyn/work/dinner-quest/content/ingredients';
 const ingredientFiles = fs.readdirSync(ingredientsDir);
 
 const ingredientLookup = new Map();
@@ -20,7 +20,7 @@ for (const file of ingredientFiles) {
 console.log(`Loaded ${ingredientLookup.size} ingredient mappings`);
 
 // Process all meal files
-const mealsDir = '/Users/michaeljoslyn/work/dinner-quest/src/content/meals';
+const mealsDir = '/Users/michaeljoslyn/work/dinner-quest/content/meals';
 const mealFiles = fs.readdirSync(mealsDir).filter(f => f.endsWith('.mdx'));
 
 let updatedCount = 0;
