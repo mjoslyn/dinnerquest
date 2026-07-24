@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   if (mode === 'client') {
     return {
       build: {
+        manifest: true,
         rollupOptions: {
           input: ['/app/client.ts', '/app/style.css'],
           output: {

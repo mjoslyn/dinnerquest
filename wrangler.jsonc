@@ -4,6 +4,7 @@
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./dist/index.js",
+  "routes": [{ "pattern": "dinnerquest.robotofthefuture.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
