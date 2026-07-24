@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => {
     }
   }
   return {
+    test: {
+      include: ['app/**/*.test.ts']
+    },
     plugins: [
       honox({
         devServer: { adapter },
