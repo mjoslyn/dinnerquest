@@ -2,7 +2,7 @@ import { createRoute } from 'honox/factory'
 import GameBoard from '../../islands/game-board'
 import { serviceClient, getUser } from '../../lib/db/supabase'
 import { GameNotFound, getParticipant, listParticipants, loadGame, redactState } from '../../lib/db/games'
-import { getAllMeals } from '../../lib/db/content'
+import { getAllMeals, getNarrativeMessages } from '../../lib/db/content'
 import { partialHarmonyIds, validateDraft } from '../../lib/engine/gameLogic'
 import { themeClass, themeSubtitles } from '../../lib/theme'
 import type { MealId } from '../../lib/engine/types'
@@ -93,13 +93,25 @@ export default createRoute(async (c) => {
     validation
   }
 
+  const introLines =
+    state.status === 'waiting' ? await getNarrativeMessages(db, 'intro', game.theme) : []
+
   return c.render(
-    <GameBoard
-      gameId={gameId}
-      initial={initial as never}
-      supabaseUrl={c.env.SUPABASE_URL}
-      supabaseAnonKey={c.env.SUPABASE_ANON_KEY}
-    />,
+    <>
+      <GameBoard
+        gameId={gameId}
+        initial={initial as never}
+        supabaseUrl={c.env.SUPABASE_URL}
+        supabaseAnonKey={c.env.SUPABASE_ANON_KEY}
+      />
+      {introLines.length > 0 && (
+        <div class="narrative">
+          {introLines.map((line) => (
+            <p>{line}</p>
+          ))}
+        </div>
+      )}
+    </>,
     head
   )
 })

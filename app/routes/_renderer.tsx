@@ -34,6 +34,9 @@ export default jsxRenderer(({ children, title, description, ogTitle, ogDescripti
             <p class="subtitle">{subtitle ?? 'A meal planning roguelike'}</p>
           </header>
           {children}
+          <footer class="site-footer">
+            <a href="/account">Your quests</a>
+          </footer>
         </div>
       </body>
     </html>

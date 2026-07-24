@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'hono/jsx'
 import { createClient } from '@supabase/supabase-js'
 import type { GameState, Meal, MealId, Seat, TakeoutMeal, Upgrade } from '../lib/engine/types'
 import { getBudgetPoints, getCostPoints } from '../lib/engine/rules'
-import { themeButtonText, themeClass } from '../lib/theme'
+import { THEMES } from '../lib/engine/types'
+import { themeButtonText, themeClass, themeLabels } from '../lib/theme'
 
 interface View {
   seat: Seat
@@ -213,11 +214,28 @@ export default function GameBoard(props: Props) {
     }
   }
 
+  const themeSwitcher = (
+    <div class="theme-switcher">
+      <label>Theme</label>
+      <select
+        value={state.theme}
+        onChange={(e) => post('theme', { theme: (e.target as HTMLSelectElement).value })}
+      >
+        {THEMES.map((t) => (
+          <option value={t} selected={t === state.theme}>
+            {themeLabels[t]}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+
   // ---------- phase: waiting for partner ----------
 
   if (state.status === 'waiting') {
     return (
       <div class="panel">
+        {themeSwitcher}
         <div class="panel-title">WAITING FOR YOUR PARTNER</div>
         <div class="status status-waiting">
           <p>The quest cannot begin alone.</p>
@@ -255,6 +273,7 @@ export default function GameBoard(props: Props) {
   return (
     <>
       <div class="panel">
+        {themeSwitcher}
         <div class="panel-title">
           {me?.name || `Player ${seat}`} - ROUND {state.currentRound}
         </div>
