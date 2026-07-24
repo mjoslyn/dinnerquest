@@ -1,0 +1,10 @@
+/* Placeholder — retro.css port lands in P4 */
+:root {
+  --bg-dark: #faf8f5;
+  --text: #2a2a2a;
+}
+body {
+  background: var(--bg-dark);
+  color: var(--text);
+  font-family: 'VT323', monospace;
+}
