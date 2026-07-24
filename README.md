@@ -2,7 +2,10 @@
 
 > A text-based RPG roguelike for couples to decide on dinner for the week
 
+**Play it live: [dinnerquest.robotofthefuture.com](https://dinnerquest.robotofthefuture.com)**
+
 ![Dinner Quest](https://img.shields.io/badge/players-2-blue)
+![Status](https://img.shields.io/badge/status-live-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## The Premise
@@ -21,18 +24,26 @@ Will you find **harmony**... or descend into takeout chaos?
 
 ## Features
 
-- Text-based RPG aesthetic with 9 selectable themes (plain + 8 flavors), switchable mid-game
+- Text-based RPG aesthetic with 9 selectable themes (plain + 8 flavors), switchable mid-game and synced live to your partner
 - ~190 meals with ingredients, allergens, and diet scores
 - Upgrades: lock, takeout, custom meal, pool redraw
 - Point-based budget system with cumulative enforcement
-- Live two-player sync (Supabase Realtime) — no refresh, no link-passing mid-game
+- Live two-player sync — no refresh, no link-passing mid-game
 - Anonymous play by default; link an email to keep your quest history
 
 ## Stack
 
-- [HonoX](https://github.com/honojs/honox) (file-based routing, JSX SSR, islands) on Cloudflare Workers
-- [Supabase](https://supabase.com) — Postgres (game state + content), anonymous auth, Realtime broadcast
-- Game content authored as MDX/JSON in `content/`, seeded into Postgres
+| Layer | Tech |
+|---|---|
+| Framework | [HonoX](https://github.com/honojs/honox) — file-based routing, JSX SSR, islands (`hono/jsx`) |
+| Runtime | [Cloudflare Workers](https://workers.cloudflare.com) with a custom domain; static assets served via the Workers assets binding |
+| Database | [Supabase](https://supabase.com) Postgres — game state as JSONB with optimistic-concurrency versioning; content in normalized tables behind RLS |
+| Auth | Supabase anonymous sign-ins with httpOnly cookie sessions (plain `supabase-js`, no `@supabase/ssr`); email linking upgrades a guest to a permanent account |
+| Realtime | Supabase Realtime — server broadcasts over the HTTP endpoint after each mutation; the browser subscribes via WebSocket with a 15s poll fallback |
+| Build | Vite 7 (two-pass: client islands + worker SSR bundle), deployed with Wrangler |
+| Content | Meals/ingredients/upgrades/narrative authored as MDX + JSON in `content/`, seeded into Postgres with `tsx` scripts |
+| Engine | Pure TypeScript reducers in `app/lib/engine/` — server-authoritative validation, harmony resolution, round advance |
+| Tests | Vitest (engine unit tests) + Playwright (two-context end-to-end games) |
 
 ## Development
 
@@ -50,8 +61,12 @@ npm test                  # vitest engine tests
 npm run test:e2e          # playwright (needs supabase + seed)
 npm run build             # client + worker bundles into dist/
 npm run preview           # wrangler dev against the built worker
-npm run deploy            # wrangler deploy
+npm run deploy            # build + wrangler deploy
 ```
+
+## Deployment
+
+Production runs on Cloudflare Workers (`wrangler.jsonc` routes `dinnerquest.robotofthefuture.com`) against a hosted Supabase project. Secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) are set with `wrangler secret put`; schema ships via `supabase db push` and content via `npm run db:seed`. Anonymous sign-ins must be enabled in the Supabase dashboard.
 
 ## Rules
 
